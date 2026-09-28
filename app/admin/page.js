@@ -23,7 +23,7 @@ export default function AdminPage(){
 
   return <main className="admin-shell">
     <aside className="admin-sidebar"><div className="citizen-brand"><span className="mark">DR</span><div><strong>Dove Riposa</strong><small>Comune di Povegliano Veronese</small></div></div>
-      {['dashboard','archivio','import','mappa','segnalazioni','utenti'].map(x=><button key={x} className={tab===x?'active':''} onClick={()=>setTab(x)}>{x[0].toUpperCase()+x.slice(1)}</button>)}
+      {['dashboard','archivio','import','mappa','segnalazioni','privacy','utenti'].map(x=><button key={x} className={tab===x?'active':''} onClick={()=>setTab(x)}>{x[0].toUpperCase()+x.slice(1)}</button>)}
       <button onClick={()=>setLogged(false)}>Esci</button>
     </aside>
     <section className="admin-content">
@@ -32,6 +32,7 @@ export default function AdminPage(){
       {tab==='import'&&<Import setRows={setRows} message={importMsg} setMessage={setImportMsg}/>}
       {tab==='mappa'&&<Panel title="Mappa del cimitero"><p>Editor dimostrativo: nella versione reale qui si associano settori, file, loculi, ingressi, percorsi e QR di calibrazione alla planimetria ufficiale.</p><div className="admin-placeholder">Editor mappa · prossimo modulo operativo</div></Panel>}
       {tab==='segnalazioni'&&<Panel title="Segnalazioni"><div className="admin-list"><p><b>Posizione da verificare</b> · 1 segnalazione demo</p><p><b>Nominativo errato</b> · 0</p><p><b>Trasferimento</b> · 0</p></div></Panel>}
+      {tab==='privacy'&&<PrivacyPanel/>}
       {tab==='utenti'&&<Panel title="Utenti e ruoli"><p>Amministratore ente · Operatore cimiteriale · Sola lettura.</p><div className="admin-warning">Questo ambiente è dimostrativo. La versione di produzione userà autenticazione lato server, ruoli, sessioni sicure e audit degli accessi.</div></Panel>}
     </section>
   </main>
@@ -57,6 +58,22 @@ function Archivio({rows,setRows,editing,setEditing}){
 function Import({setRows,message,setMessage}){
   function file(e){const f=e.target.files?.[0];if(!f)return;const reader=new FileReader();reader.onload=()=>{const lines=String(reader.result).split(/\r?\n/).filter(Boolean);setMessage(`File letto: ${lines.length} righe. Import demo pronto per anteprima.`);};reader.readAsText(f);}
   return <Panel title="Import CSV / Excel"><p>Per la demo leggiamo il file localmente senza inviarlo a un server. In produzione verrà aggiunta un’anteprima con validazione colonne, errori e conferma prima della pubblicazione.</p><input type="file" accept=".csv,.txt" onChange={file}/>{message&&<div className="import-message">{message}</div>}</Panel>
+}
+
+function PrivacyPanel(){
+  return <Panel title="Privacy & governance">
+    <div className="privacy-checklist">
+      <div><span className="check-ok">✓</span><p><b>Ricerca pubblica senza account</b><small>Nessuna registrazione richiesta al cittadino.</small></p></div>
+      <div><span className="check-ok">✓</span><p><b>Analytics senza termini di ricerca</b><small>Eventi tecnici: page view, QR, ricerca, apertura risultato, navigazione.</small></p></div>
+      <div><span className="check-ok">✓</span><p><b>Nessun profilo social del defunto</b><small>La scheda ha finalità esclusiva di localizzazione.</small></p></div>
+      <div><span className="check-ok">✓</span><p><b>Fotocamera on demand</b><small>La demo non carica né registra il flusso video.</small></p></div>
+      <div><span className="check-pending">!</span><p><b>Ruoli privacy da formalizzare</b><small>Comune, fornitore tecnico, eventuali sub-responsabili e istruzioni art. 28.</small></p></div>
+      <div><span className="check-pending">!</span><p><b>Retention e log infrastrutturali</b><small>Da definire con l'ente e il DPO prima della produzione.</small></p></div>
+      <div><span className="check-pending">!</span><p><b>Anti-scraping e sicurezza</b><small>Rate limiting, bot protection, autenticazione operatori e audit accessi.</small></p></div>
+    </div>
+    <div className="admin-warning">Stato: architettura privacy by design impostata. Nessun dato comunale reale deve essere caricato finché contratto, ruoli, informativa, sicurezza e validazione DPO non sono definiti.</div>
+    <p><Link className="text-link" href="/povegliano-veronese/privacy" target="_blank">Apri la pagina pubblica Privacy e trasparenza →</Link></p>
+  </Panel>
 }
 
 function Panel({title,children}){return <div className="admin-panel"><h2>{title}</h2>{children}</div>}
