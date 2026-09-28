@@ -57,7 +57,7 @@ export default function PoveglianoPage(){
 
   return <main>
     <header className="citizen-header">
-      <Link href="/" className="citizen-brand"><span className="mark">DR</span><div><strong>Dove Riposa</strong><small>Povegliano Veronese</small></div></Link>
+      <Link href="/povegliano-veronese" className="citizen-brand"><span className="mark">DR</span><div><strong>Dove Riposa</strong><small>Povegliano Veronese</small></div></Link>
       <nav><a href="#cerca">Cerca</a><a href="#mappa">Mappa</a><a href="#info">Informazioni</a></nav>
     </header>
 
@@ -65,7 +65,7 @@ export default function PoveglianoPage(){
       <div>
         <span className="eyebrow">CIMITERO COMUNALE · POVEGLIANO VERONESE</span>
         <h1>Trova una sepoltura.</h1>
-        <p>Cerca gratuitamente e senza registrazione. La demo utilizza solo nominativi fittizi.</p>
+        <p>Cerca gratuitamente e senza registrazione. Questa versione pilota utilizza nominativi dimostrativi.</p>
         {source.startsWith('qr-') && <div className="qr-arrival">Accesso diretto dal QR del cimitero</div>}
       </div>
       <form className="search-card public-search" onSubmit={submit}>
@@ -113,7 +113,7 @@ export default function PoveglianoPage(){
       <article><h3>Privacy</h3><p>Ricerca senza registrazione. Gli analytics raccolgono solo eventi tecnici aggregabili, mai il nominativo cercato.</p></article>
     </section>
 
-    <footer><div><b>Dove Riposa</b><span>Povegliano Veronese · demo pilota</span></div><p><Link href="/enti">Area Enti</Link> · Privacy · Accessibilità</p></footer>
+    <footer><div><b>Dove Riposa</b><span>Povegliano Veronese · progetto pilota</span></div><p>Privacy · Accessibilità · Segnala un errore</p></footer>
   </main>
 }
 
