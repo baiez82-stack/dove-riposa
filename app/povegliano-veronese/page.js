@@ -73,7 +73,7 @@ export default function PoveglianoPage(){
         <label>Cognome<input value={q.cognome} onChange={e=>setQ({...q,cognome:e.target.value})} placeholder="es. Rossi"/></label>
         <label>Anno <span>(facoltativo)</span><input value={q.anno} onChange={e=>setQ({...q,anno:e.target.value})} placeholder="es. 1941" inputMode="numeric"/></label>
         <button className="primary" type="submit">Cerca sepoltura</button>
-        <p className="micro">Nessun account. Nessuna profilazione. I termini cercati non vengono inviati agli analytics.</p>
+        <p className="micro">Nessun account. Nessuna profilazione. I termini cercati non vengono inviati agli analytics. <Link href="/povegliano-veronese/privacy">Come proteggiamo i dati →</Link></p>
       </form>
     </section>
 
@@ -110,10 +110,10 @@ export default function PoveglianoPage(){
     <section className="wrap info-cards" id="info">
       <article><h3>Orari e contatti</h3><p>Nella versione reale il Comune potrà pubblicare qui orari, contatti e avvisi del cimitero.</p></article>
       <article><h3>Segnala un errore</h3><p>Previsto un modulo per segnalare posizione o dati da verificare, senza modifiche automatiche all’archivio.</p></article>
-      <article><h3>Privacy</h3><p>Ricerca senza registrazione. Gli analytics raccolgono solo eventi tecnici aggregabili, mai il nominativo cercato.</p></article>
+      <article><h3>Privacy</h3><p>Ricerca senza registrazione, nessun profilo commemorativo e analytics minimizzati.</p><Link className="text-link" href="/povegliano-veronese/privacy">Privacy e trasparenza →</Link></article>
     </section>
 
-    <footer><div><b>Dove Riposa</b><span>Povegliano Veronese · progetto pilota</span></div><p>Privacy · Accessibilità · Segnala un errore</p></footer>
+    <footer><div><b>Dove Riposa</b><span>Povegliano Veronese · progetto pilota</span></div><p><Link href="/povegliano-veronese/privacy">Privacy e trasparenza</Link> · Accessibilità · Segnala un errore</p></footer>
   </main>
 }
 
