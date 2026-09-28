@@ -165,7 +165,7 @@ export default function Home() {
         ['Dashboard aggiornamenti', 'Controllo importazioni, anomalie, record da verificare e log.'],
         ['API interoperabili', 'Endpoint per integrare portali civici, totem e app del Comune.'],
         ['Statistiche aggregate', 'Solo dati di servizio aggregati, senza profilazione del cittadino.']
-      ]]} extra={<><PilotPlan/><Dashboard/></>}/>} 
+      ]} extra={<><PilotPlan/><Dashboard/></>}/>} 
 
       {tab === 'business' && <InfoPage title="Modello business" kicker="RICAVI" intro="Il cittadino cerca gratis. Il valore economico nasce dalla digitalizzazione, dall’integrazione e dalla gestione del servizio per enti e operatori." cards={[
         ['1 · Integrazione', 'Ricerca federata, feed/API, widget istituzionale e assistenza. Su preventivo.'],
