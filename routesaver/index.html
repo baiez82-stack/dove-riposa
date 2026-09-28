@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>RouteSaver MVP</title>
+<meta name="theme-color" content="#0f172a">
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--ink:#0f172a;--muted:#64748b;--line:#e2e8f0;--accent:#16a34a;--accent2:#2563eb;--warn:#f59e0b;--shadow:0 14px 38px rgba(15,23,42,.08)}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:linear-gradient(180deg,#eef4ff 0,#f8fafc 240px,#f5f7fb 100%);color:var(--ink)}
+.wrap{max-width:980px;margin:auto;padding:22px 16px 70px}.top{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:18px}.brand{font-weight:900;font-size:24px;letter-spacing:-.6px}.brand span{color:var(--accent)}.demo{font-size:12px;font-weight:800;background:#fff7ed;color:#9a3412;border:1px solid #fed7aa;padding:7px 10px;border-radius:999px}
+.hero{background:rgba(255,255,255,.88);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.8);border-radius:28px;padding:28px;box-shadow:var(--shadow);margin-bottom:18px}.hero h1{font-size:clamp(30px,7vw,54px);line-height:.98;letter-spacing:-2px;margin:0 0 12px;max-width:780px}.hero p{margin:0;color:var(--muted);font-size:17px;max-width:700px;line-height:1.5}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.panel{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:20px;box-shadow:var(--shadow);margin-bottom:18px}.panel h2{margin:0 0 14px;font-size:20px}.field{display:flex;flex-direction:column;gap:7px}.field label{font-size:13px;font-weight:800;color:#334155}.field input,.field select{width:100%;border:1px solid #cbd5e1;border-radius:14px;padding:13px 14px;font:inherit;background:white;color:var(--ink);outline:none}.field input:focus,.field select:focus{border-color:#60a5fa;box-shadow:0 0 0 3px #dbeafe}.full{grid-column:1/-1}
+.switchrow{display:flex;gap:8px;flex-wrap:wrap}.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 12px;font-size:13px;font-weight:800;cursor:pointer}.chip.active{background:#0f172a;color:white;border-color:#0f172a}
+.calc{width:100%;border:0;border-radius:16px;padding:15px 18px;background:linear-gradient(135deg,#16a34a,#15803d);color:white;font-size:16px;font-weight:900;cursor:pointer;box-shadow:0 10px 20px rgba(22,163,74,.18)}.calc:active{transform:translateY(1px)}
+.routebox{display:none}.summary{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px}.summary h2{margin:0}.muted{color:var(--muted)}.routeviz{height:120px;border-radius:20px;background:linear-gradient(135deg,#eff6ff,#f0fdf4);position:relative;overflow:hidden;border:1px solid #dbeafe;margin-bottom:16px}.road{position:absolute;left:8%;right:8%;top:51%;height:4px;background:#94a3b8;border-radius:10px;transform:rotate(-4deg)}.road:after{content:"";position:absolute;left:25%;right:8%;top:-28px;height:4px;background:#60a5fa;border-radius:10px;transform:rotate(10deg)}.pin{position:absolute;width:18px;height:18px;border-radius:50%;background:#0f172a;border:4px solid #fff;box-shadow:0 2px 8px #94a3b8}.pin.a{left:8%;top:61%}.pin.b{right:8%;top:32%;background:#16a34a}.route-label{position:absolute;font-size:12px;font-weight:800;background:white;padding:5px 8px;border-radius:999px;box-shadow:0 3px 10px rgba(15,23,42,.08)}.rl-a{left:6%;bottom:10px}.rl-b{right:6%;top:10px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.card{border:1px solid var(--line);border-radius:20px;padding:16px;background:#fff;position:relative}.card.best{border:2px solid #22c55e;background:linear-gradient(180deg,#f0fdf4,#fff)}.badge{display:inline-flex;padding:5px 8px;border-radius:999px;font-size:11px;font-weight:900;margin-bottom:10px;background:#e2e8f0}.best .badge{background:#dcfce7;color:#166534}.card h3{margin:0 0 4px;font-size:18px}.big{font-size:28px;font-weight:950;letter-spacing:-1px;margin:8px 0}.stats{display:grid;gap:7px;font-size:13px;color:#475569}.stat{display:flex;justify-content:space-between;gap:8px}.delta{margin-top:12px;border-radius:13px;padding:10px;font-weight:900;font-size:13px;background:#f8fafc}.best .delta{background:#dcfce7;color:#166534}
+.openmaps{display:inline-flex;justify-content:center;align-items:center;text-decoration:none;width:100%;margin-top:14px;border:1px solid #cbd5e1;border-radius:14px;padding:11px;color:#0f172a;font-weight:850;background:#fff}
+.insight{margin-top:14px;border-radius:18px;padding:16px;background:#0f172a;color:white}.insight strong{font-size:22px}.insight small{display:block;color:#cbd5e1;margin-top:5px}
+.evbox{display:none;margin-top:14px;border:1px dashed #93c5fd;background:#eff6ff;border-radius:16px;padding:13px;font-size:13px}.explain{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.ex{padding:14px;border:1px solid var(--line);border-radius:16px;background:#fafafa}.ex b{display:block;margin-bottom:4px}.foot{font-size:12px;color:#64748b;text-align:center;margin-top:22px}
+@media(max-width:720px){.wrap{padding:14px 12px 50px}.hero{padding:22px;border-radius:22px}.grid,.cards,.explain{grid-template-columns:1fr}.panel{padding:16px;border-radius:20px}.top{margin:3px 3px 14px}.brand{font-size:21px}.summary{flex-direction:column}.cards{gap:10px}.card{padding:15px}.hero h1{letter-spacing:-1.4px}.hero p{font-size:15px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand">Route<span>Saver</span></div>
+    <div class="demo">Dati demo · MVP gratuito</div>
+  </div>
+
+  <section class="hero">
+    <h1>Non il percorso più corto. Quello che ti conviene davvero.</h1>
+    <p>Confronta tempo, pedaggi e carburante o ricarica. Scopri subito se qualche minuto in più vale il risparmio.</p>
+  </section>
+
+  <section class="panel">
+    <h2>Calcola il viaggio</h2>
+    <div class="grid">
+      <div class="field"><label>Partenza</label><input id="from" value="Verona" placeholder="Es. Verona"></div>
+      <div class="field"><label>Destinazione</label><input id="to" value="Milano" placeholder="Es. Milano"></div>
+      <div class="field full"><label>Veicolo</label>
+        <div class="switchrow" id="vehicleChips">
+          <button class="chip active" data-v="benzina" type="button">Benzina</button>
+          <button class="chip" data-v="diesel" type="button">Diesel</button>
+          <button class="chip" data-v="ibrida" type="button">Ibrida</button>
+          <button class="chip" data-v="elettrica" type="button">Elettrica</button>
+        </div>
+      </div>
+      <div class="field"><label id="consLabel">Consumo medio (l/100 km)</label><input id="cons" type="number" min="1" step=".1" value="6.2"></div>
+      <div class="field"><label id="priceLabel">Prezzo carburante (€/l)</label><input id="price" type="number" min=".1" step=".01" value="1.78"></div>
+      <div class="field"><label>Quanto vale il tuo tempo? (€/h)</label><input id="timeValue" type="number" min="0" step="1" value="10"></div>
+      <div class="field" id="socField" style="display:none"><label>Batteria alla partenza (%)</label><input id="soc" type="number" min="5" max="100" value="80"></div>
+      <div class="full"><button class="calc" id="calc">Confronta i percorsi</button></div>
+    </div>
+  </section>
+
+  <section class="panel routebox" id="results">
+    <div class="summary">
+      <div><h2 id="tripTitle">Verona → Milano</h2><div class="muted">Confronto simulato · dati demo</div></div>
+      <div class="demo">MVP</div>
+    </div>
+    <div class="routeviz">
+      <div class="road"></div><div class="pin a"></div><div class="pin b"></div>
+      <div class="route-label rl-a" id="mapFrom">Verona</div><div class="route-label rl-b" id="mapTo">Milano</div>
+    </div>
+    <div class="cards" id="cards"></div>
+    <div class="insight" id="insight"></div>
+    <div class="evbox" id="evbox"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Come viene calcolato</h2>
+    <div class="explain">
+      <div class="ex"><b>1. Costo strada</b><span class="muted">Pedaggi stimati + carburante o energia.</span></div>
+      <div class="ex"><b>2. Tempo perso</b><span class="muted">Trasformiamo i minuti aggiuntivi nel valore €/h che scegli tu.</span></div>
+      <div class="ex"><b>3. Compromesso Smart</b><span class="muted">Cerchiamo il punto in cui spendi meno senza allungare troppo.</span></div>
+    </div>
+  </section>
+
+  <div class="foot">Questa è una demo di validazione. Distanze, pedaggi e prezzi sono simulati; la versione reale userà API di routing e prezzi aggiornati.</div>
+</div>
+
+<script>
+(function(){
+  var vehicle='benzina';
+  var chips=document.querySelectorAll('.chip');
+  chips.forEach(function(c){c.addEventListener('click',function(){
+    chips.forEach(function(x){x.classList.remove('active')});c.classList.add('active');vehicle=c.dataset.v;
+    var ev=vehicle==='elettrica';
+    document.getElementById('socField').style.display=ev?'flex':'none';
+    document.getElementById('consLabel').textContent=ev?'Consumo medio (kWh/100 km)':'Consumo medio (l/100 km)';
+    document.getElementById('priceLabel').textContent=ev?'Prezzo energia (€/kWh)':'Prezzo carburante (€/l)';
+    document.getElementById('cons').value=ev?'18.5':(vehicle==='diesel'?'5.4':vehicle==='ibrida'?'4.7':'6.2');
+    document.getElementById('price').value=ev?'0.55':(vehicle==='diesel'?'1.72':'1.78');
+  })});
+
+  function hash(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return h}
+  function euro(v){return new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(v)}
+  function mins(m){var h=Math.floor(m/60),mm=Math.round(m%60);return h? h+'h '+mm+'m':mm+' min'}
+  function routeCost(km,toll,cons,price){return {energy:km/100*cons*price,total:km/100*cons*price+toll}}
+
+  document.getElementById('calc').addEventListener('click',function(){
+    var from=(document.getElementById('from').value||'Partenza').trim();
+    var to=(document.getElementById('to').value||'Destinazione').trim();
+    var cons=parseFloat(document.getElementById('cons').value)||6;
+    var price=parseFloat(document.getElementById('price').value)||1.7;
+    var tv=parseFloat(document.getElementById('timeValue').value)||0;
+    var seed=hash(from.toLowerCase()+'|'+to.toLowerCase());
+    var base=120+(seed%141);
+    if(from.toLowerCase().indexOf('verona')>=0&&to.toLowerCase().indexOf('milano')>=0)base=162;
+    var fastKm=Math.round(base), smartKm=Math.round(base*1.025), cheapKm=Math.round(base*1.07);
+    var fastMin=Math.round(fastKm/92*60+8), smartMin=fastMin+11, cheapMin=fastMin+29;
+    var fastToll=Math.max(3,fastKm*.078), smartToll=fastToll*.52, cheapToll=fastToll*.12;
+    var f=routeCost(fastKm,fastToll,cons,price), s=routeCost(smartKm,smartToll,cons,price), c=routeCost(cheapKm,cheapToll,cons,price);
+    var weighted=[f.total+fastMin/60*tv,s.total+smartMin/60*tv,c.total+cheapMin/60*tv];
+    var best=weighted.indexOf(Math.min.apply(null,weighted));
+    var data=[
+      {name:'Veloce',km:fastKm,min:fastMin,toll:fastToll,cost:f,delta:0,save:0},
+      {name:'Smart',km:smartKm,min:smartMin,toll:smartToll,cost:s,delta:smartMin-fastMin,save:f.total-s.total},
+      {name:'Risparmio',km:cheapKm,min:cheapMin,toll:cheapToll,cost:c,delta:cheapMin-fastMin,save:f.total-c.total}
+    ];
+    var html='';
+    data.forEach(function(r,i){
+      var link='https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(from)+'&destination='+encodeURIComponent(to)+'&travelmode=driving';
+      html+='<article class="card '+(i===best?'best':'')+'"><div class="badge">'+(i===best?'MIGLIOR COMPROMESSO':'PERCORSO')+'</div><h3>'+r.name+'</h3><div class="big">'+euro(r.cost.total)+'</div><div class="stats"><div class="stat"><span>Durata</span><b>'+mins(r.min)+'</b></div><div class="stat"><span>Distanza</span><b>'+r.km+' km</b></div><div class="stat"><span>Pedaggi</span><b>'+euro(r.toll)+'</b></div><div class="stat"><span>'+(vehicle==='elettrica'?'Energia':'Carburante')+'</span><b>'+euro(r.cost.energy)+'</b></div></div><div class="delta">'+(i===0?'Riferimento più veloce':('+'+r.delta+' min · risparmi '+euro(Math.max(0,r.save))))+'</div><a class="openmaps" href="'+link+'" target="_blank" rel="noopener">Apri in Google Maps</a></article>';
+    });
+    document.getElementById('cards').innerHTML=html;
+    var smartSave=Math.max(0,f.total-s.total);
+    document.getElementById('insight').innerHTML='<strong>+'+(smartMin-fastMin)+' minuti = risparmi '+euro(smartSave)+'</strong><small>Il percorso Smart riduce soprattutto i pedaggi senza allungare troppo il viaggio.</small>';
+    document.getElementById('tripTitle').textContent=from+' → '+to;
+    document.getElementById('mapFrom').textContent=from;document.getElementById('mapTo').textContent=to;
+    var evbox=document.getElementById('evbox');
+    if(vehicle==='elettrica'){
+      var soc=parseFloat(document.getElementById('soc').value)||80;
+      var need=smartKm/100*cons;
+      evbox.style.display='block';
+      evbox.innerHTML='<b>EV · simulazione ricarica</b><br>Partenza al '+soc+'%. Consumo stimato sul percorso Smart: '+need.toFixed(1)+' kWh. '+(smartKm>210||soc<55?'Sosta demo suggerita: 18 min, ricarica rapida a '+euro(price)+'/kWh.':'Nessuna sosta necessaria nella simulazione.');
+    } else evbox.style.display='none';
+    document.getElementById('results').style.display='block';
+    document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
+  });
+})();
+</script>
+</body>
+</html>
