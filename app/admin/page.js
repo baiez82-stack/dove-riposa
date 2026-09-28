@@ -23,14 +23,15 @@ export default function AdminPage(){
 
   return <main className="admin-shell">
     <aside className="admin-sidebar"><div className="citizen-brand"><span className="mark">DR</span><div><strong>Dove Riposa</strong><small>Comune di Povegliano Veronese</small></div></div>
-      {['dashboard','archivio','import','mappa','segnalazioni','privacy','utenti'].map(x=><button key={x} className={tab===x?'active':''} onClick={()=>setTab(x)}>{x[0].toUpperCase()+x.slice(1)}</button>)}
+      {['dashboard','archivio','import','qualita','mappa','segnalazioni','privacy','utenti'].map(x=><button key={x} className={tab===x?'active':''} onClick={()=>setTab(x)}>{x[0].toUpperCase()+x.slice(1)}</button>)}
       <button onClick={()=>setLogged(false)}>Esci</button>
     </aside>
     <section className="admin-content">
       {tab==='dashboard'&&<Dashboard/>}
       {tab==='archivio'&&<Archivio rows={rows} setRows={setRows} editing={editing} setEditing={setEditing}/>}
       {tab==='import'&&<Import setRows={setRows} message={importMsg} setMessage={setImportMsg}/>}
-      {tab==='mappa'&&<Panel title="Mappa del cimitero"><p>Editor dimostrativo: nella versione reale qui si associano settori, file, loculi, ingressi, percorsi e QR di calibrazione alla planimetria ufficiale.</p><div className="admin-placeholder">Editor mappa · prossimo modulo operativo</div></Panel>}
+      {tab==='qualita'&&<DataQuality rows={rows}/>}
+      {tab==='mappa'&&<PrecisionAdmin/>}
       {tab==='segnalazioni'&&<Panel title="Segnalazioni"><div className="admin-list"><p><b>Posizione da verificare</b> · 1 segnalazione demo</p><p><b>Nominativo errato</b> · 0</p><p><b>Trasferimento</b> · 0</p></div></Panel>}
       {tab==='privacy'&&<PrivacyPanel/>}
       {tab==='utenti'&&<Panel title="Utenti e ruoli"><p>Amministratore ente · Operatore cimiteriale · Sola lettura.</p><div className="admin-warning">Questo ambiente è dimostrativo. La versione di produzione userà autenticazione lato server, ruoli, sessioni sicure e audit degli accessi.</div></Panel>}
@@ -58,6 +59,49 @@ function Archivio({rows,setRows,editing,setEditing}){
 function Import({setRows,message,setMessage}){
   function file(e){const f=e.target.files?.[0];if(!f)return;const reader=new FileReader();reader.onload=()=>{const lines=String(reader.result).split(/\r?\n/).filter(Boolean);setMessage(`File letto: ${lines.length} righe. Import demo pronto per anteprima.`);};reader.readAsText(f);}
   return <Panel title="Import CSV / Excel"><p>Per la demo leggiamo il file localmente senza inviarlo a un server. In produzione verrà aggiunta un’anteprima con validazione colonne, errori e conferma prima della pubblicazione.</p><input type="file" accept=".csv,.txt" onChange={file}/>{message&&<div className="import-message">{message}</div>}</Panel>
+}
+
+
+function DataQuality({rows}){
+  const published=rows.filter(r=>r.stato==='Pubblicato').length;
+  const pending=rows.length-published;
+  return <Panel title="Data Quality Engine">
+    <p>Controllo preliminare dell’archivio prima della pubblicazione. La demo evidenzia record incompleti o da verificare senza modificarli automaticamente.</p>
+    <div className="quality-grid">
+      <div><b>{rows.length}</b><span>record analizzati</span></div>
+      <div><b>{published}</b><span>localizzati</span></div>
+      <div><b>{pending}</b><span>da verificare</span></div>
+      <div><b>0</b><span>duplicati demo</span></div>
+    </div>
+    <div className="quality-list">
+      <div className="quality-ok"><b>✓ Coordinate e posizione</b><span>2 record demo coerenti con settore/fila/posizione.</span></div>
+      <div className="quality-warn"><b>! Giuseppe Verdi</b><span>Record marcato “Da verificare”: richiede conferma dell’operatore prima della pubblicazione.</span></div>
+      <div className="quality-ok"><b>✓ Campi minimi</b><span>Nessun record senza nome o cognome nella demo.</span></div>
+    </div>
+  </Panel>
+}
+
+function PrecisionAdmin(){
+  const markerRows=[
+    ['DR-PV-ING','Ingresso principale','Attivo'],
+    ['DR-PV-CEN','Incrocio centrale','Attivo'],
+    ['DR-PV-EST','Porticato est','Attivo'],
+    ['DR-PV-OVEST','Area ovest','Bozza']
+  ];
+  return <Panel title="Mappa & Dove Riposa Precision">
+    <p>I marker di calibrazione collegano un punto fisico noto alla mappa digitale. In produzione il Comune potrà definire settori, percorsi accessibili, ostacoli e marker senza applicare QR a ogni sepoltura.</p>
+    <div className="precision-admin-grid">
+      <div className="admin-placeholder">Editor planimetria · collegamento a cartografia ufficiale</div>
+      <div className="marker-admin">
+        <h3>Marker di calibrazione</h3>
+        {markerRows.map(r=><div className="marker-admin-row" key={r[0]}><div><b>{r[0]}</b><span>{r[1]}</span></div><em>{r[2]}</em></div>)}
+      </div>
+    </div>
+    <div className="admin-two">
+      <div className="admin-panel mini"><h3>Percorso breve</h3><p>Ottimizza la distanza quando non sono presenti vincoli di accessibilità.</p></div>
+      <div className="admin-panel mini"><h3>Percorso accessibile ♿</h3><p>Può evitare scale, ghiaia e passaggi non idonei usando i metadati inseriti dall’ente.</p></div>
+    </div>
+  </Panel>
 }
 
 function PrivacyPanel(){
