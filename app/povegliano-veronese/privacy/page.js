@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export const metadata = {
   title: 'Privacy e trasparenza | Dove Riposa - Povegliano Veronese',
-  description: 'Principi privacy by design adottati nella demo Dove Riposa per Povegliano Veronese.'
+  description: 'Informazioni privacy della demo pilota Dove Riposa per Povegliano Veronese.'
 };
 
 export default function PrivacyPage(){
@@ -14,82 +14,102 @@ export default function PrivacyPage(){
 
     <section className="privacy-page wrap">
       <div className="privacy-hero">
-        <span className="eyebrow">PRIVACY BY DESIGN · DEMO PILOTA</span>
+        <span className="eyebrow">DEMO PILOTA · ULTIMO AGGIORNAMENTO 28/09/2026</span>
         <h1>Privacy e trasparenza</h1>
-        <p>Questa pagina descrive le scelte privacy già incorporate nella demo e i requisiti da formalizzare prima di collegare archivi comunali reali. Non sostituisce l'informativa definitiva del Comune né la validazione del DPO.</p>
+        <p>Questa pagina descrive i trattamenti attivi nella demo e le scelte privacy già incorporate nel progetto. La demo non è ancora un servizio ufficiale del Comune di Povegliano Veronese e non contiene archivi comunali reali.</p>
       </div>
 
       <div className="privacy-summary">
-        <div><b>Nessuna registrazione</b><span>La ricerca pubblica non richiede account, email, telefono o identità del cittadino.</span></div>
-        <div><b>Nessun profilo commemorativo</b><span>La scheda serve solo a localizzare la sepoltura. Niente social, dediche o servizi commerciali collegati al defunto.</span></div>
-        <div><b>Analytics minimizzati</b><span>Gli eventi tecnici non contengono il nome o cognome digitato nella ricerca.</span></div>
-        <div><b>Fotocamera locale</b><span>La demo richiede il permesso del browser solo quando viene avviata la navigazione con fotocamera.</span></div>
+        <div><b>Nessuna registrazione</b><span>La ricerca pubblica non richiede account, email, telefono o identificazione del cittadino.</span></div>
+        <div><b>Nessun profilo social</b><span>La finalità è localizzare la sepoltura, senza dediche, community o servizi commerciali collegati al defunto.</span></div>
+        <div><b>Analytics minimizzati</b><span>Non inviamo all’endpoint analytics il nome, cognome o anno digitati nella ricerca.</span></div>
+        <div><b>Fotocamera su richiesta</b><span>La fotocamera si attiva solo dopo una scelta dell’utente e il permesso del browser.</span></div>
       </div>
 
       <div className="privacy-sections">
         <section className="privacy-section">
-          <h2>1. Ricerca senza identificazione</h2>
-          <p>Il cittadino può cercare una sepoltura senza creare un account. La demo non richiede nome dell'utente, email, numero di telefono o autenticazione. Questa scelta segue il principio di minimizzazione e l'indicazione espressa dal Garante secondo cui la semplice consultazione dell'ubicazione di una sepoltura non richiede l'identificazione dell'utente.</p>
+          <h2>1. Stato della demo e soggetti coinvolti</h2>
+          <p>Questa è una sperimentazione tecnica indipendente, non ancora adottata dal Comune. Finché non vengono caricati dati reali, la piattaforma usa nominativi e posizioni dimostrativi. Prima della produzione dovranno essere identificati formalmente il titolare del trattamento, il responsabile tecnico, gli eventuali sub-responsabili e i relativi contatti.</p>
         </section>
 
         <section className="privacy-section">
-          <h2>2. Dati mostrati sul defunto</h2>
-          <p>La finalità prevista è esclusivamente individuare la sepoltura. La versione reale dovrà pubblicare solo i dati strettamente necessari e autorizzati dal Comune, ad esempio nominativo, riferimenti temporali essenziali e posizione della sepoltura. Non sono previsti profili social, commenti, dediche, fotografie caricate automaticamente, fiori virtuali o servizi commerciali collegati alla scheda.</p>
+          <h2>2. Ricerca senza account</h2>
+          <p>Il cittadino può cercare una sepoltura senza creare un profilo. Non chiediamo nome dell’utente, email, numero di telefono o credenziali per usare la funzione pubblica. È una scelta intenzionale di minimizzazione: la ricerca istituzionale non viene condizionata alla registrazione.</p>
         </section>
 
         <section className="privacy-section">
-          <h2>3. Analytics di utilizzo</h2>
-          <p>Per misurare l'utilità del servizio registriamo solo categorie di evento come apertura pagina, ingresso da QR, ricerca effettuata, apertura di un risultato e avvio della navigazione. L'endpoint della demo non riceve il nominativo cercato né un identificatore persistente dell'utente. L'infrastruttura di hosting può comunque generare log tecnici di rete: fornitori, tempi di conservazione e configurazione dei log dovranno essere definiti e documentati prima della produzione.</p>
-          <div className="privacy-code">Esempio: search · povegliano-veronese · qr-ingresso · timestamp<br/>Non: "Mario Rossi cercato dall'utente X"</div>
+          <h2>3. Dati relativi alle sepolture</h2>
+          <p>Nella futura versione reale saranno mostrati solo i dati necessari alla finalità di ricerca e localizzazione, nei limiti stabiliti dall’ente competente: ad esempio nominativo, riferimenti temporali essenziali e posizione della sepoltura. Dove Riposa non prevede la creazione automatica di profili commemorativi, community, dediche, classifiche di popolarità, ceri virtuali o vendita di servizi collegati alla scheda del defunto.</p>
         </section>
 
         <section className="privacy-section">
-          <h2>4. Fotocamera e futura geolocalizzazione</h2>
-          <p>La fotocamera viene attivata solo dopo una scelta dell'utente e dopo il consenso richiesto dal browser. La demo non registra né carica il flusso video sui nostri server. La geolocalizzazione non è attiva nella demo; se introdotta, dovrà essere usata solo durante la navigazione, previa autorizzazione del dispositivo e senza creare uno storico degli spostamenti salvo diversa base giuridica e informativa.</p>
+          <h2>4. Analytics e statistiche di utilizzo</h2>
+          <p>La demo registra categorie tecniche di evento utili a valutare il servizio: apertura pagina, ingresso da QR, ricerca effettuata, apertura risultato e avvio della navigazione. L’endpoint applicativo non riceve i termini digitati nella ricerca né un identificatore persistente del visitatore.</p>
+          <div className="privacy-code">Esempio previsto: search · povegliano-veronese · qr-ingresso · timestamp<br/>Dato escluso: nome/cognome digitato nella ricerca</div>
+          <p>I sistemi di hosting e sicurezza possono comunque trattare log tecnici di rete, inclusi dati necessari al funzionamento e alla protezione del servizio. Prima della produzione saranno documentati fornitori, configurazioni e tempi di conservazione.</p>
         </section>
 
         <section className="privacy-section">
-          <h2>5. Ruoli e responsabilità</h2>
-          <p>L'assetto previsto per un progetto comunale è da formalizzare con l'ente e il DPO. In linea generale il Comune, quale soggetto che determina finalità e modalità del servizio istituzionale, potrà assumere il ruolo di titolare del trattamento e il fornitore tecnico quello di responsabile ai sensi dell'art. 28 GDPR, nei limiti stabiliti dal contratto. Questa configurazione dovrà essere verificata sul flusso reale prima dell'attivazione.</p>
+          <h2>5. Cookie e tecnologie analoghe</h2>
+          <p>La demo non utilizza deliberatamente cookie di marketing, profilazione pubblicitaria o strumenti di retargeting. Eventuali cookie o memorie tecniche strettamente necessarie al funzionamento dell’infrastruttura o dell’area riservata saranno documentati nella versione definitiva. Se in futuro verranno introdotti strumenti non tecnici soggetti a consenso, verrà implementata la relativa gestione delle preferenze prima dell’attivazione.</p>
         </section>
 
         <section className="privacy-section">
-          <h2>6. Rettifica, segnalazioni e diritti</h2>
-          <p>La versione reale includerà un canale per segnalare dati errati o posizioni da verificare. Una segnalazione non modificherà automaticamente l'archivio: passerà da un operatore autorizzato. Dovrà inoltre essere definita la procedura per le richieste esercitate dai soggetti legittimati ai sensi dell'art. 2-terdecies del Codice Privacy, comprese le ragioni familiari meritevoli di protezione.</p>
+          <h2>6. Fotocamera e navigazione</h2>
+          <p>La navigazione con fotocamera è facoltativa. Il browser richiede il permesso prima dell’accesso e la demo non invia né salva il flusso video sui server applicativi. La funzione serve esclusivamente come sovrapposizione visiva dimostrativa al percorso.</p>
         </section>
 
         <section className="privacy-section">
-          <h2>7. Protezione da interrogazioni massive</h2>
-          <p>Prima della produzione il motore pubblico dovrà prevedere misure anti-abuso proporzionate, come rate limiting, rilevamento bot e, quando necessario, CAPTCHA. L'obiettivo è permettere la ricerca puntuale senza rendere semplice l'estrazione automatizzata dell'intero archivio cimiteriale.</p>
+          <h2>7. Geolocalizzazione</h2>
+          <p>La geolocalizzazione non è attualmente attiva. Se verrà introdotta, sarà richiesta solo quando necessaria alla navigazione e previa autorizzazione del dispositivo. L’architettura prevista non richiede la creazione di uno storico degli spostamenti del cittadino.</p>
         </section>
 
         <section className="privacy-section">
-          <h2>8. Area operatori</h2>
-          <p>L'area amministrativa mostrata nella demo non è destinata a dati reali. La produzione dovrà usare autenticazione lato server, credenziali individuali, ruoli, sessioni sicure, audit delle modifiche, limitazione dei privilegi e procedure di revoca degli accessi. Il PIN della demo non costituisce una misura di sicurezza di produzione.</p>
+          <h2>8. Ruoli privacy nella versione reale</h2>
+          <p>L’assetto dovrà essere concordato con l’ente e il DPO sulla base del servizio effettivamente attivato. In un modello tipico, il Comune che determina finalità e modalità del servizio istituzionale può operare come titolare e il fornitore tecnico come responsabile del trattamento ai sensi dell’art. 28 GDPR. Tale configurazione non viene data per scontata: sarà formalizzata contrattualmente prima dell’uso di dati reali.</p>
         </section>
 
         <section className="privacy-section">
-          <h2>9. Cosa manca prima dei dati reali</h2>
+          <h2>9. Rettifica, segnalazioni e richieste</h2>
+          <p>La produzione includerà un canale per segnalare dati o posizioni da verificare. Le segnalazioni non modificheranno automaticamente l’archivio ma saranno sottoposte a un operatore autorizzato. Saranno inoltre definite con l’ente le procedure per le richieste previste dalla normativa italiana sui dati delle persone decedute, incluso l’art. 2-terdecies del Codice Privacy.</p>
+        </section>
+
+        <section className="privacy-section">
+          <h2>10. Sicurezza e anti-scraping</h2>
+          <p>Prima della produzione saranno attivate misure proporzionate contro interrogazioni massive e abusi, tra cui rate limiting, protezione bot e controlli automatici. L’area operatori utilizzerà autenticazione lato server, credenziali individuali, ruoli, sessioni sicure, audit delle modifiche e procedure di revoca.</p>
+        </section>
+
+        <section className="privacy-section">
+          <h2>11. Conservazione</h2>
+          <p>Nella demo gli eventi analytics applicativi non sono associati a profili utente. Per la produzione saranno stabiliti tempi di conservazione distinti per log tecnici, statistiche aggregate, audit amministrativi e segnalazioni, applicando il principio di limitazione della conservazione.</p>
+        </section>
+
+        <section className="privacy-section">
+          <h2>12. Cosa deve essere completato prima della produzione</h2>
           <ul>
-            <li>validazione del Comune e del DPO;</li>
-            <li>definizione dei ruoli privacy e degli eventuali sub-responsabili;</li>
-            <li>contratto e istruzioni sul trattamento;</li>
-            <li>informativa definitiva e contatti del titolare/DPO;</li>
-            <li>politiche di conservazione e cancellazione dei log;</li>
-            <li>misure di sicurezza, backup, incident response e gestione accessi;</li>
-            <li>valutazione della necessità di una DPIA in base al trattamento effettivo.</li>
+            <li>identificazione formale di titolare, responsabile ed eventuali sub-responsabili;</li>
+            <li>base giuridica e finalità dei singoli trattamenti;</li>
+            <li>contratto e istruzioni ex art. 28 GDPR ove applicabile;</li>
+            <li>informativa definitiva con contatti del titolare e del DPO;</li>
+            <li>registro dei trattamenti e politiche di conservazione;</li>
+            <li>misure tecniche e organizzative, backup e gestione incidenti;</li>
+            <li>valutazione della necessità di una DPIA sulla configurazione effettiva;</li>
+            <li>verifica delle condizioni di pubblicazione e riuso dei dati cimiteriali.</li>
           </ul>
         </section>
       </div>
 
       <div className="privacy-sources">
-        <h2>Riferimenti utilizzati per il progetto</h2>
-        <p><a href="https://www.garanteprivacy.it/home/docweb/-/docweb-display/docweb/10225702" target="_blank" rel="noreferrer">Garante Privacy - Provvedimento 12 febbraio 2026, doc. web 10225702</a></p>
-        <p><a href="https://garanteprivacy.it/web/guest/home/docweb/-/docweb-display/docweb/10228173" target="_blank" rel="noreferrer">Garante Privacy - Cimiteri digitali, newsletter 9 marzo 2026</a></p>
-        <p><a href="https://www.normattiva.it/atto/caricaDettaglioAtto?atto.articolo.numero=2&atto.articolo.sottoArticolo=1&atto.articolo.tipoArticolo=0&atto.codiceRedazionale=18G00129&atto.dataPubblicazioneGazzetta=2018-09-04" target="_blank" rel="noreferrer">Normattiva - art. 2-terdecies, diritti riguardanti le persone decedute</a></p>
+        <h2>Riferimenti normativi e istituzionali</h2>
+        <p><a href="https://garanteprivacy.it/web/guest/home/docweb/-/docweb-display/docweb/10228173" target="_blank" rel="noreferrer">Garante per la protezione dei dati personali - Newsletter 9 marzo 2026 sui cimiteri digitali</a></p>
+        <p><a href="https://www.garanteprivacy.it/home/docweb/-/docweb-display/docweb/10225673" target="_blank" rel="noreferrer">Garante Privacy - Provvedimento 12 febbraio 2026, doc. web 10225673</a></p>
+        <p><a href="https://eur-lex.europa.eu/eli/reg/2016/679/oj/?locale=it" target="_blank" rel="noreferrer">Regolamento (UE) 2016/679 - GDPR</a></p>
+        <p><a href="https://www.normattiva.it/" target="_blank" rel="noreferrer">Codice Privacy italiano - art. 2-terdecies</a></p>
       </div>
+
+      <div className="legal-box"><b>Documento provvisorio</b><p>Questa pagina descrive la demo e le scelte progettuali attuali. Non costituisce l’informativa privacy definitiva di un eventuale servizio comunale in produzione.</p></div>
     </section>
 
-    <footer><div><b>Dove Riposa</b><span>Povegliano Veronese · progetto pilota</span></div><p><Link href="/povegliano-veronese">Torna al servizio cittadino</Link></p></footer>
+    <footer><div><b>Dove Riposa</b><span>Povegliano Veronese · demo pilota</span></div><p><Link href="/povegliano-veronese/termini">Termini d’uso</Link> · <Link href="/povegliano-veronese">Torna alla ricerca</Link></p></footer>
   </main>
 }
