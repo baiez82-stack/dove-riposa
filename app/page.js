@@ -16,7 +16,11 @@ const demoRecords = [
     fila: 'Fila 7',
     posizione: 'Loculo 18',
     fonte: 'Dato dimostrativo fittizio — non proveniente dagli archivi comunali',
-    aggiornato: '27/09/2026'
+    aggiornato: '27/09/2026',
+    mapX: 735,
+    mapY: 325,
+    mapLabel: 'Area demo est',
+    route: 'M 520 635 L 520 555 L 555 520 L 555 440 L 635 440 L 635 365 L 735 325'
   },
   {
     id: 2,
@@ -30,7 +34,11 @@ const demoRecords = [
     fila: 'Fila 3',
     posizione: 'Tomba 42',
     fonte: 'Dato dimostrativo fittizio — non proveniente dagli archivi comunali',
-    aggiornato: '27/09/2026'
+    aggiornato: '27/09/2026',
+    mapX: 365,
+    mapY: 370,
+    mapLabel: 'Area demo ovest',
+    route: 'M 520 635 L 520 555 L 470 520 L 470 445 L 405 445 L 365 370'
   },
   {
     id: 3,
@@ -44,7 +52,11 @@ const demoRecords = [
     fila: 'Fila 11',
     posizione: 'Cippo 9',
     fonte: 'Dato dimostrativo fittizio — non proveniente dagli archivi comunali',
-    aggiornato: '27/09/2026'
+    aggiornato: '27/09/2026',
+    mapX: 650,
+    mapY: 505,
+    mapLabel: 'Area demo sud-est',
+    route: 'M 520 635 L 520 570 L 590 570 L 590 525 L 650 505'
   }
 ];
 
@@ -141,16 +153,17 @@ export default function Home() {
             <section className="map-section wrap">
               <div className="section-head"><span className="eyebrow">MAPPA INTERNA · DEMO</span><h2>{selected.cimitero}</h2><p>{selected.nome} {selected.cognome} — {selected.settore}, {selected.fila}, {selected.posizione}</p></div>
               <div className="map-card">
-                <div className="map-grid">
-                  <div className="gate">INGRESSO</div>
-                  <div className="path p1"></div><div className="path p2"></div><div className="path p3"></div>
-                  <div className="block b1">A</div><div className="block b2">B</div><div className="block b3">C</div><div className="block b4">D</div>
-                  <div className="pin">●<span>Sepoltura</span></div>
-                </div>
+                <CemeteryMap selected={selected} />
                 <div className="map-info">
-                  <h3>Percorso pedonale</h3>
-                  <p>In produzione la mappa può usare planimetrie georeferenziate fornite dall’ente. La posizione dell’utente verrebbe richiesta solo su consenso e usata per la navigazione, senza conservarla come impostazione predefinita.</p>
-                  <button className="primary">Avvia percorso demo</button>
+                  <span className="eyebrow">RICOSTRUZIONE PRELIMINARE</span>
+                  <h3>Percorso nel vero impianto</h3>
+                  <p>La sagoma e la disposizione dei volumi sono ricostruite dalla vista satellitare fornita per la demo. Settori, numerazioni e posizione del nominativo sono dimostrativi e dovranno essere sostituiti con la cartografia ufficiale del Comune.</p>
+                  <div className="map-legend">
+                    <span><i className="legend-build"></i>Edifici / porticati</span>
+                    <span><i className="legend-field"></i>Aree sepolture</span>
+                    <span><i className="legend-route"></i>Percorso demo</span>
+                  </div>
+                  <button className="primary">Percorso demo attivo</button>
                 </div>
               </div>
             </section>
@@ -194,6 +207,70 @@ export default function Home() {
       <footer><div><b>Dove Riposa</b><span>Nome di lavoro · MVP dimostrativo</span></div><p>Demo dedicata a Povegliano Veronese. Solo dati fittizi: nessun dato reale proveniente dagli archivi comunali.</p></footer>
     </main>
   );
+}
+
+
+function CemeteryMap({ selected }) {
+  return <div className="cemetery-map-shell">
+    <svg className="cemetery-map" viewBox="0 0 1000 700" role="img" aria-label="Ricostruzione dimostrativa del cimitero comunale di Povegliano Veronese">
+      <rect width="1000" height="700" className="map-ground" />
+
+      <path className="map-road" d="M 610 55 C 720 55 830 72 955 118" />
+      <text x="820" y="70" className="map-small-label">Parcheggio zona cimitero</text>
+      <rect x="760" y="88" width="165" height="68" rx="16" className="map-parking" />
+      <text x="842" y="128" textAnchor="middle" className="map-parking-label">P</text>
+
+      <g className="cemetery-footprint">
+        <path className="map-building" d="M150 92 L390 72 L450 132 L420 190 L242 190 L205 255 L125 220 Z" />
+        <path className="map-building" d="M118 230 L225 260 L205 452 L278 505 L245 585 L105 525 Z" />
+        <path className="map-building" d="M415 105 L530 118 L563 180 L530 268 L470 248 L440 168 Z" />
+        <path className="map-building" d="M610 205 L760 245 L835 360 L810 540 L715 575 L625 520 L662 450 L605 405 Z" />
+        <path className="map-building" d="M520 300 L603 312 L615 520 L555 555 L510 505 Z" />
+
+        <rect x="235" y="205" width="180" height="112" rx="10" className="map-field field-a" />
+        <rect x="260" y="335" width="145" height="132" rx="10" className="map-field field-b" />
+        <rect x="430" y="280" width="92" height="225" rx="10" className="map-field field-c" />
+        <rect x="625" y="270" width="128" height="110" rx="10" className="map-field field-d" />
+        <rect x="630" y="400" width="145" height="105" rx="10" className="map-field field-e" />
+
+        <g className="map-graves">
+          {Array.from({length: 8}).map((_,i)=><rect key={'a'+i} x={250+i*19} y="225" width="12" height="70" rx="3" />)}
+          {Array.from({length: 6}).map((_,i)=><rect key={'b'+i} x={275+i*21} y="356" width="13" height="88" rx="3" />)}
+          {Array.from({length: 10}).map((_,i)=><rect key={'c'+i} x="448" y={292+i*20} width="55" height="11" rx="3" />)}
+          {Array.from({length: 6}).map((_,i)=><rect key={'d'+i} x={640+i*18} y="289" width="11" height="70" rx="3" />)}
+          {Array.from({length: 7}).map((_,i)=><rect key={'e'+i} x={646+i*18} y="420" width="11" height="62" rx="3" />)}
+        </g>
+
+        <path className="map-walk" d="M520 620 L520 545 L555 510 L555 445 L600 420 L600 350" />
+        <path className="map-walk" d="M520 545 L465 510 L430 455" />
+        <path className="map-walk" d="M555 445 L650 445" />
+      </g>
+
+      <g className="entrance-marker">
+        <circle cx="520" cy="635" r="20" />
+        <text x="520" y="641" textAnchor="middle">↟</text>
+      </g>
+      <text x="520" y="676" textAnchor="middle" className="map-label">Ingresso demo</text>
+
+      <path d={selected.route} className="selected-route" />
+      <g className="selected-pin" transform={`translate(${selected.mapX} ${selected.mapY})`}>
+        <circle r="18" />
+        <circle r="7" className="pin-core" />
+      </g>
+      <g className="selected-callout" transform={`translate(${Math.min(selected.mapX + 28, 770)} ${Math.max(selected.mapY - 34, 60)})`}>
+        <rect width="190" height="58" rx="11" />
+        <text x="14" y="22">{selected.nome} {selected.cognome} — DEMO</text>
+        <text x="14" y="42" className="callout-small">{selected.settore} · {selected.posizione}</text>
+      </g>
+
+      <g className="map-zone-labels">
+        <text x="320" y="200">Area demo ovest</text>
+        <text x="690" y="260">Area demo est</text>
+        <text x="695" y="520">Area demo sud-est</text>
+      </g>
+    </svg>
+    <div className="map-demo-badge">Ricostruzione da immagine satellitare · non è la planimetria ufficiale</div>
+  </div>
 }
 
 function InfoPage({title, kicker, intro, cards, extra}) {
