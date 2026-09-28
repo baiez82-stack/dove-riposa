@@ -12,12 +12,14 @@ const initial=[
 export default function AdminPage(){
   const [logged,setLogged]=useState(false);
   const [pin,setPin]=useState('');
+  const [loginError,setLoginError]=useState('');
   const [rows,setRows]=useState(initial);
   const [editing,setEditing]=useState(null);
   const [tab,setTab]=useState('dashboard');
   const [importMsg,setImportMsg]=useState('');
 
-  if(!logged) return <main className="admin-login"><div className="admin-login-card"><span className="mark">DR</span><h1>Area riservata Comune</h1><p>Povegliano Veronese · accesso dimostrativo</p><label>PIN demo<input type="password" value={pin} onChange={e=>setPin(e.target.value)} placeholder="Inserisci PIN"/></label><button className="primary" onClick={()=>pin==='2026'&&setLogged(true)}>Accedi</button><small>PIN demo: <b>2026</b>. In produzione verrà sostituito da autenticazione ente sicura.</small><Link href="/povegliano-veronese">← Torna alla demo cittadino</Link></div></main>;
+  function login(e){e?.preventDefault();if(pin==='PV-DR-26'){setLogged(true);setLoginError('');}else{setLoginError('Codice non valido.');}}
+  if(!logged) return <main className="admin-login"><form className="admin-login-card" onSubmit={login}><span className="mark">DR</span><h1>Area riservata Comune</h1><p>Povegliano Veronese · accesso operatori</p><label>Codice di accesso<input type="password" value={pin} onChange={e=>{setPin(e.target.value);setLoginError('');}} placeholder="Inserisci il codice" autoComplete="current-password"/></label>{loginError&&<div className="login-error">{loginError}</div>}<button className="primary" type="submit">Accedi</button><small className="login-note">Accesso riservato al personale autorizzato. Le credenziali per l’ambiente dimostrativo vengono fornite separatamente.</small><Link href="/povegliano-veronese">← Torna al servizio cittadino</Link></form></main>;
 
   return <main className="admin-shell">
     <aside className="admin-sidebar"><div className="citizen-brand"><span className="mark">DR</span><div><strong>Dove Riposa</strong><small>Comune di Povegliano Veronese</small></div></div>
@@ -30,7 +32,7 @@ export default function AdminPage(){
       {tab==='import'&&<Import setRows={setRows} message={importMsg} setMessage={setImportMsg}/>}
       {tab==='mappa'&&<Panel title="Mappa del cimitero"><p>Editor dimostrativo: nella versione reale qui si associano settori, file, loculi, ingressi, percorsi e QR di calibrazione alla planimetria ufficiale.</p><div className="admin-placeholder">Editor mappa · prossimo modulo operativo</div></Panel>}
       {tab==='segnalazioni'&&<Panel title="Segnalazioni"><div className="admin-list"><p><b>Posizione da verificare</b> · 1 segnalazione demo</p><p><b>Nominativo errato</b> · 0</p><p><b>Trasferimento</b> · 0</p></div></Panel>}
-      {tab==='utenti'&&<Panel title="Utenti e ruoli"><p>Amministratore ente · Operatore cimiteriale · Sola lettura.</p><div className="admin-warning">Nella demo l’accesso usa un PIN pubblico. La produzione richiederà autenticazione sicura e ruoli lato server.</div></Panel>}
+      {tab==='utenti'&&<Panel title="Utenti e ruoli"><p>Amministratore ente · Operatore cimiteriale · Sola lettura.</p><div className="admin-warning">Questo ambiente è dimostrativo. La versione di produzione userà autenticazione lato server, ruoli, sessioni sicure e audit degli accessi.</div></Panel>}
     </section>
   </main>
 }
