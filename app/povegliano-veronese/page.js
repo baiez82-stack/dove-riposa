@@ -65,7 +65,7 @@ export default function PoveglianoPage(){
       <div>
         <span className="eyebrow">CIMITERO COMUNALE · POVEGLIANO VERONESE</span>
         <h1>Trova una sepoltura.</h1>
-        <p>Cerca gratuitamente e senza registrazione. Questa versione pilota utilizza nominativi dimostrativi.</p>
+        <p>Cerca gratuitamente e senza registrazione. Questa è una demo indipendente non ancora adottata dal Comune e utilizza nominativi dimostrativi.</p>
         {source.startsWith('qr-') && <div className="qr-arrival">Accesso diretto dal QR del cimitero</div>}
       </div>
       <form className="search-card public-search" onSubmit={submit}>
@@ -113,7 +113,7 @@ export default function PoveglianoPage(){
       <article><h3>Privacy</h3><p>Ricerca senza registrazione, nessun profilo commemorativo e analytics minimizzati.</p><Link className="text-link" href="/povegliano-veronese/privacy">Privacy e trasparenza →</Link></article>
     </section>
 
-    <footer><div><b>Dove Riposa</b><span>Povegliano Veronese · progetto pilota</span></div><p><Link href="/povegliano-veronese/privacy">Privacy e trasparenza</Link> · Accessibilità · Segnala un errore</p></footer>
+    <footer><div><b>Dove Riposa</b><span>Povegliano Veronese · demo pilota non ufficiale</span></div><p><Link href="/povegliano-veronese/privacy">Privacy</Link> · <Link href="/povegliano-veronese/termini">Termini d’uso</Link> · Accessibilità</p></footer>
   </main>
 }
 
