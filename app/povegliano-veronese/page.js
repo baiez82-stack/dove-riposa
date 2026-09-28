@@ -3,10 +3,77 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 
+const markers = {
+  ingresso:{id:'ingresso',code:'DR-PV-ING',label:'Ingresso principale',x:520,y:635},
+  centro:{id:'centro',code:'DR-PV-CEN',label:'Incrocio centrale',x:555,y:445},
+  est:{id:'est',code:'DR-PV-EST',label:'Porticato est',x:635,y:365},
+  ovest:{id:'ovest',code:'DR-PV-OVEST',label:'Area ovest',x:405,y:445}
+};
+
 const records = [
-  {id:1,nome:'Mario',cognome:'Rossi',anno:'1941',morte:'2024',settore:'Settore B',fila:'Fila 7',posizione:'Loculo 18',mapX:735,mapY:325,route:'M 520 635 L 520 555 L 555 520 L 555 440 L 635 440 L 635 365 L 735 325'},
-  {id:2,nome:'Anna',cognome:'Bianchi',anno:'1936',morte:'2022',settore:'Campo A',fila:'Fila 3',posizione:'Tomba 42',mapX:365,mapY:370,route:'M 520 635 L 520 555 L 470 520 L 470 445 L 405 445 L 365 370'},
-  {id:3,nome:'Giuseppe',cognome:'Verdi',anno:'1952',morte:'2025',settore:'Campo C',fila:'Fila 11',posizione:'Cippo 9',mapX:650,mapY:505,route:'M 520 635 L 520 570 L 590 570 L 590 525 L 650 505'}
+  {
+    id:1,nome:'Mario',cognome:'Rossi',anno:'1941',morte:'2024',settore:'Settore B',fila:'Fila 7',posizione:'Loculo 18',
+    mapX:735,mapY:325,
+    route:'M 520 635 L 520 555 L 555 520 L 555 440 L 635 440 L 635 365 L 735 325',
+    accessibleRoute:'M 520 635 L 520 570 L 590 570 L 590 500 L 650 500 L 650 415 L 700 415 L 700 350 L 735 325',
+    shortDistance:'35 m',accessibleDistance:'52 m',
+    instructions:[
+      'Entra dal cancello principale',
+      'Prosegui diritto fino all’incrocio centrale',
+      'Svolta a destra verso il porticato est',
+      'Raggiungi la Fila 7',
+      'Loculo 18 sulla destra'
+    ],
+    accessibleInstructions:[
+      'Entra dal cancello principale',
+      'Segui il percorso pavimentato verso destra',
+      'Continua lungo il corridoio est evitando i gradini',
+      'Rientra verso la Fila 7 dalla rampa',
+      'Loculo 18 sulla destra'
+    ]
+  },
+  {
+    id:2,nome:'Anna',cognome:'Bianchi',anno:'1936',morte:'2022',settore:'Campo A',fila:'Fila 3',posizione:'Tomba 42',
+    mapX:365,mapY:370,
+    route:'M 520 635 L 520 555 L 470 520 L 470 445 L 405 445 L 365 370',
+    accessibleRoute:'M 520 635 L 520 570 L 455 570 L 455 510 L 405 510 L 405 430 L 365 370',
+    shortDistance:'31 m',accessibleDistance:'44 m',
+    instructions:[
+      'Entra dal cancello principale',
+      'Prosegui fino al bivio',
+      'Svolta a sinistra verso l’area ovest',
+      'Raggiungi la Fila 3',
+      'Tomba 42 sul lato interno'
+    ],
+    accessibleInstructions:[
+      'Entra dal cancello principale',
+      'Segui il percorso pavimentato verso sinistra',
+      'Mantieni il corridoio largo fino all’area ovest',
+      'Raggiungi la Fila 3 senza utilizzare gradini',
+      'Tomba 42 sul lato interno'
+    ]
+  },
+  {
+    id:3,nome:'Giuseppe',cognome:'Verdi',anno:'1952',morte:'2025',settore:'Campo C',fila:'Fila 11',posizione:'Cippo 9',
+    mapX:650,mapY:505,
+    route:'M 520 635 L 520 570 L 590 570 L 590 525 L 650 505',
+    accessibleRoute:'M 520 635 L 520 590 L 610 590 L 610 540 L 650 505',
+    shortDistance:'24 m',accessibleDistance:'29 m',
+    instructions:[
+      'Entra dal cancello principale',
+      'Mantieni il viale centrale',
+      'Svolta a destra al secondo passaggio',
+      'Raggiungi la Fila 11',
+      'Cippo 9 davanti a te'
+    ],
+    accessibleInstructions:[
+      'Entra dal cancello principale',
+      'Mantieni il percorso pavimentato centrale',
+      'Prosegui fino al passaggio largo',
+      'Raggiungi la Fila 11',
+      'Cippo 9 davanti a te'
+    ]
+  }
 ];
 
 function track(event, meta={}) {
@@ -17,19 +84,40 @@ function track(event, meta={}) {
   }).catch(()=>{});
 }
 
+function markerFromValue(value){
+  const raw=String(value||'');
+  const direct=Object.values(markers).find(m=>m.code===raw.trim().toUpperCase());
+  if(direct) return direct;
+  try{
+    const url=new URL(raw, window.location.origin);
+    const id=url.searchParams.get('cal');
+    if(id && markers[id]) return markers[id];
+  }catch{}
+  return null;
+}
+
 export default function PoveglianoPage(){
   const [q,setQ]=useState({nome:'',cognome:'',anno:''});
   const [searched,setSearched]=useState(false);
   const [selected,setSelected]=useState(null);
   const [cameraOpen,setCameraOpen]=useState(false);
   const [source,setSource]=useState('');
+  const [routeMode,setRouteMode]=useState('short');
+  const [calibrated,setCalibrated]=useState(null);
+  const [offlineReady,setOfflineReady]=useState(false);
 
   useEffect(()=>{
     const p=new URLSearchParams(window.location.search);
     const src=p.get('src')||'direct';
+    const cal=p.get('cal');
     setSource(src);
+    if(cal && markers[cal]) setCalibrated(markers[cal]);
     track('page_view',{source:src});
     if(src.startsWith('qr-')) track('qr_entry',{source:src});
+
+    if('serviceWorker' in navigator){
+      navigator.serviceWorker.register('/sw.js').then(()=>setOfflineReady(true)).catch(()=>{});
+    }
   },[]);
 
   const results=useMemo(()=>{
@@ -51,8 +139,15 @@ export default function PoveglianoPage(){
   function openRecord(r){
     setSelected(r);
     setCameraOpen(false);
+    setCalibrated(markers.ingresso);
+    setRouteMode('short');
     track('result_open',{source});
     setTimeout(()=>document.getElementById('mappa')?.scrollIntoView({behavior:'smooth'}),50);
+  }
+
+  function calibrate(marker){
+    setCalibrated(marker);
+    track('navigation_start',{source,mode:'precision'});
   }
 
   return <main>
@@ -66,7 +161,10 @@ export default function PoveglianoPage(){
         <span className="eyebrow">CIMITERO COMUNALE · POVEGLIANO VERONESE</span>
         <h1>Trova una sepoltura.</h1>
         <p>Cerca gratuitamente e senza registrazione. Questa è una demo indipendente non ancora adottata dal Comune e utilizza nominativi dimostrativi.</p>
-        {source.startsWith('qr-') && <div className="qr-arrival">Accesso diretto dal QR del cimitero</div>}
+        <div className="hero-badges">
+          {source.startsWith('qr-') && <span className="qr-arrival">Accesso diretto dal QR del cimitero</span>}
+          {offlineReady && <span className="offline-badge">Disponibile offline dopo la prima apertura</span>}
+        </div>
       </div>
       <form className="search-card public-search" onSubmit={submit}>
         <label>Nome<input value={q.nome} onChange={e=>setQ({...q,nome:e.target.value})} placeholder="es. Mario"/></label>
@@ -90,22 +188,56 @@ export default function PoveglianoPage(){
     </section>}
 
     <section className="wrap" id="mappa">
-      <div className="section-head"><span className="eyebrow">MAPPA DEL CIMITERO</span><h2>{selected ? `${selected.nome} ${selected.cognome}` : 'Ricostruzione preliminare'}</h2><p>{selected ? `${selected.settore} · ${selected.fila} · ${selected.posizione}` : 'Seleziona un risultato per visualizzare il percorso.'}</p></div>
+      <div className="section-head">
+        <span className="eyebrow">DOVE RIPOSA PRECISION · DEMO</span>
+        <h2>{selected ? `${selected.nome} ${selected.cognome}` : 'Ricostruzione preliminare'}</h2>
+        <p>{selected ? `${selected.settore} · ${selected.fila} · ${selected.posizione}` : 'Seleziona un risultato per provare la navigazione di precisione.'}</p>
+      </div>
       <div className="map-card">
-        <CemeteryMap selected={selected}/>
+        <CemeteryMap selected={selected} routeMode={routeMode} calibrated={calibrated}/>
         <div className="map-info">
-          <span className="eyebrow">NAVIGAZIONE</span>
-          <h3>{selected ? 'Raggiungi la sepoltura' : 'Seleziona una sepoltura'}</h3>
-          <p>La mappa riproduce la forma del cimitero sulla base della vista satellitare fornita per la demo. Settori e posizioni sono dimostrativi finché il Comune non valida la planimetria ufficiale.</p>
+          <span className="eyebrow">PRECISION NAVIGATION</span>
+          <h3>{selected ? 'Dall’ingresso fino al loculo' : 'Seleziona una sepoltura'}</h3>
+          <p>La posizione viene ricalibrata nei punti chiave tramite QR/marker. Questo riduce la dipendenza dal GPS nell’ultimo tratto e consente di guidare l’utente fino a fila e loculo.</p>
+
           {selected && <>
-            <button className="primary" onClick={()=>{setCameraOpen(true);track('navigation_start',{source,mode:'camera'});}}>Apri navigazione con fotocamera</button>
-            <div className="camera-privacy">La fotocamera resta sul dispositivo e non viene registrata né caricata.</div>
+            <div className="route-mode">
+              <button className={routeMode==='short'?'active':''} onClick={()=>setRouteMode('short')}>Più breve <small>{selected.shortDistance}</small></button>
+              <button className={routeMode==='accessible'?'active':''} onClick={()=>setRouteMode('accessible')}>Accessibile ♿ <small>{selected.accessibleDistance}</small></button>
+            </div>
+
+            <div className={calibrated?'calibration-card calibrated':'calibration-card'}>
+              <div><b>{calibrated ? 'Posizione calibrata' : 'Calibrazione necessaria'}</b><span>{calibrated ? calibrated.label : 'Scansiona un marker Dove Riposa vicino a te'}</span></div>
+              <span className="calibration-status">{calibrated?'✓':'QR'}</span>
+            </div>
+
+            <button className="primary precision-button" onClick={()=>{setCameraOpen(true);track('navigation_start',{source,mode:'camera'});}}>Apri Dove Riposa Precision</button>
+            <div className="demo-calibration">
+              <span>Demo marker:</span>
+              {Object.values(markers).slice(0,3).map(m=><button key={m.id} onClick={()=>calibrate(m)}>{m.label}</button>)}
+            </div>
+            <div className="camera-privacy">La fotocamera resta sul dispositivo e non viene registrata né caricata. I QR di calibrazione identificano un punto del cimitero, non l’utente.</div>
           </>}
         </div>
       </div>
     </section>
 
-    {cameraOpen && selected && <CameraNavigator selected={selected} onClose={()=>setCameraOpen(false)}/>}
+    {cameraOpen && selected && <PrecisionNavigator
+      selected={selected}
+      routeMode={routeMode}
+      calibrated={calibrated}
+      onCalibrate={calibrate}
+      onClose={()=>setCameraOpen(false)}
+    />}
+
+    <section className="wrap precision-features">
+      <div className="section-head"><span className="eyebrow">PERCHÉ PRECISION</span><h2>Non solo “sei nel settore giusto”.</h2></div>
+      <div className="info-cards">
+        <article><h3>QR di calibrazione</h3><p>I marker posizionati solo nei punti strategici dicono al sistema dove si trova esattamente l’utente, senza mettere un QR su ogni tomba.</p></article>
+        <article><h3>Percorso accessibile</h3><p>Il Comune può marcare rampe, scale, ghiaia e percorsi pavimentati per offrire un itinerario più adatto a persone con mobilità ridotta.</p></article>
+        <article><h3>Continuità offline</h3><p>Dopo la prima apertura, la demo conserva localmente le risorse essenziali della web app per continuare a funzionare anche con segnale debole.</p></article>
+      </div>
+    </section>
 
     <section className="wrap info-cards" id="info">
       <article><h3>Orari e contatti</h3><p>Nella versione reale il Comune potrà pubblicare qui orari, contatti e avvisi del cimitero.</p></article>
@@ -117,37 +249,80 @@ export default function PoveglianoPage(){
   </main>
 }
 
-function CameraNavigator({selected,onClose}){
+function PrecisionNavigator({selected,routeMode,calibrated,onCalibrate,onClose}){
   const videoRef=useRef(null);
+  const detectorRef=useRef(null);
   const [error,setError]=useState('');
+  const [scanInfo,setScanInfo]=useState('');
+  const [step,setStep]=useState(0);
+  const instructions=routeMode==='accessible'?selected.accessibleInstructions:selected.instructions;
+
   useEffect(()=>{
     let stream;
+    let timer;
     navigator.mediaDevices?.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false})
-      .then(s=>{stream=s;if(videoRef.current){videoRef.current.srcObject=s;videoRef.current.play();}})
+      .then(async s=>{
+        stream=s;
+        if(videoRef.current){videoRef.current.srcObject=s;await videoRef.current.play();}
+        if('BarcodeDetector' in window){
+          detectorRef.current=new window.BarcodeDetector({formats:['qr_code']});
+          timer=setInterval(async()=>{
+            if(!videoRef.current||videoRef.current.readyState<2)return;
+            try{
+              const found=await detectorRef.current.detect(videoRef.current);
+              const marker=markerFromValue(found?.[0]?.rawValue);
+              if(marker){
+                onCalibrate(marker);
+                setScanInfo('Marker riconosciuto: '+marker.label);
+              }
+            }catch{}
+          },900);
+        }else{
+          setScanInfo('Scansione QR automatica non supportata da questo browser: usa i marker demo qui sotto.');
+        }
+      })
       .catch(()=>setError('Impossibile accedere alla fotocamera. Verifica i permessi del browser.'));
-    return()=>stream?.getTracks().forEach(t=>t.stop());
-  },[]);
-  return <div className="camera-modal">
+    return()=>{clearInterval(timer);stream?.getTracks().forEach(t=>t.stop());};
+  },[onCalibrate]);
+
+  return <div className="camera-modal precision-modal">
     <video ref={videoRef} playsInline muted/>
     <div className="camera-overlay">
       <button className="camera-close" onClick={onClose}>×</button>
-      <div className="camera-top"><b>{selected.nome} {selected.cognome}</b><span>{selected.settore} · {selected.posizione}</span></div>
-      <div className="ar-arrow">↑</div>
-      <div className="ar-instruction">Procedi lungo il percorso principale</div>
-      <div className="ar-distance">circa 35 m · DEMO</div>
-      <div className="ar-note">Navigazione AR dimostrativa: in produzione la precisione sarà calibrata con punti QR/marker nel cimitero.</div>
+      <div className="camera-top"><b>Dove Riposa Precision</b><span>{selected.nome} {selected.cognome} · {selected.settore} · {selected.posizione}</span></div>
+
+      <div className="precision-cal-chip">{calibrated ? '✓ '+calibrated.label : 'Inquadra un QR di calibrazione'}</div>
+      <div className="ar-arrow">{step>=instructions.length-1?'●':'↑'}</div>
+      <div className="ar-instruction">{instructions[step]}</div>
+      <div className="ar-distance">{routeMode==='accessible'?'Percorso accessibile ♿':'Percorso più breve'} · {routeMode==='accessible'?selected.accessibleDistance:selected.shortDistance}</div>
+
+      <div className="step-progress">{instructions.map((_,i)=><span key={i} className={i<=step?'done':''}></span>)}</div>
+      <div className="precision-controls">
+        <button disabled={step===0} onClick={()=>setStep(Math.max(0,step-1))}>← Indietro</button>
+        <button disabled={step===instructions.length-1} onClick={()=>setStep(Math.min(instructions.length-1,step+1))}>Prossima indicazione →</button>
+      </div>
+
+      <div className="marker-fallback">
+        <span>Calibrazione demo</span>
+        {Object.values(markers).slice(0,3).map(m=><button key={m.id} onClick={()=>{onCalibrate(m);setScanInfo('Marker demo: '+m.label);}}>{m.code}</button>)}
+      </div>
+
+      {scanInfo && <div className="scan-info">{scanInfo}</div>}
+      <div className="ar-note">Demo tecnica: le indicazioni diventano operative solo dopo rilievo e validazione della planimetria ufficiale e dei marker fisici.</div>
       {error && <div className="camera-error">{error}</div>}
     </div>
   </div>
 }
 
-function CemeteryMap({selected}){
+function CemeteryMap({selected,routeMode,calibrated}){
+  const path=selected ? (routeMode==='accessible'?selected.accessibleRoute:selected.route) : '';
   return <div className="cemetery-map-shell">
     <svg className="cemetery-map" viewBox="0 0 1000 700" role="img" aria-label="Ricostruzione dimostrativa del cimitero comunale di Povegliano Veronese">
       <rect width="1000" height="700" className="map-ground"/>
       <path className="map-road" d="M 610 55 C 720 55 830 72 955 118"/>
       <text x="820" y="70" className="map-small-label">Parcheggio zona cimitero</text>
       <rect x="760" y="88" width="165" height="68" rx="16" className="map-parking"/><text x="842" y="128" textAnchor="middle" className="map-parking-label">P</text>
+
       <g className="cemetery-footprint">
         <path className="map-building" d="M150 92 L390 72 L450 132 L420 190 L242 190 L205 255 L125 220 Z"/>
         <path className="map-building" d="M118 230 L225 260 L205 452 L278 505 L245 585 L105 525 Z"/>
@@ -159,12 +334,24 @@ function CemeteryMap({selected}){
         <rect x="430" y="280" width="92" height="225" rx="10" className="map-field field-c"/>
         <rect x="625" y="270" width="128" height="110" rx="10" className="map-field field-d"/>
         <rect x="630" y="400" width="145" height="105" rx="10" className="map-field field-e"/>
-        <path className="map-walk" d="M520 620 L520 545 L555 510 L555 445 L600 420 L600 350"/><path className="map-walk" d="M520 545 L465 510 L430 455"/><path className="map-walk" d="M555 445 L650 445"/>
+        <path className="map-walk" d="M520 620 L520 545 L555 510 L555 445 L600 420 L600 350"/>
+        <path className="map-walk" d="M520 545 L465 510 L430 455"/>
+        <path className="map-walk" d="M555 445 L650 445"/>
       </g>
+
+      {Object.values(markers).map(m=><g className={calibrated?.id===m.id?'precision-marker active':'precision-marker'} key={m.id} transform={`translate(${m.x} ${m.y})`}>
+        <rect x="-17" y="-17" width="34" height="34" rx="7"/>
+        <text textAnchor="middle" y="5">QR</text>
+      </g>)}
+
       <g className="entrance-marker"><circle cx="520" cy="635" r="20"/><text x="520" y="641" textAnchor="middle">↟</text></g>
       <text x="520" y="676" textAnchor="middle" className="map-label">Ingresso demo</text>
-      {selected && <><path d={selected.route} className="selected-route"/><g className="selected-pin" transform={`translate(${selected.mapX} ${selected.mapY})`}><circle r="18"/><circle r="7" className="pin-core"/></g></>}
+
+      {selected && <>
+        <path d={path} className={routeMode==='accessible'?'selected-route accessible-route':'selected-route'}/>
+        <g className="selected-pin" transform={`translate(${selected.mapX} ${selected.mapY})`}><circle r="18"/><circle r="7" className="pin-core"/></g>
+      </>}
     </svg>
-    <div className="map-demo-badge">Ricostruzione da immagine satellitare · da validare con il Comune</div>
+    <div className="map-demo-badge">Ricostruzione demo · marker e percorsi da validare con il Comune</div>
   </div>
 }
