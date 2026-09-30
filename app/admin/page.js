@@ -203,18 +203,23 @@ function PrecisionAdmin(){
 }
 
 function PrivacyPanel(){
-  return <Panel title="Privacy & governance">
+  return <Panel title="Privacy, legal & governance">
+    <div className="pilot-banner"><b>GO-LIVE BLOCCATO finché i punti critici non sono chiusi.</b><span>Non caricare archivi comunali reali solo perché il backend è pronto: la conformità dipende anche da contratti, fornitori, sicurezza, accessibilità e procedure operative.</span></div>
     <div className="privacy-checklist">
-      <div><span className="check-ok">✓</span><p><b>Ricerca pubblica senza account</b><small>Nessuna registrazione richiesta al cittadino.</small></p></div>
-      <div><span className="check-ok">✓</span><p><b>Analytics senza termini di ricerca</b><small>Eventi tecnici: page view, QR, ricerca, apertura risultato, navigazione.</small></p></div>
-      <div><span className="check-ok">✓</span><p><b>Nessun profilo social del defunto</b><small>La scheda ha finalità esclusiva di localizzazione.</small></p></div>
-      <div><span className="check-ok">✓</span><p><b>Fotocamera on demand</b><small>La demo non carica né registra il flusso video.</small></p></div>
-      <div><span className="check-pending">!</span><p><b>Ruoli privacy da formalizzare</b><small>Comune, fornitore tecnico, eventuali sub-responsabili e istruzioni art. 28.</small></p></div>
-      <div><span className="check-pending">!</span><p><b>Retention e log infrastrutturali</b><small>Da definire con l'ente e il DPO prima della produzione.</small></p></div>
-      <div><span className="check-pending">!</span><p><b>Anti-scraping e sicurezza</b><small>Rate limiting, bot protection, autenticazione operatori e audit accessi.</small></p></div>
+      <div><span className="check-ok">✓</span><p><b>Ricerca pubblica senza account</b><small>Coerente con minimizzazione e con le indicazioni del Garante sui servizi di localizzazione delle sepolture.</small></p></div>
+      <div><span className="check-ok">✓</span><p><b>Separazione istituzionale</b><small>Nessun profilo social/commerciale automatico del defunto.</small></p></div>
+      <div><span className="check-ok">✓</span><p><b>Database multi-ente + RLS</b><small>Separazione logica dei dati e ruoli operatori predisposti.</small></p></div>
+      <div><span className="check-ok">✓</span><p><b>Autenticazione nominativa</b><small>Area operatori con Supabase Auth; niente PIN condiviso.</small></p></div>
+      <div><span className="check-pending">!</span><p><b>Titolare, DPO e contatti ufficiali</b><small>Da pubblicare nell’informativa definitiva prima del pilot reale.</small></p></div>
+      <div><span className="check-pending">!</span><p><b>Accordo art. 28 GDPR</b><small>Ruoli, istruzioni, sub-responsabili, restituzione/cancellazione e audit da formalizzare.</small></p></div>
+      <div><span className="check-pending">!</span><p><b>Contratto hosting compatibile</b><small>Verificare piano Vercel e DPA prima dei dati reali; Hobby non è adatto a uso commerciale/istituzionale.</small></p></div>
+      <div><span className="check-pending">!</span><p><b>Anti-scraping</b><small>Rate limiting, protezione bot e limiti di interrogazione da attivare prima di pubblicare archivi reali.</small></p></div>
+      <div><span className="check-pending">!</span><p><b>Retention, backup e incident response</b><small>Definire tempi, restore testato, revoca account e gestione data breach.</small></p></div>
+      <div><span className="check-pending">!</span><p><b>DPIA / valutazione del rischio</b><small>Valutazione formale con il DPO prima del pilot; art. 35 GDPR se applicabile.</small></p></div>
+      <div><span className="check-pending">!</span><p><b>Accessibilità AgID</b><small>Test formale, feedback e Dichiarazione di Accessibilità dell’ente.</small></p></div>
     </div>
-    <div className="admin-warning">Stato: architettura privacy by design impostata. Nessun dato comunale reale deve essere caricato finché contratto, ruoli, informativa, sicurezza e validazione DPO non sono definiti.</div>
-    <p><Link className="text-link" href="/povegliano-veronese/privacy" target="_blank">Apri la pagina pubblica Privacy e trasparenza →</Link></p>
+    <div className="admin-warning">Regola operativa: nessun dato reale finché i punti con “!” non sono chiusi e documentati.</div>
+    <p><Link className="text-link" href="/povegliano-veronese/privacy" target="_blank">Privacy e trasparenza →</Link> · <Link className="text-link" href="/povegliano-veronese/termini" target="_blank">Termini d’uso →</Link> · <Link className="text-link" href="/povegliano-veronese/accessibilita" target="_blank">Accessibilità →</Link></p>
   </Panel>
 }
 
