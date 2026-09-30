@@ -173,6 +173,10 @@ export default function PoveglianoPage(){
     track('navigation_start',{source,mode:'precision'});
   }
 
+  const precisionSelected=selected&&liveDemo&&routeMode==='short'
+    ? {...selected,instructions:selected.accessibleInstructions,shortDistance:selected.accessibleDistance}
+    : selected;
+
   return <main>
     <header className="citizen-header">
       <Link href="/povegliano-veronese" className="citizen-brand"><BrandLockup subtitle="Povegliano Veronese"/></Link>
@@ -265,22 +269,23 @@ export default function PoveglianoPage(){
       </div>
     </section>
 
-    {cameraOpen && selected && <StandardPrecisionNavigator
-      selected={selected}
+    {cameraOpen && precisionSelected && <StandardPrecisionNavigator
+      selected={precisionSelected}
       routeMode={routeMode}
       calibrated={calibrated}
       markers={markers}
       municipalityLabel="Povegliano Veronese"
       onCalibrate={calibrate}
       onClose={()=>setCameraOpen(false)}
+      liveNotice={liveDemo?'Percorso ricalcolato per chiusura temporanea':''}
     />}
 
     <section className="wrap precision-features">
       <div className="section-head"><span className="eyebrow">PERCHÉ PRECISION</span><h2>Non solo “sei nel settore giusto”.</h2></div>
       <div className="info-cards">
-        <article><h3>QR di calibrazione</h3><p>I marker posizionati solo nei punti strategici dicono al sistema dove si trova esattamente l’utente, senza mettere un QR su ogni tomba.</p></article>
+        <article><h3>QR di posizione</h3><p>I marker identificano nodi fisici del cimitero, non memoriali. Servono a ricalibrare il percorso quando il GPS diventa poco affidabile.</p></article>
         <article><h3>Dove Riposa Assist</h3><p>Oltre al percorso accessibile, la modalità assistita può privilegiare pendenze ridotte, fondo regolare, panchine, fontanelle e punti di sosta per chi ha poca autonomia.</p></article>
-        <article><h3>Continuità offline</h3><p>Dopo la prima apertura, la demo conserva localmente le risorse essenziali della web app per continuare a funzionare anche con segnale debole.</p></article>
+        <article><h3>Controllo arrivo</h3><p>Precision non dichiara automaticamente “sei arrivato”: mostra settore, fila e posizione e chiede una conferma finale all’utente dopo l’ultimo riferimento calibrato.</p></article>
       </div>
     </section>
 
