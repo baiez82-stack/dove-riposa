@@ -19,12 +19,13 @@ Questo documento è operativo e non sostituisce il parere del DPO/legale dell'en
    - Se Dove Riposa tratta dati per conto del Comune, predisporre un accordo/atto di nomina a responsabile.
    - Definire oggetto, durata, finalità, categorie di dati e interessati, istruzioni, sicurezza, cancellazione/restituzione dati, audit e gestione sub-responsabili.
 
-3. **Hosting Vercel**
-   - Verificare il piano prima del pilot reale.
-   - Le condizioni Vercel 2026 limitano il piano Hobby a uso personale/non commerciale.
-   - Il DPA Vercel pubblicato si applica ai clienti Pro ed Enterprise.
-   - Se il workspace è Hobby, non usarlo per il pilot istituzionale con dati reali: passare almeno a un piano/contratto compatibile o migrare hosting.
-   - Verificare/disabilitare qualsiasi opzione di model training prima di dati reali.
+3. **Hosting produzione Hetzner**
+   - Target: Hetzner Cloud NBG1 (Germania), server Docker dedicato al progetto.
+   - Accettare e archiviare il DPA/AVV art. 28 prima dei dati reali.
+   - Inserire Hetzner nel registro fornitori/sub-responsabili secondo il ruolo effettivo.
+   - Definire retention dei log, backup, restore, patching e accessi amministrativi.
+   - Attivare 2FA sull'account Hetzner e chiavi SSH; vietare login SSH con password in produzione.
+   - Vercel può restare solo demo/fallback senza dati reali finché il suo piano/contratto non è idoneo.
 
 4. **Supabase**
    - Database configurato in eu-central-1.
