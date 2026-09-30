@@ -24,7 +24,7 @@ export default function PrivacyPage(){
         <div><b>Ricerca senza account</b><span>La consultazione pubblica non richiede nome dell’utente, email, telefono o autenticazione.</span></div>
         <div><b>Niente profili commemorativi</b><span>La finalità è ricerca e localizzazione della sepoltura, senza funzioni social o commerciali collegate al defunto.</span></div>
         <div><b>Minimizzazione</b><span>I termini digitati nella ricerca demo restano nel browser e non vengono inviati all’endpoint analytics applicativo.</span></div>
-        <div><b>Fotocamera facoltativa</b><span>Si attiva solo su richiesta e con permesso del browser; il flusso video non viene caricato dall’applicazione.</span></div>
+        <div><b>Permessi facoltativi</b><span>Fotocamera e posizione si attivano solo su scelta dell’utente o se il browser ha già concesso il permesso.</span></div>
       </div>
 
       <div className="legal-box"><b>Regola di sicurezza del pilot</b><p>Nessun dato comunale reale deve essere caricato finché non sono formalizzati titolare, DPO/contatti, accordi art. 28 GDPR, fornitori e sub-responsabili, tempi di conservazione, misure di sicurezza, anti-scraping e verifica dell’eventuale necessità di una DPIA.</p></div>
@@ -58,7 +58,7 @@ export default function PrivacyPage(){
         <section className="privacy-section">
           <h2>5. Fotocamera, QR e geolocalizzazione</h2>
           <p>La fotocamera è facoltativa e viene richiesta dal browser solo quando l’utente avvia Dove Riposa Precision. Nella demo il flusso video viene utilizzato localmente per mostrare l’anteprima e, se supportato dal browser, leggere i QR di calibrazione; l’app non lo salva né lo invia ai propri server.</p>
-          <p>I QR identificano punti del cimitero, non persone. La geolocalizzazione non è attualmente attiva. Se verrà introdotta, dovrà essere richiesta solo durante la navigazione, con autorizzazione del dispositivo e senza creare uno storico degli spostamenti per finalità ulteriori.</p>
+          <p>I QR identificano punti del cimitero, non persone. La geolocalizzazione è facoltativa e può essere usata dalla homepage per individuare il cimitero attivo più vicino. Le coordinate del dispositivo vengono confrontate nel browser con le coordinate dei cimiteri configurati: Dove Riposa non le invia al proprio endpoint analytics, non le salva nel database e non crea uno storico degli spostamenti. Se il permesso non viene concesso, resta sempre disponibile la scelta manuale del Comune.</p>
         </section>
 
         <section className="privacy-section">
@@ -81,7 +81,7 @@ export default function PrivacyPage(){
 
         <section className="privacy-section">
           <h2>9. Fornitori tecnici e trasferimenti</h2>
-          <p>La demo utilizza Vercel per hosting e distribuzione dell’app e Supabase per database/autenticazione. Il database Supabase del progetto è configurato in regione UE (Francoforte). I fornitori possono avvalersi di propri sub-responsabili e, secondo i rispettivi accordi, possono rendersi necessari trasferimenti internazionali soggetti alle garanzie previste dal GDPR.</p>
+          <p>La demo utilizza Render per hosting e distribuzione dell’app e Supabase per database/autenticazione. Il database Supabase del progetto è configurato in regione UE (Francoforte). I fornitori possono avvalersi di propri sub-responsabili e, secondo i rispettivi accordi, possono rendersi necessari trasferimenti internazionali soggetti alle garanzie previste dal GDPR.</p>
           <p>Prima del pilot reale verranno verificati piano contrattuale, DPA, lista dei sub-responsabili, localizzazione dei trattamenti e meccanismi di trasferimento. Nessun archivio comunale reale verrà caricato finché questa verifica non sarà completata.</p>
         </section>
 
