@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import BrandLockup from './components/BrandLockup';
 import MunicipalityFinder from './components/MunicipalityFinder';
+import NearbyCemeteryDetector from './components/NearbyCemeteryDetector';
 import { municipalities } from './data/municipalities';
 
 export default function Home(){
@@ -12,8 +13,10 @@ export default function Home(){
     <section className="directory-shell">
       <div className="directory-intro">
         <span className="eyebrow">DOVE RIPOSA · DEMO</span>
-        <h1>In quale Comune vuoi cercare?</h1>
-        <p>Seleziona il Comune per accedere alla ricerca delle sepolture.</p>
+        <h1>Trova il cimitero.</h1>
+        <p>Puoi rilevarlo dalla tua posizione oppure scegliere il Comune manualmente.</p>
+        <NearbyCemeteryDetector/>
+        <div className="directory-divider"><span>oppure</span></div>
         <MunicipalityFinder/>
       </div>
 
