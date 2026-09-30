@@ -12,7 +12,11 @@ export const municipalities = [
     province: 'VR',
     status: 'Demo attiva',
     cemeteries: [
-      { id: 'cimitero-comunale', name: 'Cimitero comunale' }
+      {
+        id: 'cimitero-comunale',
+        name: 'Cimitero comunale',
+        geo: { lat: 45.4810, lng: 10.8575, status: 'demo' }
+      }
     ]
   },
   {
@@ -21,7 +25,11 @@ export const municipalities = [
     province: 'VR',
     status: 'Demo attiva',
     cemeteries: [
-      { id: 'cimitero-comunale', name: 'Cimitero comunale' }
+      {
+        id: 'cimitero-comunale',
+        name: 'Cimitero comunale',
+        geo: null
+      }
     ]
   }
 ].map(municipality=>({
