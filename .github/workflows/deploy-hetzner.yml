@@ -1,0 +1,44 @@
+name: Deploy Hetzner
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+
+concurrency:
+  group: dove-riposa-production
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Configure SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.HETZNER_SSH_PRIVATE_KEY }}
+          SSH_HOST: ${{ secrets.HETZNER_HOST }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s
+' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
+
+      - name: Pull and deploy
+        env:
+          SSH_HOST: ${{ secrets.HETZNER_HOST }}
+          SSH_USER: ${{ secrets.HETZNER_USER }}
+        run: |
+          ssh "$SSH_USER@$SSH_HOST" '
+            set -eu
+            cd /opt/dove-riposa
+            git fetch origin main
+            git reset --hard origin/main
+            docker compose --env-file .env.production -f compose.hetzner.yml up -d --build --remove-orphans
+            docker image prune -f
+            docker compose --env-file .env.production -f compose.hetzner.yml ps
+          '
