@@ -211,6 +211,7 @@ export default function PescantinaPage(){
       markers={markers}
       municipalityLabel="Pescantina"
       onCalibrate={calibrate}
+      onArrivalConfirmed={()=>track('arrival_confirmed',{mode:routeMode})}
       onClose={()=>setCameraOpen(false)}
     />}
 
