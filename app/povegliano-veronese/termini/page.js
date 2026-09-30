@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import BrandLockup from '../../components/BrandLockup';
 
 export const metadata = {
   title: 'Termini d’uso | Dove Riposa - Povegliano Veronese',
@@ -8,7 +9,7 @@ export const metadata = {
 export default function TermsPage(){
   return <main>
     <header className="citizen-header">
-      <Link href="/povegliano-veronese" className="citizen-brand"><span className="mark">DR</span><div><strong>Dove Riposa</strong><small>Povegliano Veronese</small></div></Link>
+      <Link href="/povegliano-veronese" className="citizen-brand"><BrandLockup subtitle="Povegliano Veronese"/></Link>
       <nav><Link href="/povegliano-veronese">Torna alla ricerca</Link></nav>
     </header>
 
@@ -44,6 +45,6 @@ export default function TermsPage(){
       <div className="legal-box"><b>Stato del documento</b><p>Questi termini sono predisposti per una demo tecnica e istituzionale. Prima della messa in produzione con dati reali dovranno essere completati con l’identificazione del soggetto gestore del servizio, i contatti ufficiali, le responsabilità contrattuali e la validazione legale necessaria.</p></div>
     </section>
 
-    <footer><div><b>Dove Riposa</b><span>Povegliano Veronese · demo pilota</span></div><p><Link href="/povegliano-veronese/privacy">Privacy</Link> · <Link href="/povegliano-veronese">Torna alla ricerca</Link></p></footer>
+    <footer><div className="footer-brand"><BrandLockup compact subtitle="Povegliano Veronese · demo pilota"/></div><p><Link href="/povegliano-veronese/privacy">Privacy</Link> · <Link href="/povegliano-veronese">Torna alla ricerca</Link></p></footer>
   </main>
 }
