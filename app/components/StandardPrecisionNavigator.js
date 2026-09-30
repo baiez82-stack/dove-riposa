@@ -49,6 +49,11 @@ export default function StandardPrecisionNavigator({
 
   useEffect(()=>{onCalibrateRef.current=onCalibrate;},[onCalibrate]);
 
+  useEffect(()=>{
+    const next=Math.min(Math.max(Number(calibrated?.stepIndex)||0,0),Math.max(instructions.length-1,0));
+    setStep(next);
+  },[calibrated?.id,routeMode,selected?.id,instructions.length]);
+
   function speak(){
     if(!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
@@ -79,6 +84,7 @@ export default function StandardPrecisionNavigator({
               const marker=markerFromValue(found?.[0]?.rawValue,markers);
               if(marker){
                 onCalibrateRef.current(marker);
+                setStep(Math.min(Math.max(Number(marker.stepIndex)||0,0),Math.max(instructions.length-1,0)));
                 setScanInfo('Marker riconosciuto: '+marker.label);
               }
             }catch{}
@@ -124,7 +130,7 @@ export default function StandardPrecisionNavigator({
       <div className="marker-fallback">
         <span>Calibrazione demo</span>
         {(Array.isArray(markers)?markers:Object.values(markers||{})).slice(0,3).map(m=>
-          <button key={m.id} onClick={()=>{onCalibrate(m);setScanInfo('Marker demo: '+m.label);}}>{m.code}</button>
+          <button key={m.id} onClick={()=>{onCalibrateRef.current(m);setStep(Math.min(Math.max(Number(m.stepIndex)||0,0),Math.max(instructions.length-1,0)));setScanInfo('Marker demo: '+m.label);}}>{m.code}</button>
         )}
       </div>
 
