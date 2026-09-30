@@ -60,8 +60,8 @@ export default function PrivacyPage(){
         </section>
 
         <section className="privacy-section">
-          <h2>7. Geolocalizzazione</h2>
-          <p>La geolocalizzazione non è attualmente attiva. Se verrà introdotta, sarà richiesta solo quando necessaria alla navigazione e previa autorizzazione del dispositivo. L’architettura prevista non richiede la creazione di uno storico degli spostamenti del cittadino.</p>
+          <h2>7. Geolocalizzazione e preferenze di percorso</h2>
+          <p>La geolocalizzazione non è attualmente attiva. Se verrà introdotta, sarà richiesta solo quando necessaria alla navigazione e previa autorizzazione del dispositivo. L’architettura prevista non richiede la creazione di uno storico degli spostamenti del cittadino. Le scelte di percorso, incluse le modalità accessibile o assistita, sono preferenze funzionali della singola visita e non richiedono la creazione di un profilo sanitario o personale.</p>
         </section>
 
         <section className="privacy-section">
