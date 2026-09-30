@@ -3,13 +3,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getImportTargets, importBurials } from '../admin/import/actions';
 
-const sourceOptions=[
-  {id:'csv-generico',label:'CSV generico'},
-  {id:'gestionale-esistente',label:'Export da gestionale esistente'},
-  {id:'archivio-legacy',label:'Archivio storico / legacy'},
-  {id:'altro',label:'Altro formato'}
-];
-
 const sourceProfiles=[
   {id:'generic_csv',label:'CSV standard',desc:'File preparato con il template Dove Riposa.'},
   {id:'existing_management',label:'Gestionale esistente',desc:'Export CSV dal software già usato dal Comune.'},
@@ -122,7 +115,6 @@ export default function AdminImportManager(){
   const [parseError,setParseError]=useState('');
   const [result,setResult]=useState(null);
   const [importing,setImporting]=useState(false);
-  const [sourceType,setSourceType]=useState('csv-generico');
   const [profileName,setProfileName]=useState('');
   const [profiles,setProfiles]=useState([]);
 
@@ -222,7 +214,7 @@ export default function AdminImportManager(){
     const name=profileName.trim();
     if(!name||!headers.length) return;
     const next=[
-      {id:String(Date.now()),name,sourceType,columns:currentColumnProfile()},
+      {id:String(Date.now()),name,sourceSystem,columns:currentColumnProfile()},
       ...profiles.filter(p=>p.name.toLowerCase()!==name.toLowerCase())
     ].slice(0,20);
     setProfiles(next);
@@ -239,7 +231,7 @@ export default function AdminImportManager(){
       next[field.key]=idx>=0?String(idx):'';
     }
     setMapping(next);
-    setSourceType(profile.sourceType||'gestionale-esistente');
+    setSourceSystem(profile.sourceSystem||profile.sourceType||'existing_management');
     setProfileName(profile.name||'');
   }
 
@@ -252,10 +244,11 @@ export default function AdminImportManager(){
       const response=await importBurials({
         cemeteryId:targetId,
         filename:fileName||'import',
-        sourceName:sourceOptions.find(x=>x.id===sourceType)?.label||sourceType,
+        sourceSystem,
+        sourceName:(sourceProfiles.find(x=>x.id===sourceSystem)||sourceProfiles[0]).label,
         mappingProfile:{
           name:profileName.trim()||'Mappatura corrente',
-          sourceType,
+          sourceType:sourceSystem,
           columns:currentColumnProfile()
         },
         rows:mappedRows
@@ -291,12 +284,7 @@ export default function AdminImportManager(){
     </div>
 
     <div className="connect-source-grid">
-      <label>Origine dati
-        <select value={sourceType} onChange={e=>setSourceType(e.target.value)}>
-          {sourceOptions.map(option=><option key={option.id} value={option.id}>{option.label}</option>)}
-        </select>
-      </label>
-      <label>Profilo salvato
+      <label>Profilo di mappatura salvato
         <select defaultValue="" onChange={e=>{if(e.target.value)applyMappingProfile(e.target.value);}}>
           <option value="">Nessun profilo</option>
           {profiles.map(profile=><option key={profile.id} value={profile.id}>{profile.name}</option>)}
@@ -304,7 +292,7 @@ export default function AdminImportManager(){
       </label>
       <div className="connect-source-note">
         <b>Interoperabilità prima del lock-in.</b>
-        <span>Un Comune può continuare a usare il proprio software amministrativo e usare Dove Riposa come layer di ricerca, accessibilità e navigazione.</span>
+        <span>Il Comune può continuare a usare il proprio gestionale. Dove Riposa importa l’export necessario a ricerca, accessibilità e navigazione senza sostituire il back-office.</span>
       </div>
     </div>
 
