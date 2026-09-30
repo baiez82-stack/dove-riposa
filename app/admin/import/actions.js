@@ -49,6 +49,21 @@ function cleanDate(value){
   return Number.isNaN(date.getTime()) ? null : date.toISOString();
 }
 
+function cleanProfile(value){
+  if(!value||typeof value!=='object') return null;
+  const name=cleanText(value.name,120)||'Mappatura corrente';
+  const sourceType=cleanText(value.sourceType,80)||'csv-generico';
+  const columns={};
+  if(value.columns&&typeof value.columns==='object'){
+    for(const [key,column] of Object.entries(value.columns).slice(0,30)){
+      const safeKey=String(key).replace(/[^a-z0-9_]/gi,'').slice(0,60);
+      const safeColumn=cleanText(column,180);
+      if(safeKey&&safeColumn) columns[safeKey]=safeColumn;
+    }
+  }
+  return {name,sourceType,columns};
+}
+
 async function getAuthorizedContext(supabase,cemeteryId){
   const {data:{user},error:userError}=await supabase.auth.getUser();
   if(userError||!user) return {error:'Sessione amministratore non valida.'};
@@ -115,6 +130,8 @@ export async function importBurials(payload){
 
   const cemeteryId=String(payload?.cemeteryId||'');
   const filename=cleanText(payload?.filename,240)||'import';
+  const sourceName=cleanText(payload?.sourceName,120)||'CSV generico';
+  const mappingProfile=cleanProfile(payload?.mappingProfile);
   const inputRows=Array.isArray(payload?.rows)?payload.rows:[];
 
   if(!cemeteryId) return {ok:false,error:'Seleziona un cimitero.'};
@@ -187,6 +204,8 @@ export async function importBurials(payload){
       organization_id:cemetery.organization_id,
       cemetery_id:cemetery.id,
       filename,
+      source_name:sourceName,
+      mapping_profile:mappingProfile,
       row_count:inputRows.length,
       imported_count:0,
       skipped_count:existingKeys.size+duplicateInFile,
