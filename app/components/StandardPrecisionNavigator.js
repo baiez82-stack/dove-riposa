@@ -22,7 +22,8 @@ export default function StandardPrecisionNavigator({
   markers,
   municipalityLabel,
   onCalibrate,
-  onClose
+  onClose,
+  liveNotice=''
 }){
   const videoRef=useRef(null);
   const detectorRef=useRef(null);
@@ -30,6 +31,7 @@ export default function StandardPrecisionNavigator({
   const [error,setError]=useState('');
   const [scanInfo,setScanInfo]=useState('');
   const [step,setStep]=useState(0);
+  const [arrivalStatus,setArrivalStatus]=useState('');
 
   const instructions=routeMode==='assist'
     ? selected.assistInstructions
@@ -52,6 +54,7 @@ export default function StandardPrecisionNavigator({
   useEffect(()=>{
     const next=Math.min(Math.max(Number(calibrated?.stepIndex)||0,0),Math.max(instructions.length-1,0));
     setStep(next);
+    setArrivalStatus('');
   },[calibrated?.id,routeMode,selected?.id,instructions.length]);
 
   function speak(){
@@ -112,8 +115,9 @@ export default function StandardPrecisionNavigator({
       </div>
 
       <div className="precision-cal-chip">
-        {calibrated ? '✓ '+calibrated.label : 'Inquadra un QR di calibrazione'}
+        {calibrated ? '✓ QR calibrato · '+calibrated.label : 'Inquadra un QR di calibrazione'}
       </div>
+      {liveNotice&&<div className="precision-live-chip">↻ {liveNotice}</div>}
       <div className="ar-arrow">{step>=instructions.length-1?'●':'↑'}</div>
       <div className="ar-instruction">{instructions[step]}</div>
       <div className="ar-distance">{modeLabel} · {distance}</div>
@@ -122,9 +126,21 @@ export default function StandardPrecisionNavigator({
       <div className="step-progress">
         {instructions.map((_,i)=><span key={i} className={i<=step?'done':''}></span>)}
       </div>
+      {step===instructions.length-1&&<div className="arrival-check">
+        <span className="arrival-kicker">CONTROLLO ARRIVO</span>
+        <b>{selected.settore} · {selected.fila} · {selected.posizione}</b>
+        <small>{calibrated?'Ultimo riferimento verificato: '+calibrated.label:'Scansiona il QR più vicino per aumentare la precisione dell’ultimo tratto.'}</small>
+        {!arrivalStatus&&<div className="arrival-actions">
+          <button onClick={()=>setArrivalStatus('found')}>✓ Ho trovato la sepoltura</button>
+          <button onClick={()=>{setArrivalStatus('missing');setScanInfo('Ricalibra dal QR più vicino e ricontrolla settore, fila e posizione.');}}>Non la trovo</button>
+        </div>}
+        {arrivalStatus==='found'&&<div className="arrival-outcome found">✓ Arrivo confermato sul dispositivo.</div>}
+        {arrivalStatus==='missing'&&<div className="arrival-outcome missing">Ricalibra dal marker più vicino: Dove Riposa non dichiara l’arrivo finché non lo confermi tu.</div>}
+      </div>}
+
       <div className="precision-controls">
-        <button disabled={step===0} onClick={()=>setStep(Math.max(0,step-1))}>← Indietro</button>
-        <button disabled={step===instructions.length-1} onClick={()=>setStep(Math.min(instructions.length-1,step+1))}>Prossima →</button>
+        <button disabled={step===0} onClick={()=>{setArrivalStatus('');setStep(Math.max(0,step-1));}}>← Indietro</button>
+        <button disabled={step===instructions.length-1} onClick={()=>{setArrivalStatus('');setStep(Math.min(instructions.length-1,step+1));}}>Prossima →</button>
       </div>
 
       <div className="marker-fallback">
