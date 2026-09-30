@@ -144,12 +144,12 @@ export default function StandardPrecisionNavigator({
         <button disabled={step===instructions.length-1} onClick={()=>{setArrivalStatus('');setStep(Math.min(instructions.length-1,step+1));}}>Prossima →</button>
       </div>
 
-      <div className="marker-fallback">
-        <span>Calibrazione demo</span>
+      {(step<instructions.length-1||arrivalStatus==='missing')&&<div className="marker-fallback">
+        <span>{arrivalStatus==='missing'?'Ricalibra da un marker vicino':'Calibrazione demo'}</span>
         {(Array.isArray(markers)?markers:Object.values(markers||{})).slice(0,3).map(m=>
-          <button key={m.id} onClick={()=>{onCalibrateRef.current(m);setStep(Math.min(Math.max(Number(m.stepIndex)||0,0),Math.max(instructions.length-1,0)));setScanInfo('Marker demo: '+m.label);}}>{m.code}</button>
+          <button key={m.id} onClick={()=>{onCalibrateRef.current(m);setStep(Math.min(Math.max(Number(m.stepIndex)||0,0),Math.max(instructions.length-1,0)));setArrivalStatus('');setScanInfo('Marker demo: '+m.label);}}>{m.code}</button>
         )}
-      </div>
+      </div>}
 
       {scanInfo&&<div className="scan-info">{scanInfo}</div>}
       <div className="ar-note">Demo tecnica: percorso, accessibilità e marker diventano operativi solo dopo planimetria e sopralluogo validati.</div>
