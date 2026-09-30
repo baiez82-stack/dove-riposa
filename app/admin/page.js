@@ -19,21 +19,44 @@ export default function AdminPage(){
 
 
   return <main className="admin-shell">
-    <aside className="admin-sidebar"><div className="citizen-brand admin-brand"><BrandLockup compact inverse subtitle="Amministrazione demo"/></div>
-      {[
-        ['dashboard','Dashboard'],
-        ['archivio','Archivio'],
-        ['import','Import'],
-        ['qualita','Qualità'],
-        ['mappa','Mappa & accessibilità'],
-        ['qr','QR Precision'],
-        ['live','Live'],
-        ['segnalazioni','Segnalazioni'],
-        ['privacy','Privacy'],
-        ['utenti','Utenti']
-      ].map(([id,label])=><button key={id} className={tab===id?'active':''} onClick={()=>setTab(id)}>{label}</button>)}
-      <Link className="admin-back-link" href="/">← Sito pubblico</Link>
-      <form action="/admin/logout" method="post" className="admin-logout-form"><button type="submit">Esci</button></form>
+    <aside className="admin-sidebar">
+      <div className="citizen-brand admin-brand"><BrandLockup compact inverse subtitle="Amministrazione demo"/></div>
+
+      <div className="admin-mobile-nav">
+        <label htmlFor="admin-section">Sezione</label>
+        <select id="admin-section" value={tab} onChange={e=>setTab(e.target.value)}>
+          <option value="dashboard">Dashboard</option>
+          <option value="archivio">Archivio</option>
+          <option value="import">Import</option>
+          <option value="qualita">Qualità</option>
+          <option value="mappa">Mappa & accessibilità</option>
+          <option value="qr">QR Precision</option>
+          <option value="live">Live</option>
+          <option value="segnalazioni">Segnalazioni</option>
+          <option value="privacy">Privacy</option>
+          <option value="utenti">Utenti</option>
+        </select>
+      </div>
+
+      <div className="admin-desktop-nav">
+        {[
+          ['dashboard','Dashboard'],
+          ['archivio','Archivio'],
+          ['import','Import'],
+          ['qualita','Qualità'],
+          ['mappa','Mappa & accessibilità'],
+          ['qr','QR Precision'],
+          ['live','Live'],
+          ['segnalazioni','Segnalazioni'],
+          ['privacy','Privacy'],
+          ['utenti','Utenti']
+        ].map(([id,label])=><button key={id} className={tab===id?'active':''} onClick={()=>setTab(id)}>{label}</button>)}
+      </div>
+
+      <div className="admin-sidebar-actions">
+        <Link className="admin-back-link" href="/">← Sito pubblico</Link>
+        <form action="/admin/logout" method="post" className="admin-logout-form"><button type="submit">Esci</button></form>
+      </div>
     </aside>
     <section className="admin-content">
       {tab==='dashboard'&&<Dashboard/>}
