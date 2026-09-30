@@ -16,7 +16,8 @@ const records = [
     mapX:735,mapY:325,
     route:'M 520 635 L 520 555 L 555 520 L 555 440 L 635 440 L 635 365 L 735 325',
     accessibleRoute:'M 520 635 L 520 570 L 590 570 L 590 500 L 650 500 L 650 415 L 700 415 L 700 350 L 735 325',
-    shortDistance:'35 m',accessibleDistance:'52 m',
+    shortDistance:'35 m',accessibleDistance:'52 m',assistDistance:'58 m',
+    assistRoute:'M 520 635 L 520 590 L 575 590 L 575 545 L 620 545 L 620 470 L 675 470 L 675 390 L 735 325',
     instructions:[
       'Entra dal cancello principale',
       'Prosegui diritto fino all’incrocio centrale',
@@ -30,6 +31,14 @@ const records = [
       'Continua lungo il corridoio est evitando i gradini',
       'Rientra verso la Fila 7 dalla rampa',
       'Loculo 18 sulla destra'
+    ],
+    assistInstructions:[
+      'Entra dal cancello principale e mantieni il viale largo',
+      'Raggiungi la panchina centrale: qui puoi fare una pausa',
+      'Prosegui sul tratto pavimentato a bassa pendenza',
+      'Supera la fontanella e continua verso il porticato est',
+      'Raggiungi la Fila 7',
+      'Loculo 18 sulla destra'
     ]
   },
   {
@@ -37,7 +46,8 @@ const records = [
     mapX:365,mapY:370,
     route:'M 520 635 L 520 555 L 470 520 L 470 445 L 405 445 L 365 370',
     accessibleRoute:'M 520 635 L 520 570 L 455 570 L 455 510 L 405 510 L 405 430 L 365 370',
-    shortDistance:'31 m',accessibleDistance:'44 m',
+    shortDistance:'31 m',accessibleDistance:'44 m',assistDistance:'49 m',
+    assistRoute:'M 520 635 L 520 590 L 475 590 L 475 545 L 430 545 L 430 485 L 395 485 L 395 420 L 365 370',
     instructions:[
       'Entra dal cancello principale',
       'Prosegui fino al bivio',
@@ -51,6 +61,14 @@ const records = [
       'Mantieni il corridoio largo fino all’area ovest',
       'Raggiungi la Fila 3 senza utilizzare gradini',
       'Tomba 42 sul lato interno'
+    ],
+    assistInstructions:[
+      'Entra dal cancello principale e mantieni il viale largo',
+      'Raggiungi la panchina centrale per una pausa se necessario',
+      'Prosegui verso sinistra sul percorso più regolare',
+      'Evita il tratto in ghiaia indicato sulla mappa',
+      'Raggiungi la Fila 3',
+      'Tomba 42 sul lato interno'
     ]
   },
   {
@@ -58,7 +76,8 @@ const records = [
     mapX:650,mapY:505,
     route:'M 520 635 L 520 570 L 590 570 L 590 525 L 650 505',
     accessibleRoute:'M 520 635 L 520 590 L 610 590 L 610 540 L 650 505',
-    shortDistance:'24 m',accessibleDistance:'29 m',
+    shortDistance:'24 m',accessibleDistance:'29 m',assistDistance:'34 m',
+    assistRoute:'M 520 635 L 520 595 L 575 595 L 575 555 L 620 555 L 620 525 L 650 505',
     instructions:[
       'Entra dal cancello principale',
       'Mantieni il viale centrale',
@@ -70,6 +89,14 @@ const records = [
       'Entra dal cancello principale',
       'Mantieni il percorso pavimentato centrale',
       'Prosegui fino al passaggio largo',
+      'Raggiungi la Fila 11',
+      'Cippo 9 davanti a te'
+    ],
+    assistInstructions:[
+      'Entra dal cancello principale e procedi lentamente sul viale centrale',
+      'Raggiungi la panchina e fai una pausa se necessario',
+      'Continua sul percorso pavimentato',
+      'Svolta a destra al passaggio largo',
       'Raggiungi la Fila 11',
       'Cippo 9 davanti a te'
     ]
@@ -204,7 +231,9 @@ export default function PoveglianoPage(){
             <div className="route-mode">
               <button className={routeMode==='short'?'active':''} onClick={()=>setRouteMode('short')}>Più breve <small>{selected.shortDistance}</small></button>
               <button className={routeMode==='accessible'?'active':''} onClick={()=>setRouteMode('accessible')}>Accessibile ♿ <small>{selected.accessibleDistance}</small></button>
+              <button className={routeMode==='assist'?'active':''} onClick={()=>setRouteMode('assist')}>Assistito ♥ <small>{selected.assistDistance}</small></button>
             </div>
+            {routeMode==='assist' && <div className="assist-note"><b>Dove Riposa Assist</b><span>Priorità a percorso regolare, minore pendenza e punti di sosta. Nessun profilo personale viene salvato.</span></div>}
 
             <div className={calibrated?'calibration-card calibrated':'calibration-card'}>
               <div><b>{calibrated ? 'Posizione calibrata' : 'Calibrazione necessaria'}</b><span>{calibrated ? calibrated.label : 'Scansiona un marker Dove Riposa vicino a te'}</span></div>
@@ -234,7 +263,7 @@ export default function PoveglianoPage(){
       <div className="section-head"><span className="eyebrow">PERCHÉ PRECISION</span><h2>Non solo “sei nel settore giusto”.</h2></div>
       <div className="info-cards">
         <article><h3>QR di calibrazione</h3><p>I marker posizionati solo nei punti strategici dicono al sistema dove si trova esattamente l’utente, senza mettere un QR su ogni tomba.</p></article>
-        <article><h3>Percorso accessibile</h3><p>Il Comune può marcare rampe, scale, ghiaia e percorsi pavimentati per offrire un itinerario più adatto a persone con mobilità ridotta.</p></article>
+        <article><h3>Dove Riposa Assist</h3><p>Oltre al percorso accessibile, la modalità assistita può privilegiare pendenze ridotte, fondo regolare, panchine, fontanelle e punti di sosta per chi ha poca autonomia.</p></article>
         <article><h3>Continuità offline</h3><p>Dopo la prima apertura, la demo conserva localmente le risorse essenziali della web app per continuare a funzionare anche con segnale debole.</p></article>
       </div>
     </section>
@@ -255,7 +284,18 @@ function PrecisionNavigator({selected,routeMode,calibrated,onCalibrate,onClose})
   const [error,setError]=useState('');
   const [scanInfo,setScanInfo]=useState('');
   const [step,setStep]=useState(0);
-  const instructions=routeMode==='accessible'?selected.accessibleInstructions:selected.instructions;
+  const instructions=routeMode==='assist'?selected.assistInstructions:(routeMode==='accessible'?selected.accessibleInstructions:selected.instructions);
+  const distance=routeMode==='assist'?selected.assistDistance:(routeMode==='accessible'?selected.accessibleDistance:selected.shortDistance);
+  const modeLabel=routeMode==='assist'?'Percorso assistito ♥':(routeMode==='accessible'?'Percorso accessibile ♿':'Percorso più breve');
+
+  function speak(){
+    if(!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const utterance=new SpeechSynthesisUtterance(instructions[step]);
+    utterance.lang='it-IT';
+    utterance.rate=.88;
+    window.speechSynthesis.speak(utterance);
+  }
 
   useEffect(()=>{
     let stream;
@@ -294,7 +334,8 @@ function PrecisionNavigator({selected,routeMode,calibrated,onCalibrate,onClose})
       <div className="precision-cal-chip">{calibrated ? '✓ '+calibrated.label : 'Inquadra un QR di calibrazione'}</div>
       <div className="ar-arrow">{step>=instructions.length-1?'●':'↑'}</div>
       <div className="ar-instruction">{instructions[step]}</div>
-      <div className="ar-distance">{routeMode==='accessible'?'Percorso accessibile ♿':'Percorso più breve'} · {routeMode==='accessible'?selected.accessibleDistance:selected.shortDistance}</div>
+      <div className="ar-distance">{modeLabel} · {distance}</div>
+      <button className="voice-guide" onClick={speak}>🔊 Leggi indicazione</button>
 
       <div className="step-progress">{instructions.map((_,i)=><span key={i} className={i<=step?'done':''}></span>)}</div>
       <div className="precision-controls">
@@ -315,7 +356,7 @@ function PrecisionNavigator({selected,routeMode,calibrated,onCalibrate,onClose})
 }
 
 function CemeteryMap({selected,routeMode,calibrated}){
-  const path=selected ? (routeMode==='accessible'?selected.accessibleRoute:selected.route) : '';
+  const path=selected ? (routeMode==='assist'?selected.assistRoute:(routeMode==='accessible'?selected.accessibleRoute:selected.route)) : '';
   return <div className="cemetery-map-shell">
     <svg className="cemetery-map" viewBox="0 0 1000 700" role="img" aria-label="Ricostruzione dimostrativa del cimitero comunale di Povegliano Veronese">
       <rect width="1000" height="700" className="map-ground"/>
@@ -337,6 +378,10 @@ function CemeteryMap({selected,routeMode,calibrated}){
         <path className="map-walk" d="M520 620 L520 545 L555 510 L555 445 L600 420 L600 350"/>
         <path className="map-walk" d="M520 545 L465 510 L430 455"/>
         <path className="map-walk" d="M555 445 L650 445"/>
+        <g className="assist-poi">
+          <circle cx="575" cy="555" r="14"/><text x="575" y="560" textAnchor="middle">B</text>
+          <circle cx="630" cy="470" r="14"/><text x="630" y="475" textAnchor="middle">W</text>
+        </g>
       </g>
 
       {Object.values(markers).map(m=><g className={calibrated?.id===m.id?'precision-marker active':'precision-marker'} key={m.id} transform={`translate(${m.x} ${m.y})`}>
@@ -348,7 +393,7 @@ function CemeteryMap({selected,routeMode,calibrated}){
       <text x="520" y="676" textAnchor="middle" className="map-label">Ingresso demo</text>
 
       {selected && <>
-        <path d={path} className={routeMode==='accessible'?'selected-route accessible-route':'selected-route'}/>
+        <path d={path} className={routeMode==='assist'?'selected-route assist-route':(routeMode==='accessible'?'selected-route accessible-route':'selected-route')}/>
         <g className="selected-pin" transform={`translate(${selected.mapX} ${selected.mapY})`}><circle r="18"/><circle r="7" className="pin-core"/></g>
       </>}
     </svg>
