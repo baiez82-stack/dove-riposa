@@ -55,18 +55,6 @@ function parseDelimited(text){
   return rows;
 }
 
-function excelCell(value){
-  if(value===null||value===undefined) return '';
-  if(value instanceof Date) return value.toISOString();
-  if(typeof value==='object'){
-    if(Array.isArray(value.richText)) return value.richText.map(x=>x.text||'').join('');
-    if(value.text) return String(value.text);
-    if(value.result!==undefined) return String(value.result??'');
-    if(value.hyperlink) return String(value.text||value.hyperlink);
-  }
-  return String(value);
-}
-
 function normalizeHeader(value){
   return String(value??'')
     .normalize('NFD')
@@ -146,24 +134,9 @@ export default function AdminImportManager(){
     if(!file) return;
 
     try{
-      const lower=file.name.toLowerCase();
-      let matrix=[];
-      let firstSheet='Dati';
-
-      if(lower.endsWith('.xlsx')){
-        const ExcelJS=(await import('exceljs')).default;
-        const workbook=new ExcelJS.Workbook();
-        await workbook.xlsx.load(await file.arrayBuffer());
-        const worksheet=workbook.worksheets[0];
-        if(!worksheet) throw new Error('Nessun foglio trovato.');
-        firstSheet=worksheet.name||'Foglio 1';
-        worksheet.eachRow({includeEmpty:false},row=>{
-          matrix.push(row.values.slice(1).map(excelCell));
-        });
-      }else{
-        const text=await file.text();
-        matrix=parseDelimited(text);
-      }
+      const text=await file.text();
+      const matrix=parseDelimited(text);
+      const firstSheet='CSV';
 
       const clean=matrix.filter(row=>Array.isArray(row)&&row.some(cell=>String(cell??'').trim()!==''));
       if(clean.length<2) throw new Error('Il file deve contenere intestazioni e almeno una riga dati.');
@@ -247,7 +220,7 @@ export default function AdminImportManager(){
       <div>
         <span className="eyebrow">IMPORTAZIONE COMUNALE</span>
         <h2>Carica e controlla l’archivio</h2>
-        <p>CSV o XLSX. Il file viene letto nel browser per l’anteprima; solo dopo la conferma i record validi vengono inviati al database e salvati come <b>bozza</b>, mai pubblicati automaticamente.</p>
+        <p>CSV. Il file viene letto nel browser per l’anteprima; solo dopo la conferma i record validi vengono inviati al database e salvati come <b>bozza</b>, mai pubblicati automaticamente.</p>
       </div>
       <button type="button" className="secondary" onClick={downloadTemplate}>Scarica template CSV</button>
     </div>
@@ -271,10 +244,10 @@ export default function AdminImportManager(){
       <div className="import-step-body">
         <h3>Carica il file</h3>
         <label className="import-drop">
-          <input type="file" accept=".csv,.xlsx,.txt" onChange={e=>readFile(e.target.files?.[0])}/>
+          <input type="file" accept=".csv,.txt" onChange={e=>readFile(e.target.files?.[0])}/>
           <span className="import-drop-icon">↑</span>
-          <b>{fileName||'Scegli CSV o XLSX'}</b>
-          <small>{fileName ? `${rows.length} righe · foglio ${sheetName}` : 'Massimo 5.000 righe per importazione'}</small>
+          <b>{fileName||'Scegli file CSV'}</b>
+          <small>{fileName ? `${rows.length} righe · foglio ${sheetName}` : 'Massimo 5.000 righe per importazione · da Excel esporta in CSV'}</small>
         </label>
       </div>
     </div>
