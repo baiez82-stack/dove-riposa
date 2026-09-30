@@ -100,6 +100,7 @@ function PrecisionAdmin(){
     <div className="admin-two">
       <div className="admin-panel mini"><h3>Percorso breve</h3><p>Ottimizza la distanza quando non sono presenti vincoli di accessibilità.</p></div>
       <div className="admin-panel mini"><h3>Percorso accessibile ♿</h3><p>Può evitare scale, ghiaia e passaggi non idonei usando i metadati inseriti dall’ente.</p></div>
+      <div className="admin-panel mini"><h3>Dove Riposa Assist ♥</h3><p>Può privilegiare fondo regolare, pendenze ridotte, panchine, fontanelle e punti di sosta, senza creare profili sanitari dell’utente.</p></div>
     </div>
   </Panel>
 }
