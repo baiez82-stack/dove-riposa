@@ -6,14 +6,14 @@ import NearbyCemeteryDetector from './components/NearbyCemeteryDetector';
 export default function Home(){
   return <main className="directory-home">
     <header className="citizen-header directory-header">
-      <Link href="/" className="citizen-brand"><BrandLockup subtitle="Ricerca cimiteriale"/></Link>
+      <Link href="/" className="citizen-brand"><BrandLockup subtitle="Navigazione cimiteriale"/></Link>
     </header>
 
     <section className="directory-shell">
       <div className="directory-intro">
         <span className="eyebrow">DOVE RIPOSA · DEMO</span>
-        <h1>Trova il cimitero.<br/><em>Poi trovi chi cerchi.</em></h1>
-        <p>Rileva il cimitero vicino a te oppure cerca il Comune. Nessuna registrazione.</p>
+        <h1>Trova il cimitero.<br/><em>Poi ti guidiamo fino alla sepoltura.</em></h1>
+        <p>Rileva il cimitero vicino a te oppure cerca il Comune. Nessuna app obbligatoria, nessuna registrazione.</p>
 
         <NearbyCemeteryDetector/>
 
@@ -23,6 +23,8 @@ export default function Home(){
 
         <div className="directory-trust">
           <span>● Posizione non salvata</span>
+          <span>● QR di posizione</span>
+          <span>● Percorsi accessibili</span>
           <span>● Nessun account cittadino</span>
         </div>
       </div>
