@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import * as XLSX from 'xlsx';
 import { getImportTargets, importBurials } from '../admin/import/actions';
 
 const fields=[
@@ -17,6 +16,56 @@ const fields=[
   {key:'source_ref',label:'Riferimento sorgente',synonyms:['id','codice','matricola','source ref','riferimento']},
   {key:'source_updated_at',label:'Data aggiornamento sorgente',synonyms:['aggiornato il','data aggiornamento','updated at','last update']}
 ];
+
+
+function parseDelimited(text){
+  const firstLine=String(text||'').replace(/^\uFEFF/,'').split(/\r?\n/,1)[0]||'';
+  const candidates=[';',',','\t'];
+  let delimiter=';';
+  let best=-1;
+  for(const candidate of candidates){
+    const count=firstLine.split(candidate).length-1;
+    if(count>best){best=count;delimiter=candidate;}
+  }
+
+  const rows=[];
+  let row=[];
+  let cell='';
+  let quoted=false;
+  const source=String(text||'').replace(/^\uFEFF/,'');
+  for(let i=0;i<source.length;i++){
+    const ch=source[i];
+    if(ch==='"'){
+      if(quoted&&source[i+1]==='"'){cell+='"';i++;}
+      else quoted=!quoted;
+      continue;
+    }
+    if(!quoted&&ch===delimiter){row.push(cell);cell='';continue;}
+    if(!quoted&&(ch==='\n'||ch==='\r')){
+      if(ch==='\r'&&source[i+1]==='\n') i++;
+      row.push(cell);cell='';
+      if(row.some(value=>String(value).trim()!=='')) rows.push(row);
+      row=[];
+      continue;
+    }
+    cell+=ch;
+  }
+  row.push(cell);
+  if(row.some(value=>String(value).trim()!=='')) rows.push(row);
+  return rows;
+}
+
+function excelCell(value){
+  if(value===null||value===undefined) return '';
+  if(value instanceof Date) return value.toISOString();
+  if(typeof value==='object'){
+    if(Array.isArray(value.richText)) return value.richText.map(x=>x.text||'').join('');
+    if(value.text) return String(value.text);
+    if(value.result!==undefined) return String(value.result??'');
+    if(value.hyperlink) return String(value.text||value.hyperlink);
+  }
+  return String(value);
+}
 
 function normalizeHeader(value){
   return String(value??'')
@@ -97,16 +146,24 @@ export default function AdminImportManager(){
     if(!file) return;
 
     try{
-      const data=await file.arrayBuffer();
-      const workbook=XLSX.read(data,{type:'array',cellDates:true});
-      const firstSheet=workbook.SheetNames[0];
-      if(!firstSheet) throw new Error('Nessun foglio trovato.');
+      const lower=file.name.toLowerCase();
+      let matrix=[];
+      let firstSheet='Dati';
 
-      const matrix=XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet],{
-        header:1,
-        defval:'',
-        raw:false
-      });
+      if(lower.endsWith('.xlsx')){
+        const ExcelJS=(await import('exceljs')).default;
+        const workbook=new ExcelJS.Workbook();
+        await workbook.xlsx.load(await file.arrayBuffer());
+        const worksheet=workbook.worksheets[0];
+        if(!worksheet) throw new Error('Nessun foglio trovato.');
+        firstSheet=worksheet.name||'Foglio 1';
+        worksheet.eachRow({includeEmpty:false},row=>{
+          matrix.push(row.values.slice(1).map(excelCell));
+        });
+      }else{
+        const text=await file.text();
+        matrix=parseDelimited(text);
+      }
 
       const clean=matrix.filter(row=>Array.isArray(row)&&row.some(cell=>String(cell??'').trim()!==''));
       if(clean.length<2) throw new Error('Il file deve contenere intestazioni e almeno una riga dati.');
@@ -190,7 +247,7 @@ export default function AdminImportManager(){
       <div>
         <span className="eyebrow">IMPORTAZIONE COMUNALE</span>
         <h2>Carica e controlla l’archivio</h2>
-        <p>CSV, XLSX o XLS. Il file viene letto nel browser per l’anteprima; solo dopo la conferma i record validi vengono inviati al database e salvati come <b>bozza</b>, mai pubblicati automaticamente.</p>
+        <p>CSV o XLSX. Il file viene letto nel browser per l’anteprima; solo dopo la conferma i record validi vengono inviati al database e salvati come <b>bozza</b>, mai pubblicati automaticamente.</p>
       </div>
       <button type="button" className="secondary" onClick={downloadTemplate}>Scarica template CSV</button>
     </div>
@@ -214,9 +271,9 @@ export default function AdminImportManager(){
       <div className="import-step-body">
         <h3>Carica il file</h3>
         <label className="import-drop">
-          <input type="file" accept=".csv,.xlsx,.xls,.txt" onChange={e=>readFile(e.target.files?.[0])}/>
+          <input type="file" accept=".csv,.xlsx,.txt" onChange={e=>readFile(e.target.files?.[0])}/>
           <span className="import-drop-icon">↑</span>
-          <b>{fileName||'Scegli CSV o Excel'}</b>
+          <b>{fileName||'Scegli CSV o XLSX'}</b>
           <small>{fileName ? `${rows.length} righe · foglio ${sheetName}` : 'Massimo 5.000 righe per importazione'}</small>
         </label>
       </div>
