@@ -21,6 +21,7 @@ export default function AdminPage(){
     <aside className="admin-sidebar"><div className="citizen-brand admin-brand"><BrandLockup compact inverse subtitle="Comune di Povegliano Veronese"/></div>
       {['dashboard','archivio','import','qualita','mappa','live','segnalazioni','privacy','utenti'].map(x=><button key={x} className={tab===x?'active':''} onClick={()=>setTab(x)}>{x[0].toUpperCase()+x.slice(1)}</button>)}
       <Link className="admin-back-link" href="/povegliano-veronese">← Demo cittadino</Link>
+      <form action="/admin/logout" method="post" className="admin-logout-form"><button type="submit">Esci</button></form>
     </aside>
     <section className="admin-content">
       {tab==='dashboard'&&<Dashboard/>}
@@ -31,14 +32,14 @@ export default function AdminPage(){
       {tab==='live'&&<LivePanel/>}
       {tab==='segnalazioni'&&<Panel title="Segnalazioni"><div className="admin-list"><p><b>Posizione da verificare</b> · 1 segnalazione demo</p><p><b>Nominativo errato</b> · 0</p><p><b>Trasferimento</b> · 0</p></div></Panel>}
       {tab==='privacy'&&<PrivacyPanel/>}
-      {tab==='utenti'&&<Panel title="Utenti e ruoli"><p>Amministratore ente · Operatore cimiteriale · Sola lettura.</p><div className="admin-warning">Questo ambiente è dimostrativo. La versione di produzione userà autenticazione lato server, ruoli, sessioni sicure e audit degli accessi.</div></Panel>}
+      {tab==='utenti'&&<Panel title="Utenti e ruoli"><p>Amministratore ente · Operatore cimiteriale · Sola lettura.</p><div className="admin-warning">Gli account operatori usano autenticazione server-side e ruoli per ente. L’audit delle operazioni verrà attivato prima del caricamento dei dati comunali reali.</div></Panel>}
     </section>
   </main>
 }
 
 function Dashboard(){
   return <><div className="admin-head"><div><span className="eyebrow">DASHBOARD DEMO</span><h1>Povegliano Veronese</h1></div><span className="status">● Ambiente dimostrativo</span></div>
-    <div className="pilot-banner"><b>Demo aperta: nessun dato reale e nessuna autenticazione di produzione.</b><span>Prima del pilot reale servono database, autenticazione server-side, ruoli, audit e accordo privacy con l’ente.</span></div>
+    <div className="pilot-banner"><b>Backend pilot attivo, dati reali non ancora caricati.</b><span>Autenticazione server-side e database multi-ente sono predisposti. Prima dei dati comunali reali restano da configurare gli account operatori, il referente/DPO e il flusso di import validato.</span></div>
     <div className="stats admin-stats"><div><b>3</b><span>record fittizi</span></div><div><b>5</b><span>tratti accessibilità demo</span></div><div><b>4</b><span>marker Precision demo</span></div><div><b>0</b><span>dati comunali reali</span></div></div>
     <div className="admin-two"><Panel title="Archivio"><p><b>3</b> record demo · <b>1</b> da verificare</p></Panel><Panel title="Stato pilot"><p>La demo serve a validare flusso, mappa, accessibilità e navigazione. Le metriche reali verranno mostrate solo quando esisterà un archivio analytics persistente.</p></Panel></div>
   </>
