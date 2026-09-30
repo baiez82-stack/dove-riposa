@@ -156,7 +156,7 @@ export default function PescantinaPage(){
         <div className="map-info">
           <span className="eyebrow">PRECISION + ACCESSIBILITÀ</span>
           <h3>{selected?'Scegli il percorso':'Seleziona una sepoltura'}</h3>
-          <p>La demo combina percorso, marker QR di calibrazione e un livello accessibilità. I dati fisici restano “da verificare” finché non vengono rilevati sul posto.</p>
+          <p>La demo combina percorso, marker QR di posizione, accessibilità e controllo finale di arrivo. I dati fisici restano “da verificare” finché non vengono rilevati sul posto.</p>
 
           {selected&&<>
             <div className="route-mode">
