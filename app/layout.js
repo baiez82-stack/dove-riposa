@@ -1,4 +1,17 @@
 import './globals.css';
+import { Manrope, Fraunces } from 'next/font/google';
+
+const manrope = Manrope({
+  subsets: ['latin'],
+  variable: '--font-manrope',
+  display: 'swap'
+});
+
+const fraunces = Fraunces({
+  subsets: ['latin'],
+  variable: '--font-fraunces',
+  display: 'swap'
+});
 
 export const metadata = {
   title: {
@@ -14,7 +27,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="it">
+    <html lang="it" className={`${manrope.variable} ${fraunces.variable}`}>
       <body>{children}</body>
     </html>
   );
