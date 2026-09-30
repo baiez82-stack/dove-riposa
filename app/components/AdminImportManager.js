@@ -3,6 +3,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getImportTargets, importBurials } from '../admin/import/actions';
 
+const sourceOptions=[
+  {id:'csv-generico',label:'CSV generico'},
+  {id:'gestionale-esistente',label:'Export da gestionale esistente'},
+  {id:'archivio-legacy',label:'Archivio storico / legacy'},
+  {id:'altro',label:'Altro formato'}
+];
+
 const fields=[
   {key:'first_name',label:'Nome',required:true,synonyms:['nome','first name','firstname','given name']},
   {key:'last_name',label:'Cognome',required:true,synonyms:['cognome','last name','lastname','surname']},
@@ -107,6 +114,16 @@ export default function AdminImportManager(){
   const [parseError,setParseError]=useState('');
   const [result,setResult]=useState(null);
   const [importing,setImporting]=useState(false);
+  const [sourceType,setSourceType]=useState('csv-generico');
+  const [profileName,setProfileName]=useState('');
+  const [profiles,setProfiles]=useState([]);
+
+  useEffect(()=>{
+    try{
+      const stored=JSON.parse(localStorage.getItem('dr-import-profiles')||'[]');
+      if(Array.isArray(stored)) setProfiles(stored.slice(0,20));
+    }catch{}
+  },[]);
 
   useEffect(()=>{
     let active=true;
@@ -184,6 +201,40 @@ export default function AdminImportManager(){
   const requiredMapped=fields.filter(f=>f.required).every(f=>mapping[f.key]!==''&&mapping[f.key]!==undefined);
   const selectedTarget=targets.find(t=>t.cemeteryId===targetId);
 
+  function currentColumnProfile(){
+    const columns={};
+    for(const field of fields){
+      const idx=mapping[field.key];
+      if(idx!==''&&idx!==undefined&&headers[Number(idx)]) columns[field.key]=headers[Number(idx)];
+    }
+    return columns;
+  }
+
+  function saveMappingProfile(){
+    const name=profileName.trim();
+    if(!name||!headers.length) return;
+    const next=[
+      {id:String(Date.now()),name,sourceType,columns:currentColumnProfile()},
+      ...profiles.filter(p=>p.name.toLowerCase()!==name.toLowerCase())
+    ].slice(0,20);
+    setProfiles(next);
+    try{localStorage.setItem('dr-import-profiles',JSON.stringify(next));}catch{}
+  }
+
+  function applyMappingProfile(profileId){
+    const profile=profiles.find(p=>p.id===profileId);
+    if(!profile) return;
+    const next={};
+    for(const field of fields){
+      const wanted=normalizeHeader(profile.columns?.[field.key]||'');
+      const idx=headers.findIndex(h=>normalizeHeader(h)===wanted);
+      next[field.key]=idx>=0?String(idx):'';
+    }
+    setMapping(next);
+    setSourceType(profile.sourceType||'gestionale-esistente');
+    setProfileName(profile.name||'');
+  }
+
   async function runImport(){
     if(!requiredMapped||!targetId||!mappedRows.length||validation.valid===0) return;
 
@@ -193,6 +244,12 @@ export default function AdminImportManager(){
       const response=await importBurials({
         cemeteryId:targetId,
         filename:fileName||'import',
+        sourceName:sourceOptions.find(x=>x.id===sourceType)?.label||sourceType,
+        mappingProfile:{
+          name:profileName.trim()||'Mappatura corrente',
+          sourceType,
+          columns:currentColumnProfile()
+        },
         rows:mappedRows
       });
       setResult(response);
@@ -218,11 +275,29 @@ export default function AdminImportManager(){
   return <div className="admin-panel import-manager">
     <div className="import-manager-head">
       <div>
-        <span className="eyebrow">IMPORTAZIONE COMUNALE</span>
-        <h2>Carica e controlla l’archivio</h2>
-        <p>CSV. Il file viene letto nel browser per l’anteprima; solo dopo la conferma i record validi vengono inviati al database e salvati come <b>bozza</b>, mai pubblicati automaticamente.</p>
+        <span className="eyebrow">DOVE RIPOSA CONNECT</span>
+        <h2>Collega i dati che il Comune possiede già</h2>
+        <p>Dove Riposa non richiede di sostituire il gestionale cimiteriale: importa un export CSV, memorizza la mappatura delle colonne e riutilizzala negli aggiornamenti successivi. I record entrano sempre come <b>bozza</b>.</p>
       </div>
       <button type="button" className="secondary" onClick={downloadTemplate}>Scarica template CSV</button>
+    </div>
+
+    <div className="connect-source-grid">
+      <label>Origine dati
+        <select value={sourceType} onChange={e=>setSourceType(e.target.value)}>
+          {sourceOptions.map(option=><option key={option.id} value={option.id}>{option.label}</option>)}
+        </select>
+      </label>
+      <label>Profilo salvato
+        <select defaultValue="" onChange={e=>{if(e.target.value)applyMappingProfile(e.target.value);}}>
+          <option value="">Nessun profilo</option>
+          {profiles.map(profile=><option key={profile.id} value={profile.id}>{profile.name}</option>)}
+        </select>
+      </label>
+      <div className="connect-source-note">
+        <b>Interoperabilità prima del lock-in.</b>
+        <span>Un Comune può continuare a usare il proprio software amministrativo e usare Dove Riposa come layer di ricerca, accessibilità e navigazione.</span>
+      </div>
     </div>
 
     <div className="import-step">
@@ -265,6 +340,14 @@ export default function AdminImportManager(){
               {headers.map((header,i)=><option key={i} value={String(i)}>{header}</option>)}
             </select>
           </label>)}
+        </div>
+        <div className="mapping-profile-save">
+          <div>
+            <b>Riutilizza questa mappatura</b>
+            <span>Salvala con il nome del gestionale o dell’export ricevuto dal Comune.</span>
+          </div>
+          <input value={profileName} onChange={e=>setProfileName(e.target.value)} placeholder="es. Export gestionale Pescantina"/>
+          <button type="button" className="secondary" onClick={saveMappingProfile} disabled={!profileName.trim()}>Salva profilo</button>
         </div>
       </div>
     </div>}
