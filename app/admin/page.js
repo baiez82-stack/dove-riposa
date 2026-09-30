@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import BrandLockup from '../components/BrandLockup';
 import AdminQrGenerator from '../components/AdminQrGenerator';
+import AdminImportManager from '../components/AdminImportManager';
 
 const initial=[
   {id:1,nome:'Mario',cognome:'Rossi',settore:'Settore B',fila:'7',posizione:'Loculo 18',stato:'Pubblicato'},
@@ -15,7 +16,6 @@ export default function AdminPage(){
   const [rows,setRows]=useState(initial);
   const [editing,setEditing]=useState(null);
   const [tab,setTab]=useState('dashboard');
-  const [importMsg,setImportMsg]=useState('');
 
 
   return <main className="admin-shell">
@@ -61,7 +61,7 @@ export default function AdminPage(){
     <section className="admin-content">
       {tab==='dashboard'&&<Dashboard/>}
       {tab==='archivio'&&<Archivio rows={rows} setRows={setRows} editing={editing} setEditing={setEditing}/>}
-      {tab==='import'&&<Import setRows={setRows} message={importMsg} setMessage={setImportMsg}/>}
+      {tab==='import'&&<AdminImportManager/>}
       {tab==='qualita'&&<DataQuality rows={rows}/>}
       {tab==='mappa'&&<PrecisionAdmin/>}
       {tab==='qr'&&<AdminQrGenerator/>}
@@ -75,7 +75,7 @@ export default function AdminPage(){
 
 function Dashboard(){
   return <><div className="admin-head"><div><span className="eyebrow">DASHBOARD DEMO</span><h1>Dove Riposa Admin</h1></div><span className="status">● Ambiente dimostrativo</span></div>
-    <div className="pilot-banner"><b>Backend pilot attivo, dati reali non ancora caricati.</b><span>Autenticazione server-side e database multi-ente sono predisposti. Prima dei dati comunali reali restano da configurare gli account operatori, il referente/DPO e il flusso di import validato.</span></div>
+    <div className="pilot-banner"><b>Backend pilot attivo, dati reali non ancora caricati.</b><span>Autenticazione server-side, database multi-ente e importazione CSV/Excel con anteprima sono predisposti. Prima dei dati comunali reali restano da formalizzare referente/DPO, accordi e procedura di validazione dell’ente.</span></div>
     <div className="stats admin-stats"><div><b>2</b><span>Comuni demo</span></div><div><b>7</b><span>marker Precision</span></div><div><b>5</b><span>tratti accessibilità Povegliano</span></div><div><b>0</b><span>dati comunali reali</span></div></div>
     <div className="admin-two"><Panel title="Archivio"><p><b>3</b> record demo · <b>1</b> da verificare</p></Panel><Panel title="Stato pilot"><p>La demo serve a validare flusso, mappa, accessibilità e navigazione. Le metriche reali verranno mostrate solo quando esisterà un archivio analytics persistente.</p></Panel></div>
   </>
@@ -90,12 +90,6 @@ function Archivio({rows,setRows,editing,setEditing}){
     <div className="admin-table">{rows.map(r=><div className="admin-row" key={r.id}><div><b>{r.nome} {r.cognome}</b><span>{r.settore} · Fila {r.fila} · {r.posizione}</span></div><span>{r.stato}</span><button className="secondary" onClick={()=>startEdit(r)}>Modifica</button></div>)}</div>
   </Panel>
 }
-
-function Import({setRows,message,setMessage}){
-  function file(e){const f=e.target.files?.[0];if(!f)return;const reader=new FileReader();reader.onload=()=>{const lines=String(reader.result).split(/\r?\n/).filter(Boolean);setMessage(`File letto: ${lines.length} righe. Import demo pronto per anteprima.`);};reader.readAsText(f);}
-  return <Panel title="Import CSV"><p>Per la demo leggiamo il file localmente senza inviarlo a un server. In produzione verrà aggiunta un’anteprima con validazione colonne, errori e conferma prima della pubblicazione.</p><input type="file" accept=".csv,.txt" onChange={file}/>{message&&<div className="import-message">{message}</div>}</Panel>
-}
-
 
 function LivePanel(){
   const [active,setActive]=useState(true);
