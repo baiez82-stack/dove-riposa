@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import BrandLockup from '../../components/BrandLockup';
 
 export const metadata = {
   title: 'Privacy e trasparenza | Dove Riposa - Povegliano Veronese',
@@ -8,7 +9,7 @@ export const metadata = {
 export default function PrivacyPage(){
   return <main>
     <header className="citizen-header">
-      <Link href="/povegliano-veronese" className="citizen-brand"><span className="mark">DR</span><div><strong>Dove Riposa</strong><small>Povegliano Veronese</small></div></Link>
+      <Link href="/povegliano-veronese" className="citizen-brand"><BrandLockup subtitle="Povegliano Veronese"/></Link>
       <nav><Link href="/povegliano-veronese">Torna alla ricerca</Link></nav>
     </header>
 
@@ -110,6 +111,6 @@ export default function PrivacyPage(){
       <div className="legal-box"><b>Documento provvisorio</b><p>Questa pagina descrive la demo e le scelte progettuali attuali. Non costituisce l’informativa privacy definitiva di un eventuale servizio comunale in produzione.</p></div>
     </section>
 
-    <footer><div><b>Dove Riposa</b><span>Povegliano Veronese · demo pilota</span></div><p><Link href="/povegliano-veronese/termini">Termini d’uso</Link> · <Link href="/povegliano-veronese">Torna alla ricerca</Link></p></footer>
+    <footer><div className="footer-brand"><BrandLockup compact subtitle="Povegliano Veronese · demo pilota"/></div><p><Link href="/povegliano-veronese/termini">Termini d’uso</Link> · <Link href="/povegliano-veronese">Torna alla ricerca</Link></p></footer>
   </main>
 }
