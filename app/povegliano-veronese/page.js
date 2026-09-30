@@ -383,8 +383,9 @@ function PrecisionNavigator({selected,routeMode,calibrated,onCalibrate,onClose})
   </div>
 }
 
-function CemeteryMap({selected,routeMode,calibrated}){
-  const path=selected ? (routeMode==='assist'?selected.assistRoute:(routeMode==='accessible'?selected.accessibleRoute:selected.route)) : '';
+function CemeteryMap({selected,routeMode,calibrated,liveDemo}){
+  const standardPath=selected ? (routeMode==='assist'?selected.assistRoute:(routeMode==='accessible'?selected.accessibleRoute:selected.route)) : '';
+  const path=selected && liveDemo && routeMode==='short' ? selected.accessibleRoute : standardPath;
   return <div className="cemetery-map-shell">
     <svg className="cemetery-map" viewBox="0 0 1000 700" role="img" aria-label="Ricostruzione dimostrativa del cimitero comunale di Povegliano Veronese">
       <rect width="1000" height="700" className="map-ground"/>
@@ -408,6 +409,7 @@ function CemeteryMap({selected,routeMode,calibrated}){
         <path className="map-walk" d="M555 445 L650 445"/>
         <g className="accessibility-overlay">
           {accessibilitySegments.map(s=><path key={s.id} d={s.path} className={s.stairs?'surface-segment stairs':(s.surface.includes('Ghiaia')?'surface-segment gravel':'surface-segment paved')}/>)}
+          {liveDemo && <path d="M555 445 L650 445" className="live-blocked-segment"/>}
         </g>
         <g className="assist-poi">
           <circle cx="575" cy="555" r="14"/><text x="575" y="560" textAnchor="middle">B</text>
@@ -428,6 +430,6 @@ function CemeteryMap({selected,routeMode,calibrated}){
         <g className="selected-pin" transform={`translate(${selected.mapX} ${selected.mapY})`}><circle r="18"/><circle r="7" className="pin-core"/></g>
       </>}
     </svg>
-    <div className="map-demo-badge">Ricostruzione demo · marker e percorsi da validare con il Comune</div>
+    <div className="map-demo-badge">{liveDemo?'Live demo: deviazione attiva · ':''}Ricostruzione demo · marker e percorsi da validare con il Comune</div>
   </div>
 }
