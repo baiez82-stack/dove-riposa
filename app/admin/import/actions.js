@@ -35,10 +35,18 @@ function keyPart(value){
 }
 
 function makeDedupeKey(row){
+  const ref=keyPart(row.source_ref);
+  if(ref) return ('ref|'+ref).slice(0,500);
   return [
     row.first_name,row.last_name,row.birth_year,row.death_year,
     row.sector,row.row_label,row.position_label
   ].map(keyPart).join('|').slice(0,500);
+}
+
+function cleanDate(value){
+  if(!value) return null;
+  const date=new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
 }
 
 async function getAuthorizedContext(supabase,cemeteryId){
@@ -132,7 +140,7 @@ export async function importBurials(payload){
       map_x:cleanNumber(raw?.map_x),
       map_y:cleanNumber(raw?.map_y),
       source_ref:cleanText(raw?.source_ref,240),
-      source_updated_at:raw?.source_updated_at ? new Date(raw.source_updated_at).toISOString() : null
+      source_updated_at:cleanDate(raw?.source_updated_at)
     };
 
     if(!row.first_name||!row.last_name){
