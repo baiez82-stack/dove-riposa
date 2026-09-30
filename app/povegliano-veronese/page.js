@@ -10,6 +10,14 @@ const markers = {
   ovest:{id:'ovest',code:'DR-PV-OVEST',label:'Area ovest',x:405,y:445}
 };
 
+const accessibilitySegments = [
+  {id:'A1',label:'Ingresso → viale centrale',surface:'Pavimentato',slope:'2%',width:'2,4 m',stairs:false,ramp:false,rest:true,status:'Da verificare sul posto',confidence:'Cartografia + demo',path:'M520 620 L520 545'},
+  {id:'A2',label:'Viale centrale → area est',surface:'Ghiaia compatta',slope:'4%',width:'1,8 m',stairs:false,ramp:false,rest:true,status:'Da verificare sul posto',confidence:'Immagini + demo',path:'M555 445 L650 445'},
+  {id:'A3',label:'Accesso porticato est',surface:'Pavimentato',slope:'6%',width:'1,4 m',stairs:false,ramp:true,rest:false,status:'Da verificare sul posto',confidence:'Ipotesi demo',path:'M650 445 L700 415 L700 350'},
+  {id:'A4',label:'Area ovest',surface:'Ghiaia',slope:'3%',width:'1,5 m',stairs:false,ramp:false,rest:false,status:'Da verificare sul posto',confidence:'Immagini + demo',path:'M470 510 L405 445 L365 370'},
+  {id:'A5',label:'Scalinata interna',surface:'Pietra',slope:'—',width:'1,2 m',stairs:true,ramp:false,rest:false,status:'Non accessibile in carrozzina',confidence:'Demo',path:'M600 420 L600 350'}
+];
+
 const records = [
   {
     id:1,nome:'Mario',cognome:'Rossi',anno:'1941',morte:'2024',settore:'Settore B',fila:'Fila 7',posizione:'Loculo 18',
@@ -249,6 +257,21 @@ export default function PoveglianoPage(){
           </>}
         </div>
       </div>
+
+      <div className="accessibility-layer">
+        <div className="accessibility-layer-head">
+          <div><span className="eyebrow">ACCESSIBILITY LAYER</span><h3>Condizioni reali del percorso</h3></div>
+          <span className="layer-status">Demo · da validare</span>
+        </div>
+        <p>Ogni tratto può contenere superficie, pendenza, larghezza, rampe, gradini e punti di sosta. I dati mostrati qui sono dimostrativi: nella versione reale vengono precompilati da cartografia/immagini e poi confermati con sopralluogo.</p>
+        <div className="accessibility-segment-grid">
+          {accessibilitySegments.slice(0,4).map(s=><div className="accessibility-segment-card" key={s.id}>
+            <div className="segment-top"><b>{s.label}</b><span>{s.id}</span></div>
+            <div className="segment-tags"><span>{s.surface}</span><span>Pendenza {s.slope}</span><span>{s.width}</span>{s.ramp&&<span>Rampa</span>}{s.stairs&&<span>Gradini</span>}{s.rest&&<span>Punto sosta</span>}</div>
+            <small>{s.status} · {s.confidence}</small>
+          </div>)}
+        </div>
+      </div>
     </section>
 
     {cameraOpen && selected && <PrecisionNavigator
@@ -378,6 +401,9 @@ function CemeteryMap({selected,routeMode,calibrated}){
         <path className="map-walk" d="M520 620 L520 545 L555 510 L555 445 L600 420 L600 350"/>
         <path className="map-walk" d="M520 545 L465 510 L430 455"/>
         <path className="map-walk" d="M555 445 L650 445"/>
+        <g className="accessibility-overlay">
+          {accessibilitySegments.map(s=><path key={s.id} d={s.path} className={s.stairs?'surface-segment stairs':(s.surface.includes('Ghiaia')?'surface-segment gravel':'surface-segment paved')}/>)}
+        </g>
         <g className="assist-poi">
           <circle cx="575" cy="555" r="14"/><text x="575" y="560" textAnchor="middle">B</text>
           <circle cx="630" cy="470" r="14"/><text x="630" y="475" textAnchor="middle">W</text>
