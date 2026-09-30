@@ -1,4 +1,4 @@
-const allowedEvents = new Set(['page_view','qr_entry','search','result_open','navigation_start']);
+const allowedEvents = new Set(['page_view','qr_entry','search','result_open','navigation_start','arrival_confirmed']);
 
 function clean(value, max){
   return String(value || '').toLowerCase().replace(/[^a-z0-9_-]/g,'').slice(0,max);
