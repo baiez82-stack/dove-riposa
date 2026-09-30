@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 
 const initial=[
@@ -82,26 +82,105 @@ function DataQuality({rows}){
 }
 
 function PrecisionAdmin(){
-  const markerRows=[
-    ['DR-PV-ING','Ingresso principale','Attivo'],
-    ['DR-PV-CEN','Incrocio centrale','Attivo'],
-    ['DR-PV-EST','Porticato est','Attivo'],
-    ['DR-PV-OVEST','Area ovest','Bozza']
+  const initialSegments=[
+    {id:'A1',label:'Ingresso → viale centrale',surface:'Pavimentato',slope:'2',width:'2.4',stairs:false,ramp:false,rest:true,status:'Da verificare',source:'Cartografia'},
+    {id:'A2',label:'Viale centrale → area est',surface:'Ghiaia compatta',slope:'4',width:'1.8',stairs:false,ramp:false,rest:true,status:'Da verificare',source:'Immagini'},
+    {id:'A3',label:'Accesso porticato est',surface:'Pavimentato',slope:'6',width:'1.4',stairs:false,ramp:true,rest:false,status:'Da verificare',source:'Ipotesi demo'},
+    {id:'A4',label:'Area ovest',surface:'Ghiaia',slope:'3',width:'1.5',stairs:false,ramp:false,rest:false,status:'Da verificare',source:'Immagini'},
+    {id:'A5',label:'Scalinata interna',surface:'Pietra',slope:'',width:'1.2',stairs:true,ramp:false,rest:false,status:'Da verificare',source:'Planimetria'}
   ];
+  const [segments,setSegments]=useState(initialSegments);
+  const [selectedId,setSelectedId]=useState('A1');
+  const [surveyMode,setSurveyMode]=useState(false);
+  const [saved,setSaved]=useState('');
+
+  useEffect(()=>{
+    try{
+      const savedSegments=localStorage.getItem('dr-accessibility-demo');
+      if(savedSegments) setSegments(JSON.parse(savedSegments));
+    }catch{}
+  },[]);
+
+  const selected=segments.find(s=>s.id===selectedId)||segments[0];
+
+  function patch(field,value){
+    setSegments(rows=>rows.map(r=>r.id===selectedId?{...r,[field]:value}:r));
+    setSaved('');
+  }
+
+  function saveVerification(){
+    setSegments(rows=>{
+      const next=rows.map(r=>r.id===selectedId?{...r,status:'Verificato sul posto',source:'Sopralluogo operatore'}:r);
+      try{localStorage.setItem('dr-accessibility-demo',JSON.stringify(next));}catch{}
+      return next;
+    });
+    setSaved('Tratto verificato nella demo. In produzione la modifica sarà registrata nell’audit del Comune.');
+  }
+
+  const verified=segments.filter(s=>s.status==='Verificato sul posto').length;
+
   return <Panel title="Mappa & Dove Riposa Precision">
-    <p>I marker di calibrazione collegano un punto fisico noto alla mappa digitale. In produzione il Comune potrà definire settori, percorsi accessibili, ostacoli e marker senza applicare QR a ogni sepoltura.</p>
-    <div className="precision-admin-grid">
-      <div className="admin-placeholder">Editor planimetria · collegamento a cartografia ufficiale</div>
-      <div className="marker-admin">
-        <h3>Marker di calibrazione</h3>
-        {markerRows.map(r=><div className="marker-admin-row" key={r[0]}><div><b>{r[0]}</b><span>{r[1]}</span></div><em>{r[2]}</em></div>)}
+    <p>La mappa non dichiara un tratto accessibile solo perché appare tale in cartografia. Dove Riposa crea un <b>Accessibility Layer</b>: superficie, pendenza, larghezza, gradini, rampe e punti di sosta vengono precompilati quando possibile e poi validati sul posto.</p>
+
+    <div className="survey-toolbar">
+      <div><b>Accessibility Layer</b><span>{verified}/{segments.length} tratti verificati sul posto</span></div>
+      <button className={surveyMode?'secondary survey-active':'secondary'} onClick={()=>setSurveyMode(!surveyMode)}>{surveyMode?'Chiudi sopralluogo':'Avvia modalità sopralluogo'}</button>
+    </div>
+
+    <div className="precision-admin-grid accessibility-admin-grid">
+      <div className="access-map-demo">
+        <div className="access-map-title"><b>Planimetria demo</b><span>Tocca un tratto per verificarlo</span></div>
+        <svg viewBox="0 0 600 420" className="admin-access-svg" role="img" aria-label="Demo dei tratti accessibili del cimitero">
+          <rect width="600" height="420" rx="18" className="admin-map-bg"/>
+          <path d="M300 385 L300 300" className={selectedId==='A1'?'admin-segment selected':'admin-segment paved'} onClick={()=>setSelectedId('A1')}/>
+          <path d="M300 300 L390 245" className={selectedId==='A2'?'admin-segment selected':'admin-segment gravel'} onClick={()=>setSelectedId('A2')}/>
+          <path d="M390 245 L480 170" className={selectedId==='A3'?'admin-segment selected':'admin-segment paved'} onClick={()=>setSelectedId('A3')}/>
+          <path d="M300 300 L210 235 L150 170" className={selectedId==='A4'?'admin-segment selected':'admin-segment gravel'} onClick={()=>setSelectedId('A4')}/>
+          <path d="M390 245 L390 150" className={selectedId==='A5'?'admin-segment selected':'admin-segment stairs'} onClick={()=>setSelectedId('A5')}/>
+          <circle cx="300" cy="385" r="14" className="admin-map-node"/><text x="300" y="414" textAnchor="middle">Ingresso</text>
+          <circle cx="300" cy="300" r="10" className="admin-map-node"/>
+          <circle cx="390" cy="245" r="10" className="admin-map-node"/>
+          <text x="455" y="155">Porticato est</text><text x="95" y="150">Area ovest</text>
+        </svg>
+        <div className="surface-legend"><span><i className="legend-paved"></i>Pavimentato</span><span><i className="legend-gravel"></i>Ghiaia</span><span><i className="legend-stairs"></i>Gradini</span></div>
+      </div>
+
+      <div className="access-editor">
+        <div className="access-editor-head"><div><span className="eyebrow">{selected.id}</span><h3>{selected.label}</h3></div><span className={selected.status==='Verificato sul posto'?'verify-chip ok':'verify-chip'}>{selected.status}</span></div>
+        <label>Superficie
+          <select value={selected.surface} onChange={e=>patch('surface',e.target.value)}>
+            <option>Pavimentato</option><option>Asfalto</option><option>Cemento</option><option>Autobloccanti</option><option>Ghiaia compatta</option><option>Ghiaia</option><option>Terra</option><option>Erba</option><option>Pietra</option>
+          </select>
+        </label>
+        <div className="access-form-two">
+          <label>Pendenza %<input value={selected.slope} onChange={e=>patch('slope',e.target.value)} inputMode="decimal" placeholder="es. 4"/></label>
+          <label>Larghezza m<input value={selected.width} onChange={e=>patch('width',e.target.value)} inputMode="decimal" placeholder="es. 1.8"/></label>
+        </div>
+        <div className="access-checks">
+          <label><input type="checkbox" checked={selected.stairs} onChange={e=>patch('stairs',e.target.checked)}/> Gradini</label>
+          <label><input type="checkbox" checked={selected.ramp} onChange={e=>patch('ramp',e.target.checked)}/> Rampa</label>
+          <label><input type="checkbox" checked={selected.rest} onChange={e=>patch('rest',e.target.checked)}/> Punto di sosta vicino</label>
+        </div>
+        <div className="source-box"><b>Origine attuale</b><span>{selected.source}</span></div>
+        <button className="primary" onClick={saveVerification}>✓ Conferma sopralluogo</button>
+        {saved&&<div className="import-message">{saved}</div>}
       </div>
     </div>
+
+    {surveyMode&&<div className="survey-mobile-card">
+      <span className="eyebrow">MODALITÀ SOPRALLUOGO</span>
+      <h3>Verifica dal telefono</h3>
+      <p>Flusso previsto: apri il tratto → scegli superficie → inserisci pendenza/larghezza → marca gradini, rampa e punti di sosta → conferma. In produzione può usare anche posizione e fotocamera solo su richiesta dell’operatore.</p>
+      <div className="survey-progress"><span style={{width:(verified/segments.length*100)+'%'}}></span></div>
+      <small>{verified} tratti verificati · {segments.length-verified} ancora da controllare</small>
+    </div>}
+
     <div className="admin-two">
       <div className="admin-panel mini"><h3>Percorso breve</h3><p>Ottimizza la distanza quando non sono presenti vincoli di accessibilità.</p></div>
-      <div className="admin-panel mini"><h3>Percorso accessibile ♿</h3><p>Può evitare scale, ghiaia e passaggi non idonei usando i metadati inseriti dall’ente.</p></div>
+      <div className="admin-panel mini"><h3>Percorso accessibile ♿</h3><p>Evita automaticamente tratti con gradini o caratteristiche non compatibili con i parametri verificati.</p></div>
       <div className="admin-panel mini"><h3>Dove Riposa Assist ♥</h3><p>Può privilegiare fondo regolare, pendenze ridotte, panchine, fontanelle e punti di sosta, senza creare profili sanitari dell’utente.</p></div>
     </div>
+    <div className="admin-warning">I dati ricavati da planimetrie, immagini o stime restano “Da verificare”. Solo un controllo dell’ente sul posto può portarli allo stato “Verificato sul posto”.</div>
   </Panel>
 }
 
