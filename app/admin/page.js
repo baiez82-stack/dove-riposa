@@ -174,10 +174,10 @@ function PrecisionAdmin(){
   const verified=segments.filter(s=>s.status==='Verificato sul posto').length;
 
   return <Panel title="Mappa & Dove Riposa Precision">
-    <p>La mappa non dichiara un tratto accessibile solo perché appare tale in cartografia. Dove Riposa crea un <b>Accessibility Layer</b>: superficie, pendenza, larghezza, gradini, rampe e punti di sosta vengono precompilati quando possibile e poi validati sul posto.</p>
+    <p>La mappa non dichiara un tratto accessibile solo perché appare tale in cartografia. Dove Riposa crea <b>Dove Riposa Access</b>: superficie, pendenza, larghezza, gradini, rampe e punti di sosta vengono precompilati quando possibile e poi validati sul posto.</p>
 
     <div className="survey-toolbar">
-      <div><b>Accessibility Layer</b><span>{verified}/{segments.length} tratti verificati sul posto</span></div>
+      <div><b>Dove Riposa Access</b><span>{verified}/{segments.length} tratti verificati sul posto</span></div>
       <button className={surveyMode?'secondary survey-active':'secondary'} onClick={()=>setSurveyMode(!surveyMode)}>{surveyMode?'Chiudi sopralluogo':'Avvia modalità sopralluogo'}</button>
     </div>
 
