@@ -68,15 +68,21 @@ export default function AdminPage(){
       {tab==='live'&&<LivePanel/>}
       {tab==='segnalazioni'&&<Panel title="Segnalazioni"><div className="admin-list"><p><b>Posizione da verificare</b> · 1 segnalazione demo</p><p><b>Nominativo errato</b> · 0</p><p><b>Trasferimento</b> · 0</p></div></Panel>}
       {tab==='privacy'&&<PrivacyPanel/>}
-      {tab==='utenti'&&<Panel title="Utenti e ruoli"><p>Amministratore ente · Operatore cimiteriale · Sola lettura.</p><div className="admin-warning">Gli account operatori usano autenticazione server-side e ruoli per ente. Per questa demo non esistono ancora account operatori attivi: vanno creati e associati all’ente prima di usare l’area riservata in una presentazione autenticata.</div></Panel>}
+      {tab==='utenti'&&<Panel title="Utenti e ruoli"><p>Amministratore ente · Operatore cimiteriale · Sola lettura.</p><div className="admin-warning">L’accesso usa autenticazione nominativa server-side e ruoli per ente. Il tuo account amministratore è già associato ai due enti demo; eventuali nuovi operatori vanno creati singolarmente e autorizzati solo ai Comuni necessari.</div></Panel>}
     </section>
   </main>
 }
 
 function Dashboard(){
   return <><div className="admin-head"><div><span className="eyebrow">DASHBOARD DEMO</span><h1>Dove Riposa Admin</h1></div><span className="status">● Ambiente dimostrativo</span></div>
-    <div className="pilot-banner"><b>Backend pilot attivo, dati reali non ancora caricati.</b><span>Autenticazione server-side, database multi-ente e importazione CSV/Excel con anteprima sono predisposti. Prima dei dati comunali reali restano da formalizzare referente/DPO, accordi e procedura di validazione dell’ente.</span></div>
+    <div className="pilot-banner"><b>Backend pilot attivo, dati reali non ancora caricati.</b><span>Autenticazione server-side, database multi-ente e Data Bridge CSV con anteprima sono predisposti. Prima dei dati comunali reali restano da formalizzare referente/DPO, accordi e procedura di validazione dell’ente.</span></div>
     <div className="stats admin-stats"><div><b>2</b><span>Comuni demo</span></div><div><b>7</b><span>marker Precision</span></div><div><b>5</b><span>tratti accessibilità Povegliano</span></div><div><b>0</b><span>dati comunali reali</span></div></div>
+    <div className="platform-core-grid">
+      <div><span>BRIDGE</span><b>Usa i dati che il Comune ha già</b><p>Import da CSV e gestionali esistenti senza obbligare a sostituire il back-office.</p></div>
+      <div><span>PRECISION</span><b>QR come nodi di posizione</b><p>I marker ricalibrano la navigazione nei punti strategici, non sono memoriali sulle tombe.</p></div>
+      <div><span>ACCESS</span><b>Routing basato sui tratti reali</b><p>Superficie, pendenza, larghezza, gradini, rampe e punti di sosta verificabili sul posto.</p></div>
+      <div><span>LIVE</span><b>Percorsi che possono cambiare</b><p>Chiusure e lavori possono deviare la navigazione invece di lasciare una mappa statica.</p></div>
+    </div>
     <div className="admin-two"><Panel title="Archivio"><p><b>3</b> record demo · <b>1</b> da verificare</p></Panel><Panel title="Stato pilot"><p>La demo serve a validare flusso, mappa, accessibilità e navigazione. Le metriche reali verranno mostrate solo quando esisterà un archivio analytics persistente.</p></Panel></div>
   </>
 }
