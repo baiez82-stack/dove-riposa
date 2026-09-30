@@ -1,8 +1,15 @@
 import './globals.css';
 
 export const metadata = {
-  title: 'Dove Riposa — MVP',
-  description: 'Motore federato per la ricerca delle sepolture in Italia.'
+  title: {
+    default: 'Dove Riposa',
+    template: '%s | Dove Riposa'
+  },
+  description: 'Ricerca e navigazione cimiteriale digitale, semplice e accessibile.',
+  applicationName: 'Dove Riposa',
+  icons: {
+    icon: '/icon.svg'
+  }
 };
 
 export default function RootLayout({ children }) {
