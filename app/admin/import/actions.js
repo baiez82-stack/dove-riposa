@@ -130,7 +130,9 @@ export async function importBurials(payload){
 
   const cemeteryId=String(payload?.cemeteryId||'');
   const filename=cleanText(payload?.filename,240)||'import';
-  const sourceName=cleanText(payload?.sourceName,120)||'CSV generico';
+  const allowedSources=new Set(['generic_csv','existing_management','tombal_siscom','other']);
+  const sourceSystem=allowedSources.has(String(payload?.sourceSystem||'')) ? String(payload.sourceSystem) : 'generic_csv';
+  const sourceName=cleanText(payload?.sourceName,120)||'CSV standard';
   const mappingProfile=cleanProfile(payload?.mappingProfile);
   const inputRows=Array.isArray(payload?.rows)?payload.rows:[];
 
@@ -206,6 +208,8 @@ export async function importBurials(payload){
       filename,
       source_name:sourceName,
       mapping_profile:mappingProfile,
+      source_system:sourceSystem,
+      mapping_config:mappingProfile||{},
       row_count:inputRows.length,
       imported_count:0,
       skipped_count:existingKeys.size+duplicateInFile,
