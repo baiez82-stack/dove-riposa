@@ -1,15 +1,12 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import BrandLockup from '../components/BrandLockup';
 import StandardPrecisionNavigator from '../components/StandardPrecisionNavigator';
+import { getPrecisionConfig } from '../data/precision';
 
-const markers={
-  ingresso:{id:'ingresso',code:'DR-PC-ING',label:'Ingresso principale',x:360,y:470},
-  centro:{id:'centro',code:'DR-PC-CEN',label:'Nodo centrale',x:360,y:385},
-  testata:{id:'testata',code:'DR-PC-TES',label:'Testata centrale',x:360,y:105}
-};
+const markers=getPrecisionConfig('pescantina').markers;
 
 const accessibilitySegments=[
   {id:'A1',label:'Ingresso → nodo centrale',surface:'Da rilevare',slope:'Da rilevare',width:'Da rilevare',rest:false,status:'Da verificare sul posto',path:'M360 470 L360 385'},
@@ -70,6 +67,15 @@ export default function PescantinaPage(){
   const [calibrated,setCalibrated]=useState(null);
   const [cameraOpen,setCameraOpen]=useState(false);
 
+  useEffect(()=>{
+    const params=new URLSearchParams(window.location.search);
+    const cal=params.get('cal');
+    const source=params.get('src')||'direct';
+    if(cal && markers[cal]) setCalibrated(markers[cal]);
+    track('page_view',{source});
+    if(source.startsWith('qr-')) track('qr_entry',{source});
+  },[]);
+
   const results=useMemo(()=>{
     const n=s=>s.trim().toLowerCase();
     return demoRecords.filter(r=>
@@ -89,7 +95,7 @@ export default function PescantinaPage(){
   function openRecord(r){
     setSelected(r);
     setRouteMode('short');
-    setCalibrated(markers.ingresso);
+    setCalibrated(current=>current||markers.ingresso);
     setCameraOpen(false);
     track('result_open');
     setTimeout(()=>document.getElementById('mappa')?.scrollIntoView({behavior:'smooth'}),50);
