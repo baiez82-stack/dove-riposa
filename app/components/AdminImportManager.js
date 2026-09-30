@@ -10,6 +10,13 @@ const sourceOptions=[
   {id:'altro',label:'Altro formato'}
 ];
 
+const sourceProfiles=[
+  {id:'generic_csv',label:'CSV standard',desc:'File preparato con il template Dove Riposa.'},
+  {id:'existing_management',label:'Gestionale esistente',desc:'Export CSV dal software già usato dal Comune.'},
+  {id:'tombal_siscom',label:'Tombal / Siscom',desc:'Import da export CSV con mappatura assistita delle colonne. Nessuna integrazione ufficiale dichiarata.'},
+  {id:'other',label:'Altro archivio',desc:'CSV proveniente da un altro gestionale o archivio storico.'}
+];
+
 const fields=[
   {key:'first_name',label:'Nome',required:true,synonyms:['nome','first name','firstname','given name']},
   {key:'last_name',label:'Cognome',required:true,synonyms:['cognome','last name','lastname','surname']},
@@ -103,6 +110,7 @@ function templateCsv(){
 }
 
 export default function AdminImportManager(){
+  const [sourceSystem,setSourceSystem]=useState('generic_csv');
   const [targets,setTargets]=useState([]);
   const [targetId,setTargetId]=useState('');
   const [loadingTargets,setLoadingTargets]=useState(true);
@@ -303,6 +311,19 @@ export default function AdminImportManager(){
     <div className="import-step">
       <div className="import-step-number">1</div>
       <div className="import-step-body">
+        <h3>Da dove arrivano i dati?</h3>
+        <p>Dove Riposa non obbliga il Comune a cambiare gestionale: importa solo i dati necessari al servizio cittadino.</p>
+        <div className="source-profile-grid">
+          {sourceProfiles.map(profile=><button key={profile.id} type="button" className={sourceSystem===profile.id?'source-profile active':'source-profile'} onClick={()=>setSourceSystem(profile.id)}>
+            <b>{profile.label}</b><span>{profile.desc}</span>
+          </button>)}
+        </div>
+      </div>
+    </div>
+
+    <div className="import-step">
+      <div className="import-step-number">2</div>
+      <div className="import-step-body">
         <h3>Scegli Comune e cimitero</h3>
         {loadingTargets
           ? <p>Caricamento enti abilitati…</p>
@@ -315,7 +336,7 @@ export default function AdminImportManager(){
     </div>
 
     <div className="import-step">
-      <div className="import-step-number">2</div>
+      <div className="import-step-number">3</div>
       <div className="import-step-body">
         <h3>Carica il file</h3>
         <label className="import-drop">
@@ -328,7 +349,7 @@ export default function AdminImportManager(){
     </div>
 
     {headers.length>0&&<div className="import-step">
-      <div className="import-step-number">3</div>
+      <div className="import-step-number">4</div>
       <div className="import-step-body">
         <h3>Associa le colonne</h3>
         <p>Abbiamo provato a riconoscerle automaticamente. Correggi solo quelle sbagliate.</p>
@@ -353,7 +374,7 @@ export default function AdminImportManager(){
     </div>}
 
     {rows.length>0&&<div className="import-step">
-      <div className="import-step-number">4</div>
+      <div className="import-step-number">5</div>
       <div className="import-step-body">
         <div className="import-preview-head">
           <div><h3>Controlla prima di importare</h3><p>Anteprima delle prime 5 righe.</p></div>
@@ -381,7 +402,7 @@ export default function AdminImportManager(){
         <div className="import-confirm">
           <div>
             <b>{selectedTarget ? selectedTarget.municipality+' · '+selectedTarget.cemeteryName : 'Seleziona il cimitero'}</b>
-            <span>Tutti i nuovi record saranno salvati con stato “bozza”. I duplicati vengono saltati.</span>
+            <span>Origine: {(sourceProfiles.find(item=>item.id===sourceSystem)||sourceProfiles[0]).label}. Tutti i nuovi record saranno salvati come “bozza”; i duplicati vengono saltati.</span>
           </div>
           <button className="primary" type="button" disabled={importing||!requiredMapped||!targetId||validation.valid===0} onClick={runImport}>
             {importing?'Importazione in corso…':`Importa ${validation.valid} record`}
