@@ -11,7 +11,7 @@ export default function Home(){
       <div>
         <span className="eyebrow">SERVIZIO SENZA REGISTRAZIONE</span>
         <h1>Trova una sepoltura nel tuo Comune.</h1>
-        <p>Dove Riposa collega le aree cimiteriali aderenti in un’unica esperienza semplice, accessibile anche tramite QR direttamente all’ingresso del cimitero.</p>
+        <p>Dove Riposa nasce per collegare le aree cimiteriali aderenti in un’unica esperienza semplice, accessibile anche tramite QR direttamente all’ingresso del cimitero.</p>
       </div>
       <div className="municipality-card">
         <span className="eyebrow">COMUNE PILOTA · DEMO</span>
@@ -26,6 +26,6 @@ export default function Home(){
       <div><b>Area dedicata per Comune</b><span>Ogni ente dispone di URL, QR, mappa e contenuti propri.</span></div>
       <div><b>Analytics minimizzati</b><span>Misuriamo gli eventi di utilizzo senza inviare agli analytics i nomi cercati.</span></div>
     </section>
-    <footer><div className="footer-brand"><BrandLockup compact subtitle="Servizio digitale cimiteriale"/></div><p><Link href="/enti">Soluzione per Comuni e gestori</Link></p></footer>
+    <footer><div className="footer-brand"><BrandLockup compact subtitle="Progetto pilota"/></div><p><Link href="/enti">Soluzione per Comuni e gestori</Link></p></footer>
   </main>
 }
