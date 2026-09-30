@@ -14,11 +14,14 @@ export default function Home(){
         <p>Dove Riposa nasce per collegare le aree cimiteriali aderenti in un’unica esperienza semplice, accessibile anche tramite QR direttamente all’ingresso del cimitero.</p>
       </div>
       <div className="municipality-card">
-        <span className="eyebrow">COMUNE PILOTA · DEMO</span>
+        <span className="eyebrow">DEMO MUNICIPALI</span>
         <h2>Povegliano Veronese</h2>
-        <p>Ricerca demo, mappa ricostruita del cimitero e navigazione con fotocamera.</p>
-        <Link className="primary link-button" href="/povegliano-veronese">Apri area Povegliano Veronese</Link>
-        <Link className="qr-demo-link" href="/povegliano-veronese?src=qr-ingresso">Simula accesso dal QR all’ingresso →</Link>
+        <p>Demo completa con ricerca, mappa ricostruita, Precision, Accessibility Layer e Live.</p>
+        <Link className="primary link-button" href="/povegliano-veronese">Apri Povegliano Veronese</Link>
+        <hr/>
+        <h2>Pescantina</h2>
+        <p>Area pilot predisposta senza inventare una planimetria: ricerca demo e moduli pronti per dati e cartografia ufficiali.</p>
+        <Link className="secondary link-button" href="/pescantina">Apri Pescantina</Link>
       </div>
     </section>
     <section className="trust-strip">
