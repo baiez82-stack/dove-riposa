@@ -22,6 +22,7 @@ export default function StandardPrecisionNavigator({
   markers,
   municipalityLabel,
   onCalibrate,
+  onArrivalConfirmed,
   onClose,
   liveNotice=''
 }){
@@ -127,14 +128,14 @@ export default function StandardPrecisionNavigator({
         {instructions.map((_,i)=><span key={i} className={i<=step?'done':''}></span>)}
       </div>
       {step===instructions.length-1&&<div className="arrival-check">
-        <span className="arrival-kicker">CONTROLLO ARRIVO</span>
+        <span className="arrival-kicker">DOVE RIPOSA CHECK</span>
         <b>{selected.settore} · {selected.fila} · {selected.posizione}</b>
         <small>{calibrated?'Ultimo riferimento verificato: '+calibrated.label:'Scansiona il QR più vicino per aumentare la precisione dell’ultimo tratto.'}</small>
         {!arrivalStatus&&<div className="arrival-actions">
-          <button onClick={()=>setArrivalStatus('found')}>✓ Ho trovato la sepoltura</button>
+          <button onClick={()=>{setArrivalStatus('found');onArrivalConfirmed?.();}}>✓ Ho trovato la sepoltura</button>
           <button onClick={()=>{setArrivalStatus('missing');setScanInfo('Ricalibra dal QR più vicino e ricontrolla settore, fila e posizione.');}}>Non la trovo</button>
         </div>}
-        {arrivalStatus==='found'&&<div className="arrival-outcome found">✓ Arrivo confermato sul dispositivo.</div>}
+        {arrivalStatus==='found'&&<div className="arrival-outcome found">✓ Posizione finale confermata da te sul dispositivo.</div>}
         {arrivalStatus==='missing'&&<div className="arrival-outcome missing">Ricalibra dal marker più vicino: Dove Riposa non dichiara l’arrivo finché non lo confermi tu.</div>}
       </div>}
 
