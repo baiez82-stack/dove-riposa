@@ -26,6 +26,7 @@ export default function StandardPrecisionNavigator({
 }){
   const videoRef=useRef(null);
   const detectorRef=useRef(null);
+  const onCalibrateRef=useRef(onCalibrate);
   const [error,setError]=useState('');
   const [scanInfo,setScanInfo]=useState('');
   const [step,setStep]=useState(0);
@@ -45,6 +46,8 @@ export default function StandardPrecisionNavigator({
     : routeMode==='accessible'
       ? 'Percorso accessibile'
       : 'Percorso più breve';
+
+  useEffect(()=>{onCalibrateRef.current=onCalibrate;},[onCalibrate]);
 
   function speak(){
     if(!('speechSynthesis' in window)) return;
@@ -75,7 +78,7 @@ export default function StandardPrecisionNavigator({
               const found=await detectorRef.current.detect(videoRef.current);
               const marker=markerFromValue(found?.[0]?.rawValue,markers);
               if(marker){
-                onCalibrate(marker);
+                onCalibrateRef.current(marker);
                 setScanInfo('Marker riconosciuto: '+marker.label);
               }
             }catch{}
@@ -91,7 +94,7 @@ export default function StandardPrecisionNavigator({
       stream?.getTracks().forEach(t=>t.stop());
       if('speechSynthesis' in window) window.speechSynthesis.cancel();
     };
-  },[markers,onCalibrate]);
+  },[markers]);
 
   return <div className="camera-modal precision-modal">
     <video ref={videoRef} playsInline muted/>
