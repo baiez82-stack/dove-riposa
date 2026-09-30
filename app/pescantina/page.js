@@ -3,17 +3,72 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import BrandLockup from '../components/BrandLockup';
+import StandardPrecisionNavigator from '../components/StandardPrecisionNavigator';
+
+const markers={
+  ingresso:{id:'ingresso',code:'DR-PC-ING',label:'Ingresso principale',x:360,y:470},
+  centro:{id:'centro',code:'DR-PC-CEN',label:'Nodo centrale',x:360,y:385},
+  testata:{id:'testata',code:'DR-PC-TES',label:'Testata centrale',x:360,y:105}
+};
+
+const accessibilitySegments=[
+  {id:'A1',label:'Ingresso → nodo centrale',surface:'Da rilevare',slope:'Da rilevare',width:'Da rilevare',rest:false,status:'Da verificare sul posto',path:'M360 470 L360 385'},
+  {id:'A2',label:'Nodo centrale → area sinistra',surface:'Da rilevare',slope:'Da rilevare',width:'Da rilevare',rest:false,status:'Da verificare sul posto',path:'M360 385 L282 385 L282 260'},
+  {id:'A3',label:'Nodo centrale → area destra',surface:'Da rilevare',slope:'Da rilevare',width:'Da rilevare',rest:false,status:'Da verificare sul posto',path:'M360 385 L438 385 L438 260'},
+  {id:'A4',label:'Asse centrale → testata',surface:'Da rilevare',slope:'Da rilevare',width:'Da rilevare',rest:false,status:'Da verificare sul posto',path:'M360 385 L360 105'}
+];
 
 const demoRecords=[
-  {id:1,nome:'Lucia',cognome:'Ferrari',anno:'1948',morte:'2023',settore:'Settore A',fila:'Fila 4',posizione:'Loculo 12',mapX:240,mapY:210,route:'M360 480 L360 385 L300 385 L300 270 L240 210'},
-  {id:2,nome:'Carlo',cognome:'Mantovani',anno:'1939',morte:'2021',settore:'Campo B',fila:'Fila 6',posizione:'Tomba 27',mapX:500,mapY:245,route:'M360 480 L360 385 L430 385 L430 300 L500 245'},
-  {id:3,nome:'Gianna',cognome:'Rossi',anno:'1955',morte:'2025',settore:'Settore C',fila:'Fila 2',posizione:'Loculo 8',mapX:250,mapY:350,route:'M360 480 L360 410 L300 410 L250 350'}
+  {
+    id:1,nome:'Lucia',cognome:'Ferrari',anno:'1948',morte:'2023',settore:'Settore A',fila:'Fila 4',posizione:'Loculo 12',
+    mapX:240,mapY:210,
+    route:'M360 480 L360 385 L300 385 L300 270 L240 210',
+    accessibleRoute:'M360 480 L360 385 L282 385 L282 245 L240 210',
+    assistRoute:'M360 480 L360 405 L315 405 L315 305 L270 305 L240 210',
+    shortDistance:'Demo 55 m',accessibleDistance:'Demo 68 m',assistDistance:'Demo 74 m',
+    instructions:['Entra dall’ingresso principale','Raggiungi il nodo centrale','Svolta verso l’area sinistra','Prosegui fino alla Fila 4','Loculo 12'],
+    accessibleInstructions:['Entra dall’ingresso principale','Mantieni l’asse centrale','Usa il ramo accessibile demo verso sinistra','Prosegui sul percorso da validare','Raggiungi Fila 4 · Loculo 12'],
+    assistInstructions:['Entra dall’ingresso principale','Procedi lungo il percorso più regolare della demo','Raggiungi il nodo centrale','Prosegui verso l’area sinistra','Raggiungi Fila 4 · Loculo 12']
+  },
+  {
+    id:2,nome:'Carlo',cognome:'Mantovani',anno:'1939',morte:'2021',settore:'Campo B',fila:'Fila 6',posizione:'Tomba 27',
+    mapX:500,mapY:245,
+    route:'M360 480 L360 385 L430 385 L430 300 L500 245',
+    accessibleRoute:'M360 480 L360 385 L438 385 L438 285 L500 245',
+    assistRoute:'M360 480 L360 410 L405 410 L405 320 L465 320 L500 245',
+    shortDistance:'Demo 60 m',accessibleDistance:'Demo 72 m',assistDistance:'Demo 78 m',
+    instructions:['Entra dall’ingresso principale','Raggiungi il nodo centrale','Svolta verso l’area destra','Prosegui fino alla Fila 6','Tomba 27'],
+    accessibleInstructions:['Entra dall’ingresso principale','Mantieni l’asse centrale','Usa il ramo accessibile demo verso destra','Prosegui sul percorso da validare','Raggiungi Fila 6 · Tomba 27'],
+    assistInstructions:['Entra dall’ingresso principale','Procedi lungo il percorso più regolare della demo','Raggiungi il nodo centrale','Prosegui verso l’area destra','Raggiungi Fila 6 · Tomba 27']
+  },
+  {
+    id:3,nome:'Gianna',cognome:'Rossi',anno:'1955',morte:'2025',settore:'Settore C',fila:'Fila 2',posizione:'Loculo 8',
+    mapX:250,mapY:350,
+    route:'M360 480 L360 410 L300 410 L250 350',
+    accessibleRoute:'M360 480 L360 385 L300 385 L250 350',
+    assistRoute:'M360 480 L360 420 L320 420 L320 385 L275 385 L250 350',
+    shortDistance:'Demo 42 m',accessibleDistance:'Demo 50 m',assistDistance:'Demo 57 m',
+    instructions:['Entra dall’ingresso principale','Prosegui fino al primo passaggio','Svolta verso sinistra','Raggiungi la Fila 2','Loculo 8'],
+    accessibleInstructions:['Entra dall’ingresso principale','Mantieni l’asse centrale fino al nodo','Usa il ramo accessibile demo verso sinistra','Raggiungi la Fila 2','Loculo 8'],
+    assistInstructions:['Entra dall’ingresso principale','Segui il percorso regolare della demo','Raggiungi il nodo centrale','Svolta verso la Fila 2','Loculo 8']
+  }
 ];
+
+function track(event,meta={}){
+  fetch('/api/analytics',{
+    method:'POST',
+    headers:{'content-type':'application/json'},
+    body:JSON.stringify({event,comune:'pescantina',source:'demo',...meta})
+  }).catch(()=>{});
+}
 
 export default function PescantinaPage(){
   const [q,setQ]=useState({nome:'',cognome:'',anno:''});
   const [searched,setSearched]=useState(false);
   const [selected,setSelected]=useState(null);
+  const [routeMode,setRouteMode]=useState('short');
+  const [calibrated,setCalibrated]=useState(null);
+  const [cameraOpen,setCameraOpen]=useState(false);
 
   const results=useMemo(()=>{
     const n=s=>s.trim().toLowerCase();
@@ -24,81 +79,151 @@ export default function PescantinaPage(){
     );
   },[q]);
 
+  function submit(e){
+    e.preventDefault();
+    setSearched(true);
+    setSelected(null);
+    track('search');
+  }
+
+  function openRecord(r){
+    setSelected(r);
+    setRouteMode('short');
+    setCalibrated(markers.ingresso);
+    setCameraOpen(false);
+    track('result_open');
+    setTimeout(()=>document.getElementById('mappa')?.scrollIntoView({behavior:'smooth'}),50);
+  }
+
+  function calibrate(marker){
+    setCalibrated(marker);
+    track('navigation_start',{mode:'precision'});
+  }
+
   return <main>
     <header className="citizen-header">
-      <Link href="/pescantina" className="citizen-brand"><BrandLockup subtitle="Pescantina"/></Link>
-      <nav><a href="#cerca">Cerca</a><a href="#pilot">Pilot</a><a href="#info">Informazioni</a></nav>
+      <Link href="/" className="citizen-brand"><BrandLockup subtitle="Pescantina"/></Link>
+      <nav><Link href="/">Cambia Comune</Link><a href="#cerca">Cerca</a><a href="#mappa">Mappa</a></nav>
     </header>
 
     <section className="municipality-hero" id="cerca">
       <div>
-        <span className="eyebrow">PESCANTINA · DEMO PILOTA NON UFFICIALE</span>
+        <span className="eyebrow">PESCANTINA · DEMO</span>
         <h1>Trova una sepoltura.</h1>
-        <p>Versione dimostrativa preparata per valutare un eventuale pilot con il Comune di Pescantina. Non contiene archivi comunali reali né una planimetria ufficiale.</p>
-        <div className="hero-badges">
-          <span className="offline-badge">Nessuna registrazione cittadino</span>
-          <span className="layer-status">Dati demo fittizi</span>
-        </div>
+        <p>Cerca senza registrazione e prova il percorso fino alla posizione. Nominativi, mappa e indicazioni sono dimostrativi e non sono dati ufficiali del Comune.</p>
       </div>
-      <form className="search-card public-search" onSubmit={e=>{e.preventDefault();setSearched(true);}}>
+      <form className="search-card public-search" onSubmit={submit}>
         <label>Nome<input value={q.nome} onChange={e=>setQ({...q,nome:e.target.value})} placeholder="es. Lucia"/></label>
         <label>Cognome<input value={q.cognome} onChange={e=>setQ({...q,cognome:e.target.value})} placeholder="es. Ferrari"/></label>
         <label>Anno <span>(facoltativo)</span><input value={q.anno} onChange={e=>setQ({...q,anno:e.target.value})} placeholder="es. 1948" inputMode="numeric"/></label>
         <button className="primary" type="submit">Cerca sepoltura</button>
-        <p className="micro">Demo locale con dati fittizi. I dati reali potranno essere caricati solo dopo accordo con l’ente e verifica privacy. <Link href="/pescantina/privacy">Privacy →</Link></p>
+        <p className="micro">Dati fittizi · nessun account cittadino · <Link href="/pescantina/privacy">Privacy</Link></p>
       </form>
     </section>
 
-    {searched && <section className="wrap public-results">
+    {searched&&<section className="wrap public-results">
       <div className="section-head"><span className="eyebrow">RISULTATI DEMO</span><h2>{results.length} corrispondenze</h2></div>
       <div className="result-grid">
         {results.map(r=><article className="result-card" key={r.id}>
           <div className="person-icon">+</div>
-          <div className="result-main"><h3>{r.nome} {r.cognome}</h3><p>{r.anno}–{r.morte}</p><div className="place"><b>{r.settore}</b><span>{r.fila} · {r.posizione}</span></div><div className="source">Dato dimostrativo fittizio</div></div>
-          <button className="secondary" onClick={()=>{setSelected(r);setTimeout(()=>document.getElementById('mappa-pescantina')?.scrollIntoView({behavior:'smooth'}),50);}}>Vedi posizione demo</button>
+          <div className="result-main">
+            <h3>{r.nome} {r.cognome}</h3>
+            <p>{r.anno}–{r.morte}</p>
+            <div className="place"><b>{r.settore}</b><span>{r.fila} · {r.posizione}</span></div>
+            <div className="source">Dato dimostrativo fittizio</div>
+          </div>
+          <button className="secondary" onClick={()=>openRecord(r)}>Vedi posizione</button>
         </article>)}
         {results.length===0&&<div className="empty">Nessuna corrispondenza nei dati demo.</div>}
       </div>
     </section>}
 
-    <section className="wrap" id="mappa-pescantina">
+    <section className="wrap" id="mappa">
       <div className="section-head">
-        <span className="eyebrow">RICOSTRUZIONE PRELIMINARE · NON UFFICIALE</span>
-        <h2>{selected ? `${selected.nome} ${selected.cognome}` : 'Schema del cimitero da immagine satellitare'}</h2>
-        <p>Schema vettoriale ricostruito dalla schermata satellitare fornita per la demo. Serve solo a impostare il prodotto: settori, percorsi e misure dovranno essere sostituiti o validati con planimetria e sopralluogo dell’ente.</p>
+        <span className="eyebrow">DOVE RIPOSA PRECISION · DEMO</span>
+        <h2>{selected?selected.nome+' '+selected.cognome:'Mappa e navigazione'}</h2>
+        <p>{selected?selected.settore+' · '+selected.fila+' · '+selected.posizione:'Seleziona un risultato per provare percorso breve, accessibile e assistito.'}</p>
       </div>
-      <PescantinaMap selected={selected}/>
-      <div className="map-demo-badge">Riferimento visivo demo · non è una planimetria comunale · orientamento e proporzioni da verificare</div>
-    </section>
 
-    <section className="wrap" id="pilot">
-      <div className="section-head">
-        <span className="eyebrow">PILOT READINESS</span>
-        <h2>Ora abbiamo una base visiva, non ancora una cartografia ufficiale.</h2>
-        <p>La schermata satellitare ci permette di predisporre il layout e i punti di calibrazione. Precision, Accessibility Layer e Live potranno diventare operativi solo dopo planimetria ufficiale o validazione sul posto.</p>
+      <div className="map-card">
+        <PescantinaMap selected={selected} routeMode={routeMode} calibrated={calibrated}/>
+        <div className="map-info">
+          <span className="eyebrow">PRECISION + ACCESSIBILITÀ</span>
+          <h3>{selected?'Scegli il percorso':'Seleziona una sepoltura'}</h3>
+          <p>La demo combina percorso, marker QR di calibrazione e un livello accessibilità. I dati fisici restano “da verificare” finché non vengono rilevati sul posto.</p>
+
+          {selected&&<>
+            <div className="route-mode">
+              <button className={routeMode==='short'?'active':''} onClick={()=>setRouteMode('short')}>Più breve <small>{selected.shortDistance}</small></button>
+              <button className={routeMode==='accessible'?'active':''} onClick={()=>setRouteMode('accessible')}>Accessibile ♿ <small>{selected.accessibleDistance}</small></button>
+              <button className={routeMode==='assist'?'active':''} onClick={()=>setRouteMode('assist')}>Assistito ♥ <small>{selected.assistDistance}</small></button>
+            </div>
+
+            {routeMode==='assist'&&<div className="assist-note">
+              <b>Dove Riposa Assist</b>
+              <span>Priorità al percorso più regolare e semplice da seguire. Pendenze, fondo e punti di sosta devono essere validati con sopralluogo.</span>
+            </div>}
+
+            <div className={calibrated?'calibration-card calibrated':'calibration-card'}>
+              <div>
+                <b>{calibrated?'Posizione calibrata':'Calibrazione necessaria'}</b>
+                <span>{calibrated?calibrated.label:'Scansiona un marker Dove Riposa vicino a te'}</span>
+              </div>
+              <span className="calibration-status">{calibrated?'✓':'QR'}</span>
+            </div>
+
+            <button className="primary precision-button" onClick={()=>{setCameraOpen(true);track('navigation_start',{mode:routeMode});}}>Apri Dove Riposa Precision</button>
+            <div className="demo-calibration">
+              <span>Marker demo:</span>
+              {Object.values(markers).map(m=><button key={m.id} onClick={()=>calibrate(m)}>{m.label}</button>)}
+            </div>
+            <div className="camera-privacy">La fotocamera resta sul dispositivo. I marker identificano punti del cimitero, non la persona che utilizza il servizio.</div>
+          </>}
+        </div>
       </div>
-      <div className="info-cards">
-        <article><h3>Dove Riposa Precision</h3><p>QR di calibrazione nei punti strategici e percorso fino alla sepoltura. Da configurare dopo rilievo e validazione della mappa.</p></article>
-        <article><h3>Accessibility Layer</h3><p>Superficie, pendenza, larghezza, gradini, rampe e punti di sosta. Ogni dato resta “da verificare” finché non viene confermato sul posto.</p></article>
-        <article><h3>Dove Riposa Live</h3><p>Chiusure, lavori, accessi temporaneamente non disponibili e deviazioni. Il routing potrà reagire agli eventi pubblicati dagli operatori autorizzati.</p></article>
+
+      <div className="accessibility-layer" id="accessibilita">
+        <div className="accessibility-layer-head">
+          <div><span className="eyebrow">ACCESSIBILITY LAYER</span><h3>Il percorso accessibile non si presume</h3></div>
+          <span className="layer-status">Demo · da rilevare</span>
+        </div>
+        <p>Ogni tratto viene descritto con superficie, pendenza, larghezza, gradini, rampe e punti di sosta. Per Pescantina questi valori sono volutamente “da rilevare”: la schermata satellitare non basta per certificare l’accessibilità.</p>
+        <div className="accessibility-segment-grid">
+          {accessibilitySegments.map(s=><div className="accessibility-segment-card" key={s.id}>
+            <div className="segment-top"><b>{s.label}</b><span>{s.id}</span></div>
+            <div className="segment-tags"><span>{s.surface}</span><span>Pendenza {s.slope}</span><span>Larghezza {s.width}</span></div>
+            <small>{s.status}</small>
+          </div>)}
+        </div>
       </div>
     </section>
 
-    <section className="wrap info-cards" id="info">
-      <article><h3>Servizi cimiteriali</h3><p>Il Comune pubblica un ufficio Servizi Cimiteriali dedicato alla gestione delle sepolture, concessioni, registri e assistenza alle famiglie.</p><p><a className="text-link" href="https://www.comune.pescantina.vr.it/amministrazione/unita_organizzativa/servizi-cimiteriali/" target="_blank" rel="noreferrer">Pagina ufficiale del Comune →</a></p></article>
-      <article><h3>Gestione operativa</h3><p>Il sito comunale indica Beta Società Cooperativa Sociale per la gestione cimiteriale e Sepulcra Vigilo Srl per le luci votive. Nel pilot reale andrà chiarita la catena di ruoli tra Comune, gestore e fornitore Dove Riposa.</p></article>
-      <article><h3>Per partire</h3><p>Servono planimetria ufficiale, archivio autorizzato, referente tecnico/operativo, verifica DPO, accordi privacy e sopralluogo dei percorsi.</p></article>
-    </section>
+    {cameraOpen&&selected&&<StandardPrecisionNavigator
+      selected={selected}
+      routeMode={routeMode}
+      calibrated={calibrated}
+      markers={markers}
+      municipalityLabel="Pescantina"
+      onCalibrate={calibrate}
+      onClose={()=>setCameraOpen(false)}
+    />}
 
-    <section className="wrap">
-      <div className="business-note"><b>Stato della proposta</b><p>Pescantina è predisposto nel backend come ente pilot separato. Nessun dato reale è stato caricato e nessun servizio viene presentato come adottato dal Comune.</p></div>
-    </section>
-
-    <footer><div className="footer-brand"><BrandLockup compact subtitle="Pescantina · demo pilota"/></div><p><Link href="/pescantina/privacy">Privacy</Link> · <Link href="/pescantina/termini">Termini d’uso</Link> · <Link href="/pescantina/accessibilita">Accessibilità</Link></p></footer>
+    <footer>
+      <div className="footer-brand"><BrandLockup compact subtitle="Pescantina · demo"/></div>
+      <p><Link href="/">Cambia Comune</Link> · <Link href="/pescantina/privacy">Privacy</Link> · <Link href="/pescantina/termini">Termini</Link> · <Link href="/pescantina/accessibilita">Accessibilità</Link></p>
+    </footer>
   </main>;
 }
 
-function PescantinaMap({selected}){
+function PescantinaMap({selected,routeMode,calibrated}){
+  const selectedPath=selected
+    ? routeMode==='assist'
+      ? selected.assistRoute
+      : routeMode==='accessible'
+        ? selected.accessibleRoute
+        : selected.route
+    : '';
+
   return <div className="pescantina-map-card">
     <svg className="pescantina-map" viewBox="0 0 720 540" role="img" aria-label="Ricostruzione vettoriale dimostrativa del cimitero di Pescantina">
       <rect x="118" y="55" width="484" height="405" rx="10" className="cem-boundary"/>
@@ -108,11 +233,14 @@ function PescantinaMap({selected}){
       <rect x="315" y="405" width="90" height="48" rx="4" className="cem-building entrance"/>
       <rect x="136" y="387" width="148" height="58" rx="4" className="cem-building low"/>
       <rect x="436" y="387" width="148" height="58" rx="4" className="cem-building low"/>
+
       <path d="M360 480 L360 338" className="cem-path main"/>
       <path d="M360 385 L282 385 L282 130" className="cem-path"/>
       <path d="M360 385 L438 385 L438 130" className="cem-path"/>
       <path d="M138 370 L300 370" className="cem-path minor"/>
       <path d="M420 370 L582 370" className="cem-path minor"/>
+
+      {accessibilitySegments.map(s=><path key={s.id} d={s.path} className="surface-segment pending"/>)}
 
       {Array.from({length:7}).map((_,i)=><line key={'l'+i} x1="160" y1={110+i*34} x2="278" y2={110+i*34} className="grave-row"/>)}
       {Array.from({length:4}).map((_,i)=><rect key={'r'+i} x={455+(i%2)*60} y={120+Math.floor(i/2)*95} width="34" height="64" rx="3" className="grave-block"/>)}
@@ -121,23 +249,23 @@ function PescantinaMap({selected}){
         <text x="220" y="95" textAnchor="middle">Area sinistra · demo</text>
         <text x="500" y="95" textAnchor="middle">Area destra · demo</text>
         <text x="360" y="205" textAnchor="middle">Asse centrale</text>
-        <text x="360" y="505" textAnchor="middle">Ingresso principale · demo</text>
       </g>
 
-      <g className="precision-marker demo"><circle cx="360" cy="470" r="11"/><text x="378" y="475">QR ingresso</text></g>
-      <g className="precision-marker demo"><circle cx="360" cy="385" r="11"/><text x="378" y="390">QR nodo centrale</text></g>
-      <g className="precision-marker demo"><circle cx="360" cy="105" r="11"/><text x="378" y="110">QR testata</text></g>
+      {Object.values(markers).map(m=><g className={calibrated?.id===m.id?'precision-marker active':'precision-marker'} key={m.id}>
+        <circle cx={m.x} cy={m.y} r="11"/>
+        <text x={m.x+18} y={m.y+5}>{m.id==='ingresso'?'QR ingresso':m.id==='centro'?'QR nodo':'QR testata'}</text>
+      </g>)}
 
-      {selected && <>
-        <path d={selected.route} className="selected-route"/>
+      {selected&&<>
+        <path d={selectedPath} className={routeMode==='assist'?'selected-route assist-route':routeMode==='accessible'?'selected-route accessible-route':'selected-route'}/>
         <circle cx={selected.mapX} cy={selected.mapY} r="13" className="selected-pin"/>
         <circle cx={selected.mapX} cy={selected.mapY} r="4" className="selected-pin-core"/>
       </>}
     </svg>
     <div className="pescantina-map-legend">
-      <span><i className="legend-box building"></i> Strutture visibili</span>
-      <span><i className="legend-line"></i> Percorsi ipotizzati</span>
-      <span><i className="legend-dot"></i> Marker Precision proposti</span>
+      <span><i className="legend-line"></i> Percorsi demo</span>
+      <span><i className="legend-dot"></i> Marker Precision</span>
+      <span><i className="legend-pending"></i> Accessibilità da rilevare</span>
     </div>
   </div>;
 }

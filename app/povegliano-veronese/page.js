@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import BrandLockup from '../components/BrandLockup';
+import StandardPrecisionNavigator from '../components/StandardPrecisionNavigator';
 
 const markers = {
   ingresso:{id:'ingresso',code:'DR-PV-ING',label:'Ingresso principale',x:520,y:635},
@@ -16,7 +17,7 @@ const accessibilitySegments = [
   {id:'A2',label:'Viale centrale → area est',surface:'Ghiaia compatta',slope:'4%',width:'1,8 m',stairs:false,ramp:false,rest:true,status:'Da verificare sul posto',confidence:'Immagini + demo',path:'M555 445 L650 445'},
   {id:'A3',label:'Accesso porticato est',surface:'Pavimentato',slope:'6%',width:'1,4 m',stairs:false,ramp:true,rest:false,status:'Da verificare sul posto',confidence:'Ipotesi demo',path:'M650 445 L700 415 L700 350'},
   {id:'A4',label:'Area ovest',surface:'Ghiaia',slope:'3%',width:'1,5 m',stairs:false,ramp:false,rest:false,status:'Da verificare sul posto',confidence:'Immagini + demo',path:'M470 510 L405 445 L365 370'},
-  {id:'A5',label:'Scalinata interna',surface:'Pietra',slope:'—',width:'1,2 m',stairs:true,ramp:false,rest:false,status:'Non accessibile in carrozzina',confidence:'Demo',path:'M600 420 L600 350'}
+  {id:'A5',label:'Scalinata interna',surface:'Pietra',slope:'—',width:'1,2 m',stairs:true,ramp:false,rest:false,status:'Da verificare sul posto',confidence:'Presenza gradini · demo',path:'M600 420 L600 350'}
 ];
 
 const records = [
@@ -118,18 +119,6 @@ function track(event, meta={}) {
     headers:{'content-type':'application/json'},
     body:JSON.stringify({event, comune:'povegliano-veronese', ...meta})
   }).catch(()=>{});
-}
-
-function markerFromValue(value){
-  const raw=String(value||'');
-  const direct=Object.values(markers).find(m=>m.code===raw.trim().toUpperCase());
-  if(direct) return direct;
-  try{
-    const url=new URL(raw, window.location.origin);
-    const id=url.searchParams.get('cal');
-    if(id && markers[id]) return markers[id];
-  }catch{}
-  return null;
 }
 
 export default function PoveglianoPage(){
@@ -279,10 +268,12 @@ export default function PoveglianoPage(){
       </div>
     </section>
 
-    {cameraOpen && selected && <PrecisionNavigator
+    {cameraOpen && selected && <StandardPrecisionNavigator
       selected={selected}
       routeMode={routeMode}
       calibrated={calibrated}
+      markers={markers}
+      municipalityLabel="Povegliano Veronese"
       onCalibrate={calibrate}
       onClose={()=>setCameraOpen(false)}
     />}
@@ -304,83 +295,6 @@ export default function PoveglianoPage(){
 
     <footer><div className="footer-brand"><BrandLockup compact subtitle="Povegliano Veronese · demo pilota"/></div><p><Link href="/povegliano-veronese/privacy">Privacy</Link> · <Link href="/povegliano-veronese/termini">Termini d’uso</Link> · <Link href="/povegliano-veronese/accessibilita">Accessibilità</Link></p></footer>
   </main>
-}
-
-function PrecisionNavigator({selected,routeMode,calibrated,onCalibrate,onClose}){
-  const videoRef=useRef(null);
-  const detectorRef=useRef(null);
-  const [error,setError]=useState('');
-  const [scanInfo,setScanInfo]=useState('');
-  const [step,setStep]=useState(0);
-  const instructions=routeMode==='assist'?selected.assistInstructions:(routeMode==='accessible'?selected.accessibleInstructions:selected.instructions);
-  const distance=routeMode==='assist'?selected.assistDistance:(routeMode==='accessible'?selected.accessibleDistance:selected.shortDistance);
-  const modeLabel=routeMode==='assist'?'Percorso assistito ♥':(routeMode==='accessible'?'Percorso accessibile ♿':'Percorso più breve');
-
-  function speak(){
-    if(!('speechSynthesis' in window)) return;
-    window.speechSynthesis.cancel();
-    const utterance=new SpeechSynthesisUtterance(instructions[step]);
-    utterance.lang='it-IT';
-    utterance.rate=.88;
-    window.speechSynthesis.speak(utterance);
-  }
-
-  useEffect(()=>{
-    let stream;
-    let timer;
-    navigator.mediaDevices?.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false})
-      .then(async s=>{
-        stream=s;
-        if(videoRef.current){videoRef.current.srcObject=s;await videoRef.current.play();}
-        if('BarcodeDetector' in window){
-          detectorRef.current=new window.BarcodeDetector({formats:['qr_code']});
-          timer=setInterval(async()=>{
-            if(!videoRef.current||videoRef.current.readyState<2)return;
-            try{
-              const found=await detectorRef.current.detect(videoRef.current);
-              const marker=markerFromValue(found?.[0]?.rawValue);
-              if(marker){
-                onCalibrate(marker);
-                setScanInfo('Marker riconosciuto: '+marker.label);
-              }
-            }catch{}
-          },900);
-        }else{
-          setScanInfo('Scansione QR automatica non supportata da questo browser: usa i marker demo qui sotto.');
-        }
-      })
-      .catch(()=>setError('Impossibile accedere alla fotocamera. Verifica i permessi del browser.'));
-    return()=>{clearInterval(timer);stream?.getTracks().forEach(t=>t.stop());};
-  },[onCalibrate]);
-
-  return <div className="camera-modal precision-modal">
-    <video ref={videoRef} playsInline muted/>
-    <div className="camera-overlay">
-      <button className="camera-close" onClick={onClose}>×</button>
-      <div className="camera-top"><b>Dove Riposa Precision</b><span>{selected.nome} {selected.cognome} · {selected.settore} · {selected.posizione}</span></div>
-
-      <div className="precision-cal-chip">{calibrated ? '✓ '+calibrated.label : 'Inquadra un QR di calibrazione'}</div>
-      <div className="ar-arrow">{step>=instructions.length-1?'●':'↑'}</div>
-      <div className="ar-instruction">{instructions[step]}</div>
-      <div className="ar-distance">{modeLabel} · {distance}</div>
-      <button className="voice-guide" onClick={speak}>🔊 Leggi indicazione</button>
-
-      <div className="step-progress">{instructions.map((_,i)=><span key={i} className={i<=step?'done':''}></span>)}</div>
-      <div className="precision-controls">
-        <button disabled={step===0} onClick={()=>setStep(Math.max(0,step-1))}>← Indietro</button>
-        <button disabled={step===instructions.length-1} onClick={()=>setStep(Math.min(instructions.length-1,step+1))}>Prossima indicazione →</button>
-      </div>
-
-      <div className="marker-fallback">
-        <span>Calibrazione demo</span>
-        {Object.values(markers).slice(0,3).map(m=><button key={m.id} onClick={()=>{onCalibrate(m);setScanInfo('Marker demo: '+m.label);}}>{m.code}</button>)}
-      </div>
-
-      {scanInfo && <div className="scan-info">{scanInfo}</div>}
-      <div className="ar-note">Demo tecnica: le indicazioni diventano operative solo dopo rilievo e validazione della planimetria ufficiale e dei marker fisici.</div>
-      {error && <div className="camera-error">{error}</div>}
-    </div>
-  </div>
 }
 
 function CemeteryMap({selected,routeMode,calibrated,liveDemo}){

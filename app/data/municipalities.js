@@ -1,3 +1,10 @@
+const standardFeatures = Object.freeze({
+  precision: true,
+  accessibility: true,
+  assist: true,
+  live: true
+});
+
 export const municipalities = [
   {
     id: 'pescantina',
@@ -17,4 +24,7 @@ export const municipalities = [
       { id: 'cimitero-comunale', name: 'Cimitero comunale' }
     ]
   }
-];
+].map(municipality=>({
+  ...municipality,
+  features: {...standardFeatures}
+}));
