@@ -302,7 +302,7 @@ export default function PoveglianoPage(){
       <article><h3>Privacy</h3><p>Ricerca senza registrazione, nessun profilo commemorativo e analytics minimizzati.</p><Link className="text-link" href="/povegliano-veronese/privacy">Privacy e trasparenza →</Link></article>
     </section>
 
-    <footer><div className="footer-brand"><BrandLockup compact subtitle="Povegliano Veronese · demo pilota"/></div><p><Link href="/povegliano-veronese/privacy">Privacy</Link> · <Link href="/povegliano-veronese/termini">Termini d’uso</Link> · Accessibilità</p></footer>
+    <footer><div className="footer-brand"><BrandLockup compact subtitle="Povegliano Veronese · demo pilota"/></div><p><Link href="/povegliano-veronese/privacy">Privacy</Link> · <Link href="/povegliano-veronese/termini">Termini d’uso</Link> · <Link href="/povegliano-veronese/accessibilita">Accessibilità</Link></p></footer>
   </main>
 }
 
