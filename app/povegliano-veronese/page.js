@@ -4,13 +4,9 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import BrandLockup from '../components/BrandLockup';
 import StandardPrecisionNavigator from '../components/StandardPrecisionNavigator';
+import { getPrecisionConfig } from '../data/precision';
 
-const markers = {
-  ingresso:{id:'ingresso',code:'DR-PV-ING',label:'Ingresso principale',x:520,y:635},
-  centro:{id:'centro',code:'DR-PV-CEN',label:'Incrocio centrale',x:555,y:445},
-  est:{id:'est',code:'DR-PV-EST',label:'Porticato est',x:635,y:365},
-  ovest:{id:'ovest',code:'DR-PV-OVEST',label:'Area ovest',x:405,y:445}
-};
+const markers=getPrecisionConfig('povegliano-veronese').markers;
 
 const accessibilitySegments = [
   {id:'A1',label:'Ingresso → viale centrale',surface:'Pavimentato',slope:'2%',width:'2,4 m',stairs:false,ramp:false,rest:true,status:'Da verificare sul posto',confidence:'Cartografia + demo',path:'M520 620 L520 545'},
@@ -166,7 +162,7 @@ export default function PoveglianoPage(){
   function openRecord(r){
     setSelected(r);
     setCameraOpen(false);
-    setCalibrated(markers.ingresso);
+    setCalibrated(current=>current||markers.ingresso);
     setRouteMode('short');
     track('result_open',{source});
     setTimeout(()=>document.getElementById('mappa')?.scrollIntoView({behavior:'smooth'}),50);
@@ -190,6 +186,7 @@ export default function PoveglianoPage(){
         <p>Cerca gratuitamente e senza registrazione. Questa è una demo indipendente non ancora adottata dal Comune e utilizza nominativi dimostrativi.</p>
         <div className="hero-badges">
           {source.startsWith('qr-') && <span className="qr-arrival">Accesso diretto dal QR del cimitero</span>}
+          {calibrated && source.startsWith('qr-') && <span className="offline-badge">Posizione calibrata: {calibrated.label}</span>}
           {offlineReady && <span className="offline-badge">Disponibile offline dopo la prima apertura</span>}
         </div>
       </div>
