@@ -141,11 +141,13 @@ export default function PoveglianoPage(){
   const [routeMode,setRouteMode]=useState('short');
   const [calibrated,setCalibrated]=useState(null);
   const [offlineReady,setOfflineReady]=useState(false);
+  const [liveDemo,setLiveDemo]=useState(false);
 
   useEffect(()=>{
     const p=new URLSearchParams(window.location.search);
     const src=p.get('src')||'direct';
     const cal=p.get('cal');
+    setLiveDemo(p.get('live')==='1');
     setSource(src);
     if(cal && markers[cal]) setCalibrated(markers[cal]);
     track('page_view',{source:src});
@@ -211,6 +213,8 @@ export default function PoveglianoPage(){
       </form>
     </section>
 
+    {liveDemo && <section className="wrap live-public-wrap"><div className="live-public-alert"><div><span className="live-dot"></span><b>Dove Riposa Live · evento demo</b></div><h3>Passaggio est temporaneamente chiuso</h3><p>Lavori in corso fino alle 13:00. I percorsi che attraversano il porticato est vengono deviati sul viale centrale.</p><button className="secondary" onClick={()=>setLiveDemo(false)}>Nascondi simulazione</button></div></section>}
+
     {searched && <section className="wrap public-results">
       <div className="section-head"><span className="eyebrow">RISULTATI DEMO</span><h2>{results.length} corrispondenze</h2></div>
       <div className="result-grid">
@@ -230,7 +234,7 @@ export default function PoveglianoPage(){
         <p>{selected ? `${selected.settore} · ${selected.fila} · ${selected.posizione}` : 'Seleziona un risultato per provare la navigazione di precisione.'}</p>
       </div>
       <div className="map-card">
-        <CemeteryMap selected={selected} routeMode={routeMode} calibrated={calibrated}/>
+        <CemeteryMap selected={selected} routeMode={routeMode} calibrated={calibrated} liveDemo={liveDemo}/>
         <div className="map-info">
           <span className="eyebrow">PRECISION NAVIGATION</span>
           <h3>{selected ? 'Dall’ingresso fino al loculo' : 'Seleziona una sepoltura'}</h3>
