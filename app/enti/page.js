@@ -3,20 +3,46 @@ import BrandLockup from '../components/BrandLockup';
 
 export default function EntiPage(){
   return <main>
-    <header className="citizen-header"><Link href="/" className="citizen-brand"><BrandLockup subtitle="Per Comuni e gestori"/></Link><nav><Link href="/povegliano-veronese">Demo cittadino</Link><Link href="/admin">Area riservata</Link></nav></header>
+    <header className="citizen-header">
+      <Link href="/" className="citizen-brand"><BrandLockup subtitle="Per Comuni e gestori"/></Link>
+      <nav><Link href="/povegliano-veronese">Demo cittadino</Link><Link href="/admin">Area riservata</Link></nav>
+    </header>
+
     <section className="info-page wrap">
-      <div className="info-hero"><span className="eyebrow">DOVE RIPOSA PER GLI ENTI</span><h1>Un servizio semplice da pilotare, progettato per crescere Comune dopo Comune.</h1><p>La demo valida già ricerca, QR, mappa, Precision, Accessibility Layer e Live. Database multi-ente, autenticazione di produzione, audit e integrazioni gestionali fanno parte della fase successiva del pilot reale.</p></div>
-      <div className="info-grid">
-        <article><h3>QR dedicato</h3><p>Ogni Comune può posizionare QR all’ingresso, sulle bacheche o nei settori. Il cittadino entra direttamente nell’area del proprio Comune.</p></article>
-        <article><h3>Archivio flessibile</h3><p>La demo supporta inserimento manuale e lettura CSV. Excel, persistenza e sincronizzazione API con il gestionale esistente saranno attivati nella fase di produzione.</p></article>
-        <article><h3>Mappa e navigazione</h3><p>Planimetria interattiva, percorso fino alla sepoltura e navigazione con fotocamera calibrabile tramite QR/marker.</p></article>
-        <article><h3>Statistiche aggregate</h3><p>Accessi, ricerche, risultati aperti, navigazioni e ingressi da QR, senza registrazione del cittadino e senza inviare i nomi cercati agli analytics.</p></article>
-        <article><h3>Privacy by design</h3><p>Nessun account per la ricerca pubblica, nessun profilo commemorativo automatico, fotocamera attivata solo su richiesta e separazione netta tra servizio istituzionale e area gestionale.</p></article>
-        <article><h3>Audit operativo · roadmap</h3><p>Previsto nella versione di produzione: storico di accessi, modifiche, importazioni e correzioni per sapere chi ha aggiornato cosa e quando.</p></article>
-        <article><h3>Multi-Comune · roadmap</h3><p>Architettura prevista: dati separati per ente e possibilità di gestire più cimiteri nello stesso Comune senza creare applicazioni isolate.</p></article>
+      <div className="info-hero">
+        <span className="eyebrow">DOVE RIPOSA PER GLI ENTI</span>
+        <h1>Non un altro gestionale cimiteriale. Il layer di navigazione sopra i dati che il Comune possiede già.</h1>
+        <p>Dove Riposa separa il back-office amministrativo dall’esperienza del cittadino: importa i dati necessari, costruisce una rete di percorsi verificabili e accompagna la persona fino a settore, fila e posizione senza richiedere un account.</p>
       </div>
-      <div className="business-note"><b>Posizionamento Dove Riposa</b><p>Il progetto resta volutamente essenziale: accesso web immediato, nessuna app obbligatoria, nessuna registrazione per cercare una sepoltura, nessun profilo social o commemorativo automatico e nessun commercio collegato alla scheda del defunto. Ogni Comune ha la propria area raggiungibile anche da QR e può gestire dati, mappa, importazioni e statistiche aggregate.</p></div>
-      <div className="business-note"><b>Proposta Comune pilota fondatore · 12 mesi gratuiti</b><p>Il primo Comune pilota utilizzerà Dove Riposa gratuitamente per 12 mesi dall’attivazione della versione reale. L’obiettivo è validare il servizio con dati, cartografia e utilizzo effettivi, misurando ricerca, navigazione, QR, accessibilità, segnalazioni e funzioni Live. Al termine del periodo pilota, l’eventuale prosecuzione verrà regolata da una proposta commerciale separata.</p><p>Per partire servono planimetria ufficiale, archivio autorizzato, un referente operativo e validazione dei flussi con il DPO. La configurazione privacy, i ruoli, i fornitori, i tempi di conservazione e le misure di sicurezza verranno formalizzati prima di caricare dati reali.</p><p><Link className="text-link" href="/povegliano-veronese/privacy">Privacy by design →</Link> · <Link className="text-link" href="/povegliano-veronese/termini">Termini d’uso demo →</Link></p></div>
+
+      <div className="platform-core public-core">
+        <article><span>BRIDGE</span><h3>Non sostituisce il gestionale</h3><p>Il Comune continua a usare il proprio software. Dove Riposa importa export CSV, memorizza la mappatura delle colonne e usa solo i dati necessari al servizio pubblico.</p></article>
+        <article><span>PRECISION</span><h3>QR come nodi di posizione</h3><p>I QR non devono stare sulle tombe: possono essere installati in ingresso e nei nodi strategici per ricalibrare la navigazione quando il GPS non basta.</p></article>
+        <article><span>ACCESS</span><h3>Accessibilità dentro il percorso</h3><p>Superficie, pendenza, larghezza, gradini, rampe e punti di sosta diventano attributi dei singoli tratti e possono influenzare il routing.</p></article>
+        <article><span>LIVE</span><h3>La mappa non è statica</h3><p>Lavori, passaggi chiusi o limitazioni temporanee possono escludere un tratto e ricalcolare il percorso disponibile.</p></article>
+        <article><span>CHECK</span><h3>L’arrivo viene confermato</h3><p>Alla fine Precision mostra settore, fila e posizione e chiede una conferma esplicita. Se la sepoltura non viene trovata, invita a ricalibrare dal marker più vicino.</p></article>
+      </div>
+
+      <div className="business-note">
+        <b>Il principio che ci differenzia</b>
+        <p>Dove Riposa non vuole diventare il software con cui il Comune gestisce concessioni, rinnovi, contratti, memoriali o servizi commerciali. Si concentra sul problema specifico del cittadino: <strong>trovare una sepoltura e raggiungerla con un percorso comprensibile, verificabile e adatto alle condizioni reali del cimitero.</strong></p>
+      </div>
+
+      <div className="info-grid">
+        <article><h3>Web, non app obbligatoria</h3><p>Accesso immediato da browser, QR o sito comunale. Nessun download necessario per il cittadino.</p></article>
+        <article><h3>Ricerca senza account</h3><p>La ricerca pubblica non richiede registrazione. I termini cercati non devono diventare profili o interessi dell’utente.</p></article>
+        <article><h3>Multi-Comune e multi-cimitero</h3><p>Un’unica infrastruttura può separare enti e cimiteri senza creare applicazioni isolate per ogni amministrazione.</p></article>
+        <article><h3>Data Bridge già operativo</h3><p>L’admin accetta CSV, associa le colonne, mostra un’anteprima, salta i duplicati e importa i record come bozza per la successiva verifica.</p></article>
+        <article><h3>Sopralluogo accessibilità</h3><p>I dati stimati restano “da verificare”. Solo il controllo sul posto può trasformare un tratto in informazione operativa affidabile.</p></article>
+        <article><h3>QR Precision</h3><p>L’admin genera QR di posizione per ogni nodo configurato, con download e test del link prima dell’installazione fisica.</p></article>
+      </div>
+
+      <div className="business-note">
+        <b>Proposta Comune pilota fondatore · 12 mesi gratuiti</b>
+        <p>Il Comune pilota utilizza Dove Riposa gratuitamente per 12 mesi dall’attivazione della versione reale. Il test misura ricerca, navigazione, QR, accessibilità, qualità dei dati, segnalazioni e deviazioni Live.</p>
+        <p>Per partire servono planimetria ufficiale, archivio autorizzato, un referente operativo e validazione dei flussi con il DPO. Hosting, accordi, ruoli privacy, retention, backup e misure anti-abuso vanno chiusi prima di caricare dati reali.</p>
+        <p><Link className="text-link" href="/povegliano-veronese/privacy">Privacy by design →</Link> · <Link className="text-link" href="/povegliano-veronese/accessibilita">Accessibilità →</Link></p>
+      </div>
     </section>
   </main>
 }
