@@ -190,7 +190,7 @@ export default function PescantinaPage(){
 
       <div className="accessibility-layer" id="accessibilita">
         <div className="accessibility-layer-head">
-          <div><span className="eyebrow">ACCESSIBILITY LAYER</span><h3>Il percorso accessibile non si presume</h3></div>
+          <div><span className="eyebrow">DOVE RIPOSA ACCESS</span><h3>Il percorso accessibile non si presume</h3></div>
           <span className="layer-status">Demo · da rilevare</span>
         </div>
         <p>Ogni tratto viene descritto con superficie, pendenza, larghezza, gradini, rampe e punti di sosta. Per Pescantina questi valori sono volutamente “da rilevare”: la schermata satellitare non basta per certificare l’accessibilità.</p>
@@ -214,6 +214,15 @@ export default function PescantinaPage(){
       onArrivalConfirmed={()=>track('arrival_confirmed',{mode:routeMode})}
       onClose={()=>setCameraOpen(false)}
     />}
+
+    <section className="wrap precision-features">
+      <div className="section-head"><span className="eyebrow">PERCHÉ DOVE RIPOSA</span><h2>Non solo una mappa con un pin.</h2></div>
+      <div className="info-cards">
+        <article><h3>Dove Riposa Precision</h3><p>I QR identificano punti fisici del cimitero e permettono di ricalibrare il percorso nei tratti in cui il GPS può essere poco affidabile.</p></article>
+        <article><h3>Dove Riposa Access</h3><p>Il percorso può usare dati verificati su fondo, pendenza, larghezza, gradini, rampe e punti di sosta, invece di presumere l’accessibilità dalla sola mappa.</p></article>
+        <article><h3>Dove Riposa Check</h3><p>Alla fine mostriamo settore, fila e posizione e chiediamo una conferma dell’utente: nessuna falsa promessa di precisione assoluta.</p></article>
+      </div>
+    </section>
 
     <footer>
       <div className="footer-brand"><BrandLockup compact subtitle="Pescantina · demo"/></div>
