@@ -27,7 +27,7 @@ export default function AdminPage(){
         <select id="admin-section" value={tab} onChange={e=>setTab(e.target.value)}>
           <option value="dashboard">Dashboard</option>
           <option value="archivio">Archivio</option>
-          <option value="import">Import</option>
+          <option value="import">Connect / Import</option>
           <option value="qualita">Qualità</option>
           <option value="mappa">Mappa & accessibilità</option>
           <option value="qr">QR Precision</option>
@@ -42,7 +42,7 @@ export default function AdminPage(){
         {[
           ['dashboard','Dashboard'],
           ['archivio','Archivio'],
-          ['import','Import'],
+          ['import','Connect / Import'],
           ['qualita','Qualità'],
           ['mappa','Mappa & accessibilità'],
           ['qr','QR Precision'],
