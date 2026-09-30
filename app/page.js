@@ -1,9 +1,10 @@
 import Link from 'next/link';
+import BrandLockup from './components/BrandLockup';
 
 export default function Home(){
   return <main>
     <header className="citizen-header">
-      <Link href="/" className="citizen-brand"><span className="mark">DR</span><div><strong>Dove Riposa</strong><small>Trova una sepoltura</small></div></Link>
+      <Link href="/" className="citizen-brand"><BrandLockup subtitle="Trova una sepoltura"/></Link>
       <nav><Link href="/enti">Per gli enti</Link></nav>
     </header>
     <section className="national-hero">
@@ -25,6 +26,6 @@ export default function Home(){
       <div><b>Area dedicata per Comune</b><span>Ogni ente dispone di URL, QR, mappa e contenuti propri.</span></div>
       <div><b>Analytics minimizzati</b><span>Misuriamo gli eventi di utilizzo senza inviare agli analytics i nomi cercati.</span></div>
     </section>
-    <footer><div><b>Dove Riposa</b><span>MVP dimostrativo</span></div><p><Link href="/enti">Soluzione per Comuni e gestori</Link></p></footer>
+    <footer><div className="footer-brand"><BrandLockup compact subtitle="Servizio digitale cimiteriale"/></div><p><Link href="/enti">Soluzione per Comuni e gestori</Link></p></footer>
   </main>
 }
