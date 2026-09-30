@@ -255,7 +255,7 @@ export default function PoveglianoPage(){
 
       <div className="accessibility-layer">
         <div className="accessibility-layer-head">
-          <div><span className="eyebrow">ACCESSIBILITY LAYER</span><h3>Condizioni reali del percorso</h3></div>
+          <div><span className="eyebrow">DOVE RIPOSA ACCESS</span><h3>Accessibilità descritta tratto per tratto</h3></div>
           <span className="layer-status">Demo · da validare</span>
         </div>
         <p>Ogni tratto può contenere superficie, pendenza, larghezza, rampe, gradini e punti di sosta. I dati mostrati qui sono dimostrativi: nella versione reale vengono precompilati da cartografia/immagini e poi confermati con sopralluogo.</p>
@@ -286,7 +286,7 @@ export default function PoveglianoPage(){
       <div className="info-cards">
         <article><h3>QR di posizione</h3><p>I marker identificano nodi fisici del cimitero, non memoriali. Servono a ricalibrare il percorso quando il GPS diventa poco affidabile.</p></article>
         <article><h3>Dove Riposa Assist</h3><p>Oltre al percorso accessibile, la modalità assistita può privilegiare pendenze ridotte, fondo regolare, panchine, fontanelle e punti di sosta per chi ha poca autonomia.</p></article>
-        <article><h3>Controllo arrivo</h3><p>Precision non dichiara automaticamente “sei arrivato”: mostra settore, fila e posizione e chiede una conferma finale all’utente dopo l’ultimo riferimento calibrato.</p></article>
+        <article><h3>Dove Riposa Check</h3><p>Precision non dichiara automaticamente “sei arrivato”: mostra settore, fila e posizione e chiede una conferma finale all’utente dopo l’ultimo riferimento calibrato.</p></article>
       </div>
     </section>
 
