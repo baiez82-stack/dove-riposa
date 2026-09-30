@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
+import BrandLockup from '../components/BrandLockup';
 
 const markers = {
   ingresso:{id:'ingresso',code:'DR-PV-ING',label:'Ingresso principale',x:520,y:635},
@@ -187,7 +188,7 @@ export default function PoveglianoPage(){
 
   return <main>
     <header className="citizen-header">
-      <Link href="/povegliano-veronese" className="citizen-brand"><span className="mark">DR</span><div><strong>Dove Riposa</strong><small>Povegliano Veronese</small></div></Link>
+      <Link href="/povegliano-veronese" className="citizen-brand"><BrandLockup subtitle="Povegliano Veronese"/></Link>
       <nav><a href="#cerca">Cerca</a><a href="#mappa">Mappa</a><a href="#info">Informazioni</a></nav>
     </header>
 
@@ -297,7 +298,7 @@ export default function PoveglianoPage(){
       <article><h3>Privacy</h3><p>Ricerca senza registrazione, nessun profilo commemorativo e analytics minimizzati.</p><Link className="text-link" href="/povegliano-veronese/privacy">Privacy e trasparenza →</Link></article>
     </section>
 
-    <footer><div><b>Dove Riposa</b><span>Povegliano Veronese · demo pilota non ufficiale</span></div><p><Link href="/povegliano-veronese/privacy">Privacy</Link> · <Link href="/povegliano-veronese/termini">Termini d’uso</Link> · Accessibilità</p></footer>
+    <footer><div className="footer-brand"><BrandLockup compact subtitle="Povegliano Veronese · demo pilota"/></div><p><Link href="/povegliano-veronese/privacy">Privacy</Link> · <Link href="/povegliano-veronese/termini">Termini d’uso</Link> · Accessibilità</p></footer>
   </main>
 }
 
