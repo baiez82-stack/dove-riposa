@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import BrandLockup from '../components/BrandLockup';
+import AdminQrGenerator from '../components/AdminQrGenerator';
 
 const initial=[
   {id:1,nome:'Mario',cognome:'Rossi',settore:'Settore B',fila:'7',posizione:'Loculo 18',stato:'Pubblicato'},
@@ -18,9 +19,20 @@ export default function AdminPage(){
 
 
   return <main className="admin-shell">
-    <aside className="admin-sidebar"><div className="citizen-brand admin-brand"><BrandLockup compact inverse subtitle="Comune di Povegliano Veronese"/></div>
-      {['dashboard','archivio','import','qualita','mappa','live','segnalazioni','privacy','utenti'].map(x=><button key={x} className={tab===x?'active':''} onClick={()=>setTab(x)}>{x[0].toUpperCase()+x.slice(1)}</button>)}
-      <Link className="admin-back-link" href="/povegliano-veronese">← Demo cittadino</Link>
+    <aside className="admin-sidebar"><div className="citizen-brand admin-brand"><BrandLockup compact inverse subtitle="Amministrazione demo"/></div>
+      {[
+        ['dashboard','Dashboard'],
+        ['archivio','Archivio'],
+        ['import','Import'],
+        ['qualita','Qualità'],
+        ['mappa','Mappa & accessibilità'],
+        ['qr','QR Precision'],
+        ['live','Live'],
+        ['segnalazioni','Segnalazioni'],
+        ['privacy','Privacy'],
+        ['utenti','Utenti']
+      ].map(([id,label])=><button key={id} className={tab===id?'active':''} onClick={()=>setTab(id)}>{label}</button>)}
+      <Link className="admin-back-link" href="/">← Sito pubblico</Link>
       <form action="/admin/logout" method="post" className="admin-logout-form"><button type="submit">Esci</button></form>
     </aside>
     <section className="admin-content">
@@ -29,18 +41,19 @@ export default function AdminPage(){
       {tab==='import'&&<Import setRows={setRows} message={importMsg} setMessage={setImportMsg}/>}
       {tab==='qualita'&&<DataQuality rows={rows}/>}
       {tab==='mappa'&&<PrecisionAdmin/>}
+      {tab==='qr'&&<AdminQrGenerator/>}
       {tab==='live'&&<LivePanel/>}
       {tab==='segnalazioni'&&<Panel title="Segnalazioni"><div className="admin-list"><p><b>Posizione da verificare</b> · 1 segnalazione demo</p><p><b>Nominativo errato</b> · 0</p><p><b>Trasferimento</b> · 0</p></div></Panel>}
       {tab==='privacy'&&<PrivacyPanel/>}
-      {tab==='utenti'&&<Panel title="Utenti e ruoli"><p>Amministratore ente · Operatore cimiteriale · Sola lettura.</p><div className="admin-warning">Gli account operatori usano autenticazione server-side e ruoli per ente. L’audit delle operazioni verrà attivato prima del caricamento dei dati comunali reali.</div></Panel>}
+      {tab==='utenti'&&<Panel title="Utenti e ruoli"><p>Amministratore ente · Operatore cimiteriale · Sola lettura.</p><div className="admin-warning">Gli account operatori usano autenticazione server-side e ruoli per ente. Per questa demo non esistono ancora account operatori attivi: vanno creati e associati all’ente prima di usare l’area riservata in una presentazione autenticata.</div></Panel>}
     </section>
   </main>
 }
 
 function Dashboard(){
-  return <><div className="admin-head"><div><span className="eyebrow">DASHBOARD DEMO</span><h1>Povegliano Veronese</h1></div><span className="status">● Ambiente dimostrativo</span></div>
+  return <><div className="admin-head"><div><span className="eyebrow">DASHBOARD DEMO</span><h1>Dove Riposa Admin</h1></div><span className="status">● Ambiente dimostrativo</span></div>
     <div className="pilot-banner"><b>Backend pilot attivo, dati reali non ancora caricati.</b><span>Autenticazione server-side e database multi-ente sono predisposti. Prima dei dati comunali reali restano da configurare gli account operatori, il referente/DPO e il flusso di import validato.</span></div>
-    <div className="stats admin-stats"><div><b>3</b><span>record fittizi</span></div><div><b>5</b><span>tratti accessibilità demo</span></div><div><b>4</b><span>marker Precision demo</span></div><div><b>0</b><span>dati comunali reali</span></div></div>
+    <div className="stats admin-stats"><div><b>2</b><span>Comuni demo</span></div><div><b>7</b><span>marker Precision</span></div><div><b>5</b><span>tratti accessibilità Povegliano</span></div><div><b>0</b><span>dati comunali reali</span></div></div>
     <div className="admin-two"><Panel title="Archivio"><p><b>3</b> record demo · <b>1</b> da verificare</p></Panel><Panel title="Stato pilot"><p>La demo serve a validare flusso, mappa, accessibilità e navigazione. Le metriche reali verranno mostrate solo quando esisterà un archivio analytics persistente.</p></Panel></div>
   </>
 }
@@ -212,7 +225,7 @@ function PrivacyPanel(){
       <div><span className="check-ok">✓</span><p><b>Autenticazione nominativa</b><small>Area operatori con Supabase Auth; niente PIN condiviso.</small></p></div>
       <div><span className="check-pending">!</span><p><b>Titolare, DPO e contatti ufficiali</b><small>Da pubblicare nell’informativa definitiva prima del pilot reale.</small></p></div>
       <div><span className="check-pending">!</span><p><b>Accordo art. 28 GDPR</b><small>Ruoli, istruzioni, sub-responsabili, restituzione/cancellazione e audit da formalizzare.</small></p></div>
-      <div><span className="check-pending">!</span><p><b>Contratto hosting compatibile</b><small>Verificare piano Vercel e DPA prima dei dati reali; Hobby non è adatto a uso commerciale/istituzionale.</small></p></div>
+      <div><span className="check-pending">!</span><p><b>Contratto hosting compatibile</b><small>La demo gira su Render Free. Prima dei dati reali va scelto un piano/contratto idoneo, verificati DPA, localizzazione, log e sub-responsabili.</small></p></div>
       <div><span className="check-pending">!</span><p><b>Anti-scraping</b><small>Rate limiting, protezione bot e limiti di interrogazione da attivare prima di pubblicare archivi reali.</small></p></div>
       <div><span className="check-pending">!</span><p><b>Retention, backup e incident response</b><small>Definire tempi, restore testato, revoca account e gestione data breach.</small></p></div>
       <div><span className="check-pending">!</span><p><b>DPIA / valutazione del rischio</b><small>Valutazione formale con il DPO prima del pilot; art. 35 GDPR se applicabile.</small></p></div>
