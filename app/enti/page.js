@@ -1,8 +1,9 @@
 import Link from 'next/link';
+import BrandLockup from '../components/BrandLockup';
 
 export default function EntiPage(){
   return <main>
-    <header className="citizen-header"><Link href="/" className="citizen-brand"><span className="mark">DR</span><div><strong>Dove Riposa</strong><small>Per Comuni e gestori</small></div></Link><nav><Link href="/povegliano-veronese">Demo cittadino</Link><Link href="/admin">Area riservata</Link></nav></header>
+    <header className="citizen-header"><Link href="/" className="citizen-brand"><BrandLockup subtitle="Per Comuni e gestori"/></Link><nav><Link href="/povegliano-veronese">Demo cittadino</Link><Link href="/admin">Area riservata</Link></nav></header>
     <section className="info-page wrap">
       <div className="info-hero"><span className="eyebrow">DOVE RIPOSA PER GLI ENTI</span><h1>Un unico servizio, ogni Comune con la propria area.</h1><p>Dove Riposa mantiene un marchio nazionale ma crea un ambiente dedicato per ogni ente: URL, QR, mappa, archivio, dashboard e contenuti locali.</p></div>
       <div className="info-grid">
