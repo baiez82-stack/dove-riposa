@@ -276,6 +276,7 @@ export default function PoveglianoPage(){
       markers={markers}
       municipalityLabel="Povegliano Veronese"
       onCalibrate={calibrate}
+      onArrivalConfirmed={()=>track('arrival_confirmed',{source,mode:routeMode})}
       onClose={()=>setCameraOpen(false)}
       liveNotice={liveDemo?'Percorso ricalcolato per chiusura temporanea':''}
     />}
