@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: dove-riposa-demo
+    runtime: docker
+    plan: free
+    region: frankfurt
+    branch: main
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: PORT
+        value: "3000"
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        value: https://cqjhwxbtyngwnyvrujkx.supabase.co
+      - key: NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+        sync: false
