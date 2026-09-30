@@ -32,7 +32,8 @@ export default function PrivacyPage(){
       <div className="privacy-sections">
         <section className="privacy-section">
           <h2>1. Chi tratta i dati nella demo</h2>
-          <p>La demo è attualmente gestita come progetto tecnico indipendente. Non essendo ancora adottata dal Comune, il Comune di Pescantina non viene indicato come titolare di questa demo. Prima dell’avvio di un servizio comunale reale dovranno essere pubblicati l’identità e i contatti del titolare, del DPO ove previsto, del responsabile tecnico e degli eventuali sub-responsabili. L’assenza di tali dati costituisce un blocco al caricamento di archivi comunali reali.</p>
+          <p>La demo è attualmente gestita come progetto tecnico indipendente. Non essendo ancora adottata dal Comune, il Comune di Pescantina non viene indicato come titolare di questa demo.</p>
+          <p>Per un eventuale servizio istituzionale, le fonti pubbliche del Comune indicano attualmente il Comune di Pescantina, Via Madonna 49, 37026 Pescantina (VR), protocollo@comune.pescantina.vr.it, PEC pescantina.vr@cert.ip-veneto.net; il DPO pubblicato dal Comune è l’Avv. Veronica Dei Rossi, contattabile a dpo@veronicadeirossi.com. Questi riferimenti verranno riportati nell’informativa definitiva solo dopo l’adozione formale del servizio e la validazione dell’ente.</p>
         </section>
 
         <section className="privacy-section">
@@ -98,7 +99,7 @@ export default function PrivacyPage(){
         <section className="privacy-section">
           <h2>12. Segnalazioni, rettifiche e diritti</h2>
           <p>Nel servizio reale le segnalazioni su dati o posizioni non produrranno modifiche automatiche: saranno verificate da un operatore autorizzato. L’ente dovrà pubblicare un canale per esercitare i diritti applicabili e per le richieste relative ai dati di persone decedute ai sensi dell’art. 2-terdecies del Codice Privacy.</p>
-          <p>I contatti ufficiali del titolare e del DPO non sono ancora pubblicati perché il Comune non ha adottato il servizio. Dovranno essere inseriti nell’informativa definitiva prima dell’avvio del pilot con dati reali.</p>
+          <p>I riferimenti pubblici del Comune e del DPO sono già individuati, ma questa demo non li presenta come contatti di un servizio Dove Riposa ufficiale finché l’ente non avrà adottato e validato il pilot. L’informativa definitiva dovrà essere approvata prima del caricamento dei dati reali.</p>
         </section>
 
         <section className="privacy-section">
