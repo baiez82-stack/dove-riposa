@@ -82,6 +82,7 @@ function Dashboard(){
       <div><span>PRECISION</span><b>QR come nodi di posizione</b><p>I marker ricalibrano la navigazione nei punti strategici, non sono memoriali sulle tombe.</p></div>
       <div><span>ACCESS</span><b>Routing basato sui tratti reali</b><p>Superficie, pendenza, larghezza, gradini, rampe e punti di sosta verificabili sul posto.</p></div>
       <div><span>LIVE</span><b>Percorsi che possono cambiare</b><p>Chiusure e lavori possono deviare la navigazione invece di lasciare una mappa statica.</p></div>
+      <div><span>CHECK</span><b>L’arrivo non viene dato per scontato</b><p>Il sistema mostra settore, fila e posizione e chiede una conferma finale dopo l’ultimo riferimento calibrato.</p></div>
     </div>
     <div className="admin-two"><Panel title="Archivio"><p><b>3</b> record demo · <b>1</b> da verificare</p></Panel><Panel title="Stato pilot"><p>La demo serve a validare flusso, mappa, accessibilità e navigazione. Le metriche reali verranno mostrate solo quando esisterà un archivio analytics persistente.</p></Panel></div>
   </>
