@@ -11,21 +11,16 @@ const initial=[
 ];
 
 export default function AdminPage(){
-  const [logged,setLogged]=useState(false);
-  const [pin,setPin]=useState('');
-  const [loginError,setLoginError]=useState('');
   const [rows,setRows]=useState(initial);
   const [editing,setEditing]=useState(null);
   const [tab,setTab]=useState('dashboard');
   const [importMsg,setImportMsg]=useState('');
 
-  function login(e){e?.preventDefault();if(pin==='PV-DR-26'){setLogged(true);setLoginError('');}else{setLoginError('Codice non valido.');}}
-  if(!logged) return <main className="admin-login"><form className="admin-login-card" onSubmit={login}><div className="admin-login-brand"><BrandLockup subtitle="Area riservata"/></div><h1>Area riservata Comune</h1><p>Povegliano Veronese · accesso operatori</p><label>Codice di accesso<input type="password" value={pin} onChange={e=>{setPin(e.target.value);setLoginError('');}} placeholder="Inserisci il codice" autoComplete="current-password"/></label>{loginError&&<div className="login-error">{loginError}</div>}<button className="primary" type="submit">Accedi</button><small className="login-note">Accesso riservato al personale autorizzato. Le credenziali per l’ambiente dimostrativo vengono fornite separatamente.</small><Link href="/povegliano-veronese">← Torna al servizio cittadino</Link></form></main>;
 
   return <main className="admin-shell">
     <aside className="admin-sidebar"><div className="citizen-brand admin-brand"><BrandLockup compact inverse subtitle="Comune di Povegliano Veronese"/></div>
-      {['dashboard','archivio','import','qualita','mappa','segnalazioni','privacy','utenti'].map(x=><button key={x} className={tab===x?'active':''} onClick={()=>setTab(x)}>{x[0].toUpperCase()+x.slice(1)}</button>)}
-      <button onClick={()=>setLogged(false)}>Esci</button>
+      {['dashboard','archivio','import','qualita','mappa','live','segnalazioni','privacy','utenti'].map(x=><button key={x} className={tab===x?'active':''} onClick={()=>setTab(x)}>{x[0].toUpperCase()+x.slice(1)}</button>)}
+      <Link className="admin-back-link" href="/povegliano-veronese">← Demo cittadino</Link>
     </aside>
     <section className="admin-content">
       {tab==='dashboard'&&<Dashboard/>}
@@ -33,6 +28,7 @@ export default function AdminPage(){
       {tab==='import'&&<Import setRows={setRows} message={importMsg} setMessage={setImportMsg}/>}
       {tab==='qualita'&&<DataQuality rows={rows}/>}
       {tab==='mappa'&&<PrecisionAdmin/>}
+      {tab==='live'&&<LivePanel/>}
       {tab==='segnalazioni'&&<Panel title="Segnalazioni"><div className="admin-list"><p><b>Posizione da verificare</b> · 1 segnalazione demo</p><p><b>Nominativo errato</b> · 0</p><p><b>Trasferimento</b> · 0</p></div></Panel>}
       {tab==='privacy'&&<PrivacyPanel/>}
       {tab==='utenti'&&<Panel title="Utenti e ruoli"><p>Amministratore ente · Operatore cimiteriale · Sola lettura.</p><div className="admin-warning">Questo ambiente è dimostrativo. La versione di produzione userà autenticazione lato server, ruoli, sessioni sicure e audit degli accessi.</div></Panel>}
@@ -41,9 +37,10 @@ export default function AdminPage(){
 }
 
 function Dashboard(){
-  return <><div className="admin-head"><div><span className="eyebrow">DASHBOARD</span><h1>Povegliano Veronese</h1></div><span className="status">● Demo</span></div>
-    <div className="stats admin-stats"><div><b>1.284</b><span>visite demo</span></div><div><b>734</b><span>ricerche</span></div><div><b>295</b><span>navigazioni</span></div><div><b>61%</b><span>da QR</span></div></div>
-    <div className="admin-two"><Panel title="Archivio"><p><b>3</b> record demo · <b>1</b> da verificare</p></Panel><Panel title="Privacy analytics"><p>Gli eventi previsti non includono nominativi cercati né identificatori persistenti. I numeri mostrati qui sono demo.</p></Panel></div>
+  return <><div className="admin-head"><div><span className="eyebrow">DASHBOARD DEMO</span><h1>Povegliano Veronese</h1></div><span className="status">● Ambiente dimostrativo</span></div>
+    <div className="pilot-banner"><b>Demo aperta: nessun dato reale e nessuna autenticazione di produzione.</b><span>Prima del pilot reale servono database, autenticazione server-side, ruoli, audit e accordo privacy con l’ente.</span></div>
+    <div className="stats admin-stats"><div><b>3</b><span>record fittizi</span></div><div><b>5</b><span>tratti accessibilità demo</span></div><div><b>4</b><span>marker Precision demo</span></div><div><b>0</b><span>dati comunali reali</span></div></div>
+    <div className="admin-two"><Panel title="Archivio"><p><b>3</b> record demo · <b>1</b> da verificare</p></Panel><Panel title="Stato pilot"><p>La demo serve a validare flusso, mappa, accessibilità e navigazione. Le metriche reali verranno mostrate solo quando esisterà un archivio analytics persistente.</p></Panel></div>
   </>
 }
 
@@ -59,9 +56,28 @@ function Archivio({rows,setRows,editing,setEditing}){
 
 function Import({setRows,message,setMessage}){
   function file(e){const f=e.target.files?.[0];if(!f)return;const reader=new FileReader();reader.onload=()=>{const lines=String(reader.result).split(/\r?\n/).filter(Boolean);setMessage(`File letto: ${lines.length} righe. Import demo pronto per anteprima.`);};reader.readAsText(f);}
-  return <Panel title="Import CSV / Excel"><p>Per la demo leggiamo il file localmente senza inviarlo a un server. In produzione verrà aggiunta un’anteprima con validazione colonne, errori e conferma prima della pubblicazione.</p><input type="file" accept=".csv,.txt" onChange={file}/>{message&&<div className="import-message">{message}</div>}</Panel>
+  return <Panel title="Import CSV"><p>Per la demo leggiamo il file localmente senza inviarlo a un server. In produzione verrà aggiunta un’anteprima con validazione colonne, errori e conferma prima della pubblicazione.</p><input type="file" accept=".csv,.txt" onChange={file}/>{message&&<div className="import-message">{message}</div>}</Panel>
 }
 
+
+function LivePanel(){
+  const [active,setActive]=useState(true);
+  const [type,setType]=useState('Lavori in corso');
+  const [until,setUntil]=useState('13:00');
+  const [message,setMessage]=useState('Passaggio est temporaneamente chiuso. Il percorso viene deviato sul viale centrale.');
+  return <Panel title="Dove Riposa Live">
+    <p>Gestione dimostrativa di chiusure, lavori e limitazioni temporanee che possono modificare il percorso del cittadino.</p>
+    <div className="live-admin-card">
+      <div className="live-admin-head"><div><b>Evento demo</b><span>Tratto: viale est → porticato</span></div><button className={active?'live-switch on':'live-switch'} onClick={()=>setActive(!active)}>{active?'Attivo':'Disattivo'}</button></div>
+      <label>Tipo evento<select value={type} onChange={e=>setType(e.target.value)}><option>Lavori in corso</option><option>Passaggio chiuso</option><option>Accesso non disponibile</option><option>Area temporaneamente interdetta</option></select></label>
+      <label>Messaggio<input value={message} onChange={e=>setMessage(e.target.value)}/></label>
+      <label>Fino alle<input value={until} onChange={e=>setUntil(e.target.value)} inputMode="numeric"/></label>
+      <div className="live-preview"><span>{active?'● ATTIVO':'○ NON ATTIVO'}</span><b>{type}</b><p>{message}</p><small>Fine prevista: {until}</small></div>
+      <Link className="primary link-button" href={active?"/povegliano-veronese?live=1":"/povegliano-veronese"} target="_blank">Apri la simulazione cittadino →</Link>
+    </div>
+    <div className="admin-warning">In produzione gli eventi Live saranno salvati nel database, avranno data/ora di inizio e fine, audit dell’operatore e ricalcolo automatico dei percorsi. Questa sezione è solo dimostrativa.</div>
+  </Panel>
+}
 
 function DataQuality({rows}){
   const published=rows.filter(r=>r.stato==='Pubblicato').length;
