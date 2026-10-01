@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import BrandLockup from '../components/BrandLockup';
 import AdminQrGenerator from '../components/AdminQrGenerator';
@@ -28,13 +28,10 @@ export default function AdminPage(){
           <option value="dashboard">Dashboard</option>
           <option value="archivio">Archivio</option>
           <option value="import">Connect / Import</option>
-          <option value="qualita">Qualità</option>
           <option value="mappa">Mappa & accessibilità</option>
           <option value="qr">QR Precision</option>
           <option value="live">Live</option>
-          <option value="segnalazioni">Segnalazioni</option>
           <option value="privacy">Privacy</option>
-          <option value="utenti">Utenti</option>
         </select>
       </div>
 
@@ -43,13 +40,10 @@ export default function AdminPage(){
           ['dashboard','Dashboard'],
           ['archivio','Archivio'],
           ['import','Connect / Import'],
-          ['qualita','Qualità'],
           ['mappa','Mappa & accessibilità'],
           ['qr','QR Precision'],
           ['live','Live'],
-          ['segnalazioni','Segnalazioni'],
           ['privacy','Privacy'],
-          ['utenti','Utenti']
         ].map(([id,label])=><button key={id} className={tab===id?'active':''} onClick={()=>setTab(id)}>{label}</button>)}
       </div>
 
@@ -62,13 +56,11 @@ export default function AdminPage(){
       {tab==='dashboard'&&<Dashboard/>}
       {tab==='archivio'&&<Archivio rows={rows} setRows={setRows} editing={editing} setEditing={setEditing}/>}
       {tab==='import'&&<AdminImportManager/>}
-      {tab==='qualita'&&<DataQuality rows={rows}/>}
+
       {tab==='mappa'&&<PrecisionAdmin/>}
       {tab==='qr'&&<AdminQrGenerator/>}
       {tab==='live'&&<LivePanel/>}
-      {tab==='segnalazioni'&&<Panel title="Segnalazioni"><div className="admin-list"><p><b>Posizione da verificare</b> · 1 segnalazione demo</p><p><b>Nominativo errato</b> · 0</p><p><b>Trasferimento</b> · 0</p></div></Panel>}
       {tab==='privacy'&&<PrivacyPanel/>}
-      {tab==='utenti'&&<Panel title="Utenti e ruoli"><p>Amministratore ente · Operatore cimiteriale · Sola lettura.</p><div className="admin-warning">L’accesso usa autenticazione nominativa server-side e ruoli per ente. Il tuo account amministratore è già associato ai due enti demo; eventuali nuovi operatori vanno creati singolarmente e autorizzati solo ai Comuni necessari.</div></Panel>}
     </section>
   </main>
 }
@@ -84,7 +76,7 @@ function Dashboard(){
       <div><span>LIVE</span><b>Percorsi che possono cambiare</b><p>Chiusure e lavori possono deviare la navigazione invece di lasciare una mappa statica.</p></div>
       <div><span>CHECK</span><b>L’arrivo non viene dato per scontato</b><p>Il sistema mostra settore, fila e posizione e chiede una conferma finale dopo l’ultimo riferimento calibrato.</p></div>
     </div>
-    <div className="admin-two"><Panel title="Archivio"><p><b>3</b> record demo · <b>1</b> da verificare</p></Panel><Panel title="Stato pilot"><p>La demo serve a validare flusso, mappa, accessibilità e navigazione. Le metriche reali verranno mostrate solo quando esisterà un archivio analytics persistente.</p></Panel></div>
+    <div className="admin-two"><Panel title="Archivio"><p><b>3</b> record demo · <b>1</b> da verificare</p></Panel><Panel title="Stato pilot"><p>La demo valida il flusso essenziale: import dati, mappa, accessibilità, QR Precision e navigazione. Le funzioni non operative non vengono mostrate come moduli attivi.</p></Panel></div>
   </>
 }
 
@@ -114,25 +106,6 @@ function LivePanel(){
       <Link className="primary link-button" href={active?"/povegliano-veronese?live=1":"/povegliano-veronese"} target="_blank">Apri la simulazione cittadino →</Link>
     </div>
     <div className="admin-warning">In produzione gli eventi Live saranno salvati nel database, avranno data/ora di inizio e fine, audit dell’operatore e ricalcolo automatico dei percorsi. Questa sezione è solo dimostrativa.</div>
-  </Panel>
-}
-
-function DataQuality({rows}){
-  const published=rows.filter(r=>r.stato==='Pubblicato').length;
-  const pending=rows.length-published;
-  return <Panel title="Data Quality Engine">
-    <p>Controllo preliminare dell’archivio prima della pubblicazione. La demo evidenzia record incompleti o da verificare senza modificarli automaticamente.</p>
-    <div className="quality-grid">
-      <div><b>{rows.length}</b><span>record analizzati</span></div>
-      <div><b>{published}</b><span>localizzati</span></div>
-      <div><b>{pending}</b><span>da verificare</span></div>
-      <div><b>0</b><span>duplicati demo</span></div>
-    </div>
-    <div className="quality-list">
-      <div className="quality-ok"><b>✓ Coordinate e posizione</b><span>2 record demo coerenti con settore/fila/posizione.</span></div>
-      <div className="quality-warn"><b>! Giuseppe Verdi</b><span>Record marcato “Da verificare”: richiede conferma dell’operatore prima della pubblicazione.</span></div>
-      <div className="quality-ok"><b>✓ Campi minimi</b><span>Nessun record senza nome o cognome nella demo.</span></div>
-    </div>
   </Panel>
 }
 
