@@ -33,16 +33,15 @@ const records = [
     ],
     accessibleInstructions:[
       'Entra dal cancello principale',
-      'Segui il percorso pavimentato verso destra',
-      'Continua lungo il corridoio est evitando i gradini',
-      'Rientra verso la Fila 7 dalla rampa',
+      'Segui il percorso accessibilità demo verso destra',
+      'Continua sul tracciato indicato',
+      'Raggiungi la Fila 7',
       'Loculo 18 sulla destra'
     ],
     assistInstructions:[
-      'Entra dal cancello principale e mantieni il viale largo',
-      'Raggiungi la panchina centrale: qui puoi fare una pausa',
-      'Prosegui sul tratto pavimentato a bassa pendenza',
-      'Supera la fontanella e continua verso il porticato est',
+      'Entra dal cancello principale',
+      'Segui il percorso assistito demo',
+      'Continua sul tracciato indicato',
       'Raggiungi la Fila 7',
       'Loculo 18 sulla destra'
     ]
@@ -63,16 +62,15 @@ const records = [
     ],
     accessibleInstructions:[
       'Entra dal cancello principale',
-      'Segui il percorso pavimentato verso sinistra',
-      'Mantieni il corridoio largo fino all’area ovest',
-      'Raggiungi la Fila 3 senza utilizzare gradini',
+      'Segui il percorso accessibilità demo verso sinistra',
+      'Continua sul tracciato indicato',
+      'Raggiungi la Fila 3',
       'Tomba 42 sul lato interno'
     ],
     assistInstructions:[
-      'Entra dal cancello principale e mantieni il viale largo',
-      'Raggiungi la panchina centrale per una pausa se necessario',
-      'Prosegui verso sinistra sul percorso più regolare',
-      'Evita il tratto in ghiaia indicato sulla mappa',
+      'Entra dal cancello principale',
+      'Segui il percorso assistito demo verso sinistra',
+      'Continua sul tracciato indicato',
       'Raggiungi la Fila 3',
       'Tomba 42 sul lato interno'
     ]
@@ -93,16 +91,15 @@ const records = [
     ],
     accessibleInstructions:[
       'Entra dal cancello principale',
-      'Mantieni il percorso pavimentato centrale',
-      'Prosegui fino al passaggio largo',
+      'Segui il percorso accessibilità demo centrale',
+      'Continua sul tracciato indicato',
       'Raggiungi la Fila 11',
       'Cippo 9 davanti a te'
     ],
     assistInstructions:[
-      'Entra dal cancello principale e procedi lentamente sul viale centrale',
-      'Raggiungi la panchina e fai una pausa se necessario',
-      'Continua sul percorso pavimentato',
-      'Svolta a destra al passaggio largo',
+      'Entra dal cancello principale',
+      'Segui il percorso assistito demo centrale',
+      'Continua sul tracciato indicato',
       'Raggiungi la Fila 11',
       'Cippo 9 davanti a te'
     ]
@@ -171,7 +168,7 @@ export default function PoveglianoPage(){
         <p>Cerca gratuitamente e senza registrazione. Questa è una demo indipendente non ancora adottata dal Comune e utilizza nominativi dimostrativi.</p>
         <div className="hero-badges">
           {source.startsWith('qr-') && <span className="qr-arrival">Accesso diretto dal QR del cimitero</span>}
-          {calibrated && source.startsWith('qr-') && <span className="offline-badge">Posizione calibrata: {calibrated.label}</span>}
+          {calibrated && source.startsWith('qr-') && <span className="offline-badge">Riferimento QR acquisito: {calibrated.label}</span>}
         </div>
       </div>
       <form className="search-card public-search" onSubmit={submit}>
@@ -179,7 +176,7 @@ export default function PoveglianoPage(){
         <label>Cognome<input value={q.cognome} onChange={e=>setQ({...q,cognome:e.target.value})} placeholder="es. Rossi"/></label>
         <label>Anno <span>(facoltativo)</span><input value={q.anno} onChange={e=>setQ({...q,anno:e.target.value})} placeholder="es. 1941" inputMode="numeric"/></label>
         <button className="primary" type="submit">Cerca sepoltura</button>
-        <p className="micro">Nessun account. Nessuna profilazione. I termini cercati non vengono inviati agli analytics. <Link href="/povegliano-veronese/privacy">Come proteggiamo i dati →</Link></p>
+        <p className="micro">Nessun account. Nessuna profilazione. Nella demo i termini cercati restano nel browser. <Link href="/povegliano-veronese/privacy">Come proteggiamo i dati →</Link></p>
       </form>
     </section>
 
@@ -219,7 +216,7 @@ export default function PoveglianoPage(){
             {routeMode==='assist' && <div className="assist-note"><b>Dove Riposa Assist</b><span>Simula la preferenza per un percorso più semplice. Pendenza, fondo e punti di sosta devono essere rilevati e validati sul posto prima dell’uso reale.</span></div>}
 
             <div className={calibrated?'calibration-card calibrated':'calibration-card'}>
-              <div><b>{calibrated ? 'Posizione calibrata' : 'Calibrazione necessaria'}</b><span>{calibrated ? calibrated.label : 'Scansiona un marker Dove Riposa vicino a te'}</span></div>
+              <div><b>{calibrated ? 'Riferimento QR acquisito' : 'Calibrazione necessaria'}</b><span>{calibrated ? calibrated.label : 'Scansiona un marker Dove Riposa vicino a te'}</span></div>
               <span className="calibration-status">{calibrated?'✓':'QR'}</span>
             </div>
 
@@ -287,10 +284,6 @@ function CemeteryMap({selected,routeMode,calibrated,liveDemo}){
         <g className="accessibility-overlay">
           {accessibilitySegments.map(s=><path key={s.id} d={s.path} className={s.stairs?'surface-segment stairs':(s.surface.includes('Ghiaia')?'surface-segment gravel':'surface-segment paved')}/>)}
           {liveDemo && <path d="M555 445 L650 445" className="live-blocked-segment"/>}
-        </g>
-        <g className="assist-poi">
-          <circle cx="575" cy="555" r="14"/><text x="575" y="560" textAnchor="middle">B</text>
-          <circle cx="630" cy="470" r="14"/><text x="630" y="475" textAnchor="middle">W</text>
         </g>
       </g>
 
