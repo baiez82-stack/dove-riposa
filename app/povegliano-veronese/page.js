@@ -125,7 +125,6 @@ export default function PoveglianoPage(){
   const [source,setSource]=useState('');
   const [routeMode,setRouteMode]=useState('short');
   const [calibrated,setCalibrated]=useState(null);
-  const [offlineReady,setOfflineReady]=useState(false);
   const [liveDemo,setLiveDemo]=useState(false);
 
   useEffect(()=>{
@@ -137,10 +136,6 @@ export default function PoveglianoPage(){
     if(cal && markers[cal]) setCalibrated(markers[cal]);
     track('page_view',{source:src});
     if(src.startsWith('qr-')) track('qr_entry',{source:src});
-
-    if('serviceWorker' in navigator){
-      navigator.serviceWorker.register('/sw.js').then(()=>setOfflineReady(true)).catch(()=>{});
-    }
   },[]);
 
   const results=useMemo(()=>{
@@ -162,7 +157,6 @@ export default function PoveglianoPage(){
   function openRecord(r){
     setSelected(r);
     setCameraOpen(false);
-    setCalibrated(current=>current||markers.ingresso);
     setRouteMode('short');
     track('result_open',{source});
     setTimeout(()=>document.getElementById('mappa')?.scrollIntoView({behavior:'smooth'}),50);
@@ -180,7 +174,7 @@ export default function PoveglianoPage(){
   return <main>
     <header className="citizen-header">
       <Link href="/povegliano-veronese" className="citizen-brand"><BrandLockup subtitle="Povegliano Veronese"/></Link>
-      <nav><a href="#cerca">Cerca</a><a href="#mappa">Mappa</a><a href="#info">Informazioni</a></nav>
+      <nav><Link href="/">Cambia Comune</Link><a href="#cerca">Cerca</a><a href="#mappa">Mappa</a></nav>
     </header>
 
     <section className="municipality-hero" id="cerca">
@@ -191,7 +185,6 @@ export default function PoveglianoPage(){
         <div className="hero-badges">
           {source.startsWith('qr-') && <span className="qr-arrival">Accesso diretto dal QR del cimitero</span>}
           {calibrated && source.startsWith('qr-') && <span className="offline-badge">Posizione calibrata: {calibrated.label}</span>}
-          {offlineReady && <span className="offline-badge">Disponibile offline dopo la prima apertura</span>}
         </div>
       </div>
       <form className="search-card public-search" onSubmit={submit}>
@@ -244,11 +237,7 @@ export default function PoveglianoPage(){
             </div>
 
             <button className="primary precision-button" onClick={()=>{setCameraOpen(true);track('navigation_start',{source,mode:'camera'});}}>Apri Dove Riposa Precision</button>
-            <div className="demo-calibration">
-              <span>Demo marker:</span>
-              {Object.values(markers).slice(0,3).map(m=><button key={m.id} onClick={()=>calibrate(m)}>{m.label}</button>)}
-            </div>
-            <div className="camera-privacy">La fotocamera resta sul dispositivo e non viene registrata né caricata. I QR di calibrazione identificano un punto del cimitero, non l’utente.</div>
+            <div className="camera-privacy">Precision funziona anche senza fotocamera. La fotocamera viene attivata solo se scegli “Scansiona QR” e il video non viene salvato né inviato a Dove Riposa.</div>
           </>}
         </div>
       </div>
@@ -280,22 +269,6 @@ export default function PoveglianoPage(){
       onClose={()=>setCameraOpen(false)}
       liveNotice={liveDemo?'Percorso ricalcolato per chiusura temporanea':''}
     />}
-
-    <section className="wrap precision-features">
-      <div className="section-head"><span className="eyebrow">PERCHÉ PRECISION</span><h2>Non solo “sei nel settore giusto”.</h2></div>
-      <div className="info-cards">
-        <article><h3>QR di posizione</h3><p>I marker identificano nodi fisici del cimitero, non memoriali. Servono a ricalibrare il percorso quando il GPS diventa poco affidabile.</p></article>
-        <article><h3>Dove Riposa Assist</h3><p>Oltre al percorso accessibile, la modalità assistita può privilegiare pendenze ridotte, fondo regolare, panchine, fontanelle e punti di sosta per chi ha poca autonomia.</p></article>
-        <article><h3>Dove Riposa Check</h3><p>Precision non dichiara automaticamente “sei arrivato”: mostra settore, fila e posizione e chiede una conferma finale all’utente dopo l’ultimo riferimento calibrato.</p></article>
-        <article><h3>Dove Riposa Haptic</h3><p>Guida silenziosa facoltativa tramite vibrazioni: 1 impulso dritto, 2 sinistra, 3 destra, impulso lungo all’arrivo. Il pattern è sperimentale e va testato con utenti ciechi e ipovedenti.</p></article>
-      </div>
-    </section>
-
-    <section className="wrap info-cards" id="info">
-      <article><h3>Orari e contatti</h3><p>Nella versione reale il Comune potrà pubblicare qui orari, contatti e avvisi del cimitero.</p></article>
-      <article><h3>Segnala un errore</h3><p>Previsto un modulo per segnalare posizione o dati da verificare, senza modifiche automatiche all’archivio.</p></article>
-      <article><h3>Privacy</h3><p>Ricerca senza registrazione, nessun profilo commemorativo e analytics minimizzati.</p><Link className="text-link" href="/povegliano-veronese/privacy">Privacy e trasparenza →</Link></article>
-    </section>
 
     <footer><div className="footer-brand"><BrandLockup compact subtitle="Povegliano Veronese · demo pilota"/></div><p><Link href="/povegliano-veronese/privacy">Privacy</Link> · <Link href="/povegliano-veronese/termini">Termini d’uso</Link> · <Link href="/povegliano-veronese/accessibilita">Accessibilità</Link></p></footer>
   </main>
