@@ -109,14 +109,6 @@ const records = [
   }
 ];
 
-function track(event, meta={}) {
-  fetch('/api/analytics',{
-    method:'POST',
-    headers:{'content-type':'application/json'},
-    body:JSON.stringify({event, comune:'povegliano-veronese', ...meta})
-  }).catch(()=>{});
-}
-
 export default function PoveglianoPage(){
   const [q,setQ]=useState({nome:'',cognome:'',anno:''});
   const [searched,setSearched]=useState(false);
@@ -134,8 +126,6 @@ export default function PoveglianoPage(){
     setLiveDemo(p.get('live')==='1');
     setSource(src);
     if(cal && markers[cal]) setCalibrated(markers[cal]);
-    track('page_view',{source:src});
-    if(src.startsWith('qr-')) track('qr_entry',{source:src});
   },[]);
 
   const results=useMemo(()=>{
@@ -151,20 +141,17 @@ export default function PoveglianoPage(){
     e.preventDefault();
     setSearched(true);
     setSelected(null);
-    track('search',{source});
   }
 
   function openRecord(r){
     setSelected(r);
     setCameraOpen(false);
     setRouteMode('short');
-    track('result_open',{source});
     setTimeout(()=>document.getElementById('mappa')?.scrollIntoView({behavior:'smooth'}),50);
   }
 
   function calibrate(marker){
     setCalibrated(marker);
-    track('navigation_start',{source,mode:'precision'});
   }
 
   const precisionSelected=selected&&liveDemo&&routeMode==='short'
@@ -236,7 +223,7 @@ export default function PoveglianoPage(){
               <span className="calibration-status">{calibrated?'✓':'QR'}</span>
             </div>
 
-            <button className="primary precision-button" onClick={()=>{setCameraOpen(true);track('navigation_start',{source,mode:'camera'});}}>Apri Dove Riposa Precision</button>
+            <button className="primary precision-button" onClick={()=>setCameraOpen(true)}>Apri Dove Riposa Precision</button>
             <div className="camera-privacy">Precision funziona anche senza fotocamera. La fotocamera viene attivata solo se scegli “Scansiona QR” e il video non viene salvato né inviato a Dove Riposa.</div>
           </>}
         </div>
@@ -265,7 +252,6 @@ export default function PoveglianoPage(){
       markers={markers}
       municipalityLabel="Povegliano Veronese"
       onCalibrate={calibrate}
-      onArrivalConfirmed={()=>track('arrival_confirmed',{source,mode:routeMode})}
       onClose={()=>setCameraOpen(false)}
       liveNotice={liveDemo?'Percorso ricalcolato per chiusura temporanea':''}
     />}
