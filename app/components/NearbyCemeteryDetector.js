@@ -96,7 +96,7 @@ export default function NearbyCemeteryDetector(){
       <div className="nearby-result-copy">
         <span className="nearby-result-kicker">Potresti essere qui</span>
         <strong>{suggestion.name}</strong>
-        <p>{suggestion.municipalityName} · {suggestion.province} · circa {formatDistance(suggestion.distance)}</p>
+        <p>{suggestion.municipalityName} · {suggestion.province} · circa {formatDistance(suggestion.distance)}{suggestion.geo?.status==='demo'?' · posizione demo da verificare':''}</p>
       </div>
       <button type="button" className="nearby-open" onClick={openSuggestion}>Apri <span>→</span></button>
     </div>}
