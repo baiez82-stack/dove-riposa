@@ -117,6 +117,7 @@ export default function AdminImportManager(){
   const [importing,setImporting]=useState(false);
   const [profileName,setProfileName]=useState('');
   const [profiles,setProfiles]=useState([]);
+  const [demoConfirmed,setDemoConfirmed]=useState(false);
 
   useEffect(()=>{
     try{
@@ -251,7 +252,8 @@ export default function AdminImportManager(){
           sourceType:sourceSystem,
           columns:currentColumnProfile()
         },
-        rows:mappedRows
+        rows:mappedRows,
+        demoConfirmed
       });
       setResult(response);
     }catch{
@@ -387,12 +389,17 @@ export default function AdminImportManager(){
         {!requiredMapped&&<div className="admin-warning">Associa almeno le colonne <b>Nome</b> e <b>Cognome</b>.</div>}
         {validation.missingLocation>0&&<div className="admin-warning">{validation.missingLocation} record non hanno settore, fila o posizione. Possono essere importati, ma resteranno da completare prima della pubblicazione.</div>}
 
+        <label className="demo-data-confirm">
+          <input type="checkbox" checked={demoConfirmed} onChange={e=>setDemoConfirmed(e.target.checked)}/>
+          <span><b>Confermo che questo file contiene solo dati fittizi o espressamente autorizzati per la demo.</b><small>In questa fase non devono essere caricati archivi comunali reali.</small></span>
+        </label>
+
         <div className="import-confirm">
           <div>
             <b>{selectedTarget ? selectedTarget.municipality+' · '+selectedTarget.cemeteryName : 'Seleziona il cimitero'}</b>
             <span>Origine: {(sourceProfiles.find(item=>item.id===sourceSystem)||sourceProfiles[0]).label}. Tutti i nuovi record saranno salvati come “bozza”; i duplicati vengono saltati.</span>
           </div>
-          <button className="primary" type="button" disabled={importing||!requiredMapped||!targetId||validation.valid===0} onClick={runImport}>
+          <button className="primary" type="button" disabled={importing||!requiredMapped||!targetId||validation.valid===0||!demoConfirmed} onClick={runImport}>
             {importing?'Importazione in corso…':`Importa ${validation.valid} record`}
           </button>
         </div>
