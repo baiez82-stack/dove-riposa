@@ -2,7 +2,8 @@ const standardFeatures = Object.freeze({
   precision: true,
   accessibility: true,
   assist: true,
-  live: true
+  live: true,
+  haptics: true
 });
 
 export const municipalities = [
