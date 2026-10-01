@@ -287,6 +287,7 @@ export default function PoveglianoPage(){
         <article><h3>QR di posizione</h3><p>I marker identificano nodi fisici del cimitero, non memoriali. Servono a ricalibrare il percorso quando il GPS diventa poco affidabile.</p></article>
         <article><h3>Dove Riposa Assist</h3><p>Oltre al percorso accessibile, la modalità assistita può privilegiare pendenze ridotte, fondo regolare, panchine, fontanelle e punti di sosta per chi ha poca autonomia.</p></article>
         <article><h3>Dove Riposa Check</h3><p>Precision non dichiara automaticamente “sei arrivato”: mostra settore, fila e posizione e chiede una conferma finale all’utente dopo l’ultimo riferimento calibrato.</p></article>
+        <article><h3>Dove Riposa Haptic</h3><p>Guida silenziosa facoltativa tramite vibrazioni: 1 impulso dritto, 2 sinistra, 3 destra, impulso lungo all’arrivo. Il pattern è sperimentale e va testato con utenti ciechi e ipovedenti.</p></article>
       </div>
     </section>
 
