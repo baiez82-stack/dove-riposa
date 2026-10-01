@@ -229,7 +229,7 @@ export default function StandardPrecisionNavigator({
           <span>Lungo · Arrivo</span>
         </div>}
 
-        <small className="haptic-note">Funzione sperimentale e facoltativa. Le vibrazioni aiutano a seguire le indicazioni senza audio e non sostituiscono la segnaletica.</small>
+        <small className="haptic-note">{hapticsEnabled?'Funzione sperimentale: le vibrazioni non sostituiscono la segnaletica o altri ausili.':'Facoltative e senza audio.'}</small>
       </div>}
 
       <div className="step-progress" aria-hidden="true">
@@ -252,7 +252,7 @@ export default function StandardPrecisionNavigator({
 
       {step<instructions.length-1&&<div className="precision-controls">
         <button disabled={step===0} onClick={()=>moveTo(step-1)}>← Indietro</button>
-        <button onClick={()=>moveTo(step+1)}>Prossima →</button>
+        <button onClick={()=>moveTo(step+1)}>Prossima indicazione →</button>
       </div>}
 
       {arrivalStatus==='missing'&&<div className="arrival-recovery">
