@@ -220,6 +220,11 @@ function PrivacyPanel(){
       <div><span className="check-ok">✓</span><p><b>Separazione istituzionale</b><small>Nessun profilo social/commerciale automatico del defunto.</small></p></div>
       <div><span className="check-ok">✓</span><p><b>Database multi-ente + RLS</b><small>Separazione logica dei dati e ruoli operatori predisposti.</small></p></div>
       <div><span className="check-ok">✓</span><p><b>Autenticazione nominativa</b><small>Area operatori con Supabase Auth; niente PIN condiviso.</small></p></div>
+      <div><span className="check-ok">✓</span><p><b>Permessi pubblici minimizzati</b><small>Posizione, fotocamera e vibrazione sono facoltative e si attivano solo dopo un’azione esplicita dell’utente.</small></p></div>
+      <div><span className="check-ok">✓</span><p><b>Demo senza analytics applicativi</b><small>Ricerca e navigazione demo non vengono salvate in un sistema analytics; restano solo gli inevitabili log tecnici dell’infrastruttura.</small></p></div>
+      <div><span className="check-ok">✓</span><p><b>Demo non indicizzata</b><small>Le pagine dimostrative sono impostate noindex/nofollow per ridurre il rischio che dati fittizi vengano scambiati per informazioni ufficiali.</small></p></div>
+      <div><span className="check-pending">!</span><p><b>Rotazione credenziali admin</b><small>Prima del pilot reale cambia la password amministratore usata durante la demo e non riutilizzarla su altri servizi.</small></p></div>
+      <div><span className="check-pending">!</span><p><b>Protezione password compromesse</b><small>Supabase segnala “Leaked Password Protection” non attiva: abilitarla prima della produzione.</small></p></div>
       <div><span className="check-pending">!</span><p><b>Titolare, DPO e contatti ufficiali</b><small>Da pubblicare nell’informativa definitiva prima del pilot reale.</small></p></div>
       <div><span className="check-pending">!</span><p><b>Accordo art. 28 GDPR</b><small>Ruoli, istruzioni, sub-responsabili, restituzione/cancellazione e audit da formalizzare.</small></p></div>
       <div><span className="check-pending">!</span><p><b>Contratto hosting compatibile</b><small>La demo gira su Render Free. Prima dei dati reali va scelto un piano/contratto idoneo, verificati DPA, localizzazione, log e sub-responsabili.</small></p></div>
