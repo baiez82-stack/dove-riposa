@@ -136,6 +136,7 @@ export async function importBurials(payload){
   const mappingProfile=cleanProfile(payload?.mappingProfile);
   const inputRows=Array.isArray(payload?.rows)?payload.rows:[];
 
+  if(payload?.demoConfirmed!==true) return {ok:false,error:'Import bloccato: in questa fase sono ammessi solo dati fittizi o espressamente autorizzati per la demo.'};
   if(!cemeteryId) return {ok:false,error:'Seleziona un cimitero.'};
   if(!inputRows.length) return {ok:false,error:'Il file non contiene righe importabili.'};
   if(inputRows.length>MAX_ROWS) return {ok:false,error:`Massimo ${MAX_ROWS} righe per importazione.`};
