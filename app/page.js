@@ -24,7 +24,7 @@ export default function Home(){
         <div className="directory-trust">
           <span>● Posizione non salvata</span>
           <span>● QR di posizione</span>
-          <span>● Percorsi accessibili</span>
+          <span>● Info accessibilità</span>
           <span>● Nessun account cittadino</span>
         </div>
       </div>
