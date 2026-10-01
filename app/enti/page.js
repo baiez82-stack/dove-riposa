@@ -21,6 +21,7 @@ export default function EntiPage(){
         <article><span>ACCESS</span><h3>Accessibilità dentro il percorso</h3><p>Superficie, pendenza, larghezza, gradini, rampe e punti di sosta diventano attributi dei singoli tratti e possono influenzare il routing.</p></article>
         <article><span>LIVE</span><h3>La mappa non è statica</h3><p>Lavori, passaggi chiusi o limitazioni temporanee possono escludere un tratto e ricalcolare il percorso disponibile.</p></article>
         <article><span>CHECK</span><h3>L’arrivo viene confermato</h3><p>Alla fine Precision mostra settore, fila e posizione e chiede una conferma esplicita. Se la sepoltura non viene trovata, invita a ricalibrare dal marker più vicino.</p></article>
+        <article><span>HAPTIC</span><h3>Guida silenziosa opzionale</h3><p>Sui browser compatibili, brevi pattern di vibrazione possono distinguere dritto, sinistra, destra e arrivo. È una funzione sperimentale da validare con utenti ciechi e ipovedenti, non uno standard internazionale.</p></article>
       </div>
 
       <div className="business-note">
