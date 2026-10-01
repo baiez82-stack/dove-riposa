@@ -62,7 +62,6 @@ export default function PescantinaPage(){
   useEffect(()=>{
     const params=new URLSearchParams(window.location.search);
     const cal=params.get('cal');
-    const source=params.get('src')||'direct';
     if(cal && markers[cal]) setCalibrated(markers[cal]);
   },[]);
 
@@ -146,14 +145,14 @@ export default function PescantinaPage(){
 
           {selected&&<>
             <div className="route-mode">
-              <button className={routeMode==='short'?'active':''} onClick={()=>setRouteMode('short')}>Più breve <small>{selected.shortDistance}</small></button>
-              <button className={routeMode==='accessible'?'active':''} onClick={()=>setRouteMode('accessible')}>Accessibile ♿ <small>{selected.accessibleDistance}</small></button>
-              <button className={routeMode==='assist'?'active':''} onClick={()=>setRouteMode('assist')}>Assistito ♥ <small>{selected.assistDistance}</small></button>
+              <button className={routeMode==='short'?'active':''} onClick={()=>setRouteMode('short')}>Breve demo <small>{selected.shortDistance}</small></button>
+              <button className={routeMode==='accessible'?'active':''} onClick={()=>setRouteMode('accessible')}>Accessibilità demo ♿ <small>{selected.accessibleDistance}</small></button>
+              <button className={routeMode==='assist'?'active':''} onClick={()=>setRouteMode('assist')}>Assistito demo ♥ <small>{selected.assistDistance}</small></button>
             </div>
 
             {routeMode==='assist'&&<div className="assist-note">
               <b>Dove Riposa Assist</b>
-              <span>Priorità al percorso più regolare e semplice da seguire. Pendenze, fondo e punti di sosta devono essere validati con sopralluogo.</span>
+              <span>Simula la preferenza per un percorso più semplice. Pendenze, fondo e punti di sosta devono essere rilevati e validati sul posto prima dell’uso reale.</span>
             </div>}
 
             <div className={calibrated?'calibration-card calibrated':'calibration-card'}>
