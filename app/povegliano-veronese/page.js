@@ -9,11 +9,11 @@ import { getPrecisionConfig } from '../data/precision';
 const markers=getPrecisionConfig('povegliano-veronese').markers;
 
 const accessibilitySegments = [
-  {id:'A1',label:'Ingresso → viale centrale',surface:'Pavimentato',slope:'2%',width:'2,4 m',stairs:false,ramp:false,rest:true,status:'Da verificare sul posto',confidence:'Cartografia + demo',path:'M520 620 L520 545'},
-  {id:'A2',label:'Viale centrale → area est',surface:'Ghiaia compatta',slope:'4%',width:'1,8 m',stairs:false,ramp:false,rest:true,status:'Da verificare sul posto',confidence:'Immagini + demo',path:'M555 445 L650 445'},
-  {id:'A3',label:'Accesso porticato est',surface:'Pavimentato',slope:'6%',width:'1,4 m',stairs:false,ramp:true,rest:false,status:'Da verificare sul posto',confidence:'Ipotesi demo',path:'M650 445 L700 415 L700 350'},
-  {id:'A4',label:'Area ovest',surface:'Ghiaia',slope:'3%',width:'1,5 m',stairs:false,ramp:false,rest:false,status:'Da verificare sul posto',confidence:'Immagini + demo',path:'M470 510 L405 445 L365 370'},
-  {id:'A5',label:'Scalinata interna',surface:'Pietra',slope:'—',width:'1,2 m',stairs:true,ramp:false,rest:false,status:'Da verificare sul posto',confidence:'Presenza gradini · demo',path:'M600 420 L600 350'}
+  {id:'A1',label:'Ingresso → viale centrale',surface:'Da rilevare',slope:'Da rilevare',width:'Da rilevare',stairs:false,ramp:false,rest:false,status:'Da verificare sul posto',confidence:'Demo',path:'M520 620 L520 545'},
+  {id:'A2',label:'Viale centrale → area est',surface:'Da rilevare',slope:'Da rilevare',width:'Da rilevare',stairs:false,ramp:false,rest:false,status:'Da verificare sul posto',confidence:'Demo',path:'M555 445 L650 445'},
+  {id:'A3',label:'Accesso porticato est',surface:'Da rilevare',slope:'Da rilevare',width:'Da rilevare',stairs:false,ramp:false,rest:false,status:'Da verificare sul posto',confidence:'Demo',path:'M650 445 L700 415 L700 350'},
+  {id:'A4',label:'Area ovest',surface:'Da rilevare',slope:'Da rilevare',width:'Da rilevare',stairs:false,ramp:false,rest:false,status:'Da verificare sul posto',confidence:'Demo',path:'M470 510 L405 445 L365 370'},
+  {id:'A5',label:'Tratto interno',surface:'Da rilevare',slope:'Da rilevare',width:'Da rilevare',stairs:false,ramp:false,rest:false,status:'Da verificare sul posto',confidence:'Demo',path:'M600 420 L600 350'}
 ];
 
 const records = [
@@ -22,7 +22,7 @@ const records = [
     mapX:735,mapY:325,
     route:'M 520 635 L 520 555 L 555 520 L 555 440 L 635 440 L 635 365 L 735 325',
     accessibleRoute:'M 520 635 L 520 570 L 590 570 L 590 500 L 650 500 L 650 415 L 700 415 L 700 350 L 735 325',
-    shortDistance:'35 m',accessibleDistance:'52 m',assistDistance:'58 m',
+    shortDistance:'Demo 35 m',accessibleDistance:'Demo 52 m',assistDistance:'Demo 58 m',
     assistRoute:'M 520 635 L 520 590 L 575 590 L 575 545 L 620 545 L 620 470 L 675 470 L 675 390 L 735 325',
     instructions:[
       'Entra dal cancello principale',
@@ -52,7 +52,7 @@ const records = [
     mapX:365,mapY:370,
     route:'M 520 635 L 520 555 L 470 520 L 470 445 L 405 445 L 365 370',
     accessibleRoute:'M 520 635 L 520 570 L 455 570 L 455 510 L 405 510 L 405 430 L 365 370',
-    shortDistance:'31 m',accessibleDistance:'44 m',assistDistance:'49 m',
+    shortDistance:'Demo 31 m',accessibleDistance:'Demo 44 m',assistDistance:'Demo 49 m',
     assistRoute:'M 520 635 L 520 590 L 475 590 L 475 545 L 430 545 L 430 485 L 395 485 L 395 420 L 365 370',
     instructions:[
       'Entra dal cancello principale',
@@ -82,7 +82,7 @@ const records = [
     mapX:650,mapY:505,
     route:'M 520 635 L 520 570 L 590 570 L 590 525 L 650 505',
     accessibleRoute:'M 520 635 L 520 590 L 610 590 L 610 540 L 650 505',
-    shortDistance:'24 m',accessibleDistance:'29 m',assistDistance:'34 m',
+    shortDistance:'Demo 24 m',accessibleDistance:'Demo 29 m',assistDistance:'Demo 34 m',
     assistRoute:'M 520 635 L 520 595 L 575 595 L 575 555 L 620 555 L 620 525 L 650 505',
     instructions:[
       'Entra dal cancello principale',
@@ -212,11 +212,11 @@ export default function PoveglianoPage(){
 
           {selected && <>
             <div className="route-mode">
-              <button className={routeMode==='short'?'active':''} onClick={()=>setRouteMode('short')}>Più breve <small>{selected.shortDistance}</small></button>
-              <button className={routeMode==='accessible'?'active':''} onClick={()=>setRouteMode('accessible')}>Accessibile ♿ <small>{selected.accessibleDistance}</small></button>
-              <button className={routeMode==='assist'?'active':''} onClick={()=>setRouteMode('assist')}>Assistito ♥ <small>{selected.assistDistance}</small></button>
+              <button className={routeMode==='short'?'active':''} onClick={()=>setRouteMode('short')}>Breve demo <small>{selected.shortDistance}</small></button>
+              <button className={routeMode==='accessible'?'active':''} onClick={()=>setRouteMode('accessible')}>Accessibilità demo ♿ <small>{selected.accessibleDistance}</small></button>
+              <button className={routeMode==='assist'?'active':''} onClick={()=>setRouteMode('assist')}>Assistito demo ♥ <small>{selected.assistDistance}</small></button>
             </div>
-            {routeMode==='assist' && <div className="assist-note"><b>Dove Riposa Assist</b><span>Priorità a percorso regolare, minore pendenza e punti di sosta. Nessun profilo personale viene salvato.</span></div>}
+            {routeMode==='assist' && <div className="assist-note"><b>Dove Riposa Assist</b><span>Simula la preferenza per un percorso più semplice. Pendenza, fondo e punti di sosta devono essere rilevati e validati sul posto prima dell’uso reale.</span></div>}
 
             <div className={calibrated?'calibration-card calibrated':'calibration-card'}>
               <div><b>{calibrated ? 'Posizione calibrata' : 'Calibrazione necessaria'}</b><span>{calibrated ? calibrated.label : 'Scansiona un marker Dove Riposa vicino a te'}</span></div>
@@ -234,11 +234,11 @@ export default function PoveglianoPage(){
           <div><span className="eyebrow">DOVE RIPOSA ACCESS</span><h3>Accessibilità descritta tratto per tratto</h3></div>
           <span className="layer-status">Demo · da validare</span>
         </div>
-        <p>Ogni tratto può contenere superficie, pendenza, larghezza, rampe, gradini e punti di sosta. I dati mostrati qui sono dimostrativi: nella versione reale vengono precompilati da cartografia/immagini e poi confermati con sopralluogo.</p>
+        <p>Ogni tratto potrà contenere superficie, pendenza, larghezza, rampe, gradini e punti di sosta. In questa demo tali valori sono volutamente “da rilevare”: cartografia e immagini non bastano per dichiarare un percorso accessibile.</p>
         <div className="accessibility-segment-grid">
           {accessibilitySegments.slice(0,4).map(s=><div className="accessibility-segment-card" key={s.id}>
             <div className="segment-top"><b>{s.label}</b><span>{s.id}</span></div>
-            <div className="segment-tags"><span>{s.surface}</span><span>Pendenza {s.slope}</span><span>{s.width}</span>{s.ramp&&<span>Rampa</span>}{s.stairs&&<span>Gradini</span>}{s.rest&&<span>Punto sosta</span>}</div>
+            <div className="segment-tags"><span>Superficie: {s.surface}</span><span>Pendenza: {s.slope}</span><span>Larghezza: {s.width}</span></div>
             <small>{s.status} · {s.confidence}</small>
           </div>)}
         </div>
