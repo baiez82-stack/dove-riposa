@@ -20,6 +20,12 @@ export const metadata = {
   },
   description: 'Ricerca e navigazione cimiteriale digitale, semplice e accessibile.',
   applicationName: 'Dove Riposa',
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true
+  },
+  referrer: 'strict-origin-when-cross-origin',
   icons: {
     icon: '/icon.svg'
   }
