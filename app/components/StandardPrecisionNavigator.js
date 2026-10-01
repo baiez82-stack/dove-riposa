@@ -22,7 +22,6 @@ export default function StandardPrecisionNavigator({
   markers,
   municipalityLabel,
   onCalibrate,
-  onArrivalConfirmed,
   onClose,
   liveNotice=''
 }){
@@ -243,7 +242,7 @@ export default function StandardPrecisionNavigator({
         <small>{calibrated?'Ultimo riferimento QR: '+calibrated.label:'Ultimo tratto non ricalibrato con QR. Verifica con attenzione settore, fila e posizione.'}</small>
 
         {!arrivalStatus&&<div className="arrival-actions">
-          <button onClick={()=>{vibrate('arrival');setArrivalStatus('found');onArrivalConfirmed?.();}}>✓ Ho trovato la sepoltura</button>
+          <button onClick={()=>{vibrate('arrival');setArrivalStatus('found');}}>✓ Ho trovato la sepoltura</button>
           <button onClick={()=>{vibrate('recalibrate');setArrivalStatus('missing');setScanInfo('Se disponibile, scansiona il QR più vicino e ricontrolla settore, fila e posizione.');}}>Non la trovo</button>
         </div>}
 
