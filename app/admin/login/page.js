@@ -16,13 +16,13 @@ export default async function AdminLogin({searchParams}){
     <form className="admin-login-card" action={login}>
       <div className="admin-login-brand"><BrandLockup subtitle="Area riservata"/></div>
       <h1>Accesso operatori</h1>
-      <p>Povegliano Veronese · ambiente pilot</p>
+      <p>Dove Riposa · ambiente demo multi-ente</p>
       {message&&<div className="login-error">{message}</div>}
       <label>Email<input name="email" type="email" autoComplete="username" required placeholder="nome@comune.it"/></label>
       <label>Password<input name="password" type="password" autoComplete="current-password" required placeholder="••••••••"/></label>
       <button className="primary" type="submit">Accedi</button>
       <small className="login-note">Accesso riservato a utenti nominativi autorizzati. Nessun PIN condiviso.</small>
-      <Link href="/povegliano-veronese">← Torna al servizio cittadino</Link>
+      <Link href="/">← Torna al sito pubblico</Link>
     </form>
   </main>;
 }
