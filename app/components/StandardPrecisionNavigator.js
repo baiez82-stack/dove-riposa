@@ -179,16 +179,16 @@ export default function StandardPrecisionNavigator({
       <button className="camera-close" onClick={close} aria-label="Chiudi">×</button>
 
       <div className="camera-top">
-        <b>Dove Riposa Precision</b>
+        <b>Percorso verso la sepoltura</b>
         <span>{municipalityLabel} · {selected.nome} {selected.cognome}</span>
       </div>
 
       <div className="precision-cal-row">
         <div className={calibrated?'precision-cal-chip calibrated':'precision-cal-chip'}>
-          {calibrated ? '✓ Riferimento QR · '+calibrated.label : 'Nessun riferimento QR verificato'}
+          {calibrated ? '✓ Posizione aggiornata · '+calibrated.label : 'Posizione non ancora aggiornata con QR'}
         </div>
         {!cameraActive
-          ? <button type="button" className="scan-qr-button" onClick={startCamera}>Scansiona QR</button>
+          ? <button type="button" className="scan-qr-button" onClick={startCamera}>Scansiona un QR</button>
           : <button type="button" className="scan-qr-button active" onClick={stopCamera}>Chiudi fotocamera</button>}
       </div>
 
@@ -202,8 +202,8 @@ export default function StandardPrecisionNavigator({
       {step<instructions.length-1&&<div className="haptic-guide">
         <div className="haptic-guide-head">
           <div>
-            <span>GUIDA APTICA SILENZIOSA</span>
-            <b>{hapticsEnabled?'Vibrazioni attive':'Vibrazioni facoltative'}</b>
+            <span>VIBRAZIONI DURANTE IL PERCORSO</span>
+            <b>{hapticsEnabled?'Vibrazioni attive':'Vibrazioni disattivate'}</b>
           </div>
           <button
             type="button"
@@ -229,7 +229,7 @@ export default function StandardPrecisionNavigator({
           <span>Lungo · Arrivo</span>
         </div>}
 
-        <small className="haptic-note">Pattern sperimentale Dove Riposa, non standard internazionale. Supporto opzionale: non sostituisce screen reader, segnaletica o indicazioni accessibili.</small>
+        <small className="haptic-note">Funzione sperimentale e facoltativa. Le vibrazioni aiutano a seguire le indicazioni senza audio e non sostituiscono la segnaletica.</small>
       </div>}
 
       <div className="step-progress" aria-hidden="true">
@@ -237,17 +237,17 @@ export default function StandardPrecisionNavigator({
       </div>
 
       {step===instructions.length-1&&<div className="arrival-check">
-        <span className="arrival-kicker">DOVE RIPOSA CHECK</span>
+        <span className="arrival-kicker">SEI ARRIVATO</span>
         <b>{selected.settore} · {selected.fila} · {selected.posizione}</b>
-        <small>{calibrated?'Ultimo riferimento QR: '+calibrated.label:'Ultimo tratto non ricalibrato con QR. Verifica con attenzione settore, fila e posizione.'}</small>
+        <small>{calibrated?'Posizione aggiornata con QR: '+calibrated.label:'Controlla settore, fila e posizione indicati qui sopra.'}</small>
 
         {!arrivalStatus&&<div className="arrival-actions">
-          <button onClick={()=>{vibrate('arrival');setArrivalStatus('found');}}>✓ Ho trovato la sepoltura</button>
+          <button onClick={()=>{vibrate('arrival');setArrivalStatus('found');}}>Ho trovato la sepoltura</button>
           <button onClick={()=>{vibrate('recalibrate');setArrivalStatus('missing');setScanInfo('Se disponibile, scansiona il QR più vicino e ricontrolla settore, fila e posizione.');}}>Non la trovo</button>
         </div>}
 
         {arrivalStatus==='found'&&<div className="arrival-outcome found">✓ Arrivo confermato da te sul dispositivo.</div>}
-        {arrivalStatus==='missing'&&<div className="arrival-outcome missing">Ricalibra con un QR vicino oppure torna al passaggio precedente. Dove Riposa non conferma automaticamente l’arrivo.</div>}
+        {arrivalStatus==='missing'&&<div className="arrival-outcome missing">Prova a scansionare un QR vicino oppure torna al passaggio precedente.</div>}
       </div>}
 
       {step<instructions.length-1&&<div className="precision-controls">
@@ -256,14 +256,14 @@ export default function StandardPrecisionNavigator({
       </div>}
 
       {arrivalStatus==='missing'&&<div className="arrival-recovery">
-        <button type="button" onClick={()=>moveTo(Math.max(step-1,0))}>← Torna al passaggio precedente</button>
-        {!cameraActive&&<button type="button" onClick={startCamera}>Scansiona il QR più vicino</button>}
+        <button type="button" onClick={()=>moveTo(Math.max(step-1,0))}>← Torna indietro</button>
+        {!cameraActive&&<button type="button" onClick={startCamera}>Scansiona un QR vicino</button>}
       </div>}
 
       {scanInfo&&<div className="scan-info" aria-live="polite">{scanInfo}</div>}
       {error&&<div className="camera-error" aria-live="assertive">{error}</div>}
 
-      <div className="ar-note">Demo tecnica: percorsi, accessibilità e marker diventano operativi solo dopo planimetria ufficiale e sopralluogo validato.</div>
+      <div className="ar-note">Demo: percorso e posizioni devono essere verificati sul posto prima dell’uso reale.</div>
     </div>
   </div>;
 }
