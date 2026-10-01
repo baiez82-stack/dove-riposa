@@ -58,13 +58,44 @@ export default function StandardPrecisionNavigator({
     setArrivalStatus('');
   },[calibrated?.id,routeMode,selected?.id,instructions.length]);
 
-  function speak(){
-    if(!('speechSynthesis' in window)) return;
-    window.speechSynthesis.cancel();
-    const utterance=new SpeechSynthesisUtterance(instructions[step]);
-    utterance.lang='it-IT';
-    utterance.rate=.88;
-    window.speechSynthesis.speak(utterance);
+  const [hapticsEnabled,setHapticsEnabled]=useState(false);
+  const hapticsSupported=typeof navigator!=='undefined'&&typeof navigator.vibrate==='function';
+
+  function hapticPattern(type){
+    if(type==='left') return [80,70,80];
+    if(type==='right') return [80,70,80,70,80];
+    if(type==='arrival') return [420];
+    if(type==='recalibrate') return [70,60,220];
+    return [120];
+  }
+
+  function directionFor(index){
+    if(index>=instructions.length-1) return 'arrival';
+    const text=String(instructions[index]||'').toLowerCase();
+    if(text.includes('sinistra')) return 'left';
+    if(text.includes('destra')) return 'right';
+    return 'straight';
+  }
+
+  function vibrate(type){
+    if(!hapticsEnabled||!hapticsSupported) return;
+    navigator.vibrate(hapticPattern(type));
+  }
+
+  function moveTo(index){
+    const next=Math.min(Math.max(index,0),Math.max(instructions.length-1,0));
+    setArrivalStatus('');
+    setStep(next);
+    vibrate(directionFor(next));
+  }
+
+  function enableHaptics(){
+    if(!hapticsSupported){
+      setScanInfo('Le vibrazioni web non sono supportate da questo browser. La guida visiva resta disponibile.');
+      return;
+    }
+    setHapticsEnabled(true);
+    navigator.vibrate(hapticPattern(directionFor(step)));
   }
 
   useEffect(()=>{
@@ -88,7 +119,9 @@ export default function StandardPrecisionNavigator({
               const marker=markerFromValue(found?.[0]?.rawValue,markers);
               if(marker){
                 onCalibrateRef.current(marker);
-                setStep(Math.min(Math.max(Number(marker.stepIndex)||0,0),Math.max(instructions.length-1,0)));
+                const markerStep=Math.min(Math.max(Number(marker.stepIndex)||0,0),Math.max(instructions.length-1,0));
+                setStep(markerStep);
+                vibrate('recalibrate');
                 setScanInfo('Marker riconosciuto: '+marker.label);
               }
             }catch{}
@@ -102,7 +135,6 @@ export default function StandardPrecisionNavigator({
     return()=>{
       clearInterval(timer);
       stream?.getTracks().forEach(t=>t.stop());
-      if('speechSynthesis' in window) window.speechSynthesis.cancel();
     };
   },[markers]);
 
@@ -120,9 +152,27 @@ export default function StandardPrecisionNavigator({
       </div>
       {liveNotice&&<div className="precision-live-chip">↻ {liveNotice}</div>}
       <div className="ar-arrow">{step>=instructions.length-1?'●':'↑'}</div>
-      <div className="ar-instruction">{instructions[step]}</div>
+      <div className="ar-instruction" aria-live="polite">{instructions[step]}</div>
       <div className="ar-distance">{modeLabel} · {distance}</div>
-      <button className="voice-guide" onClick={speak}>🔊 Leggi indicazione</button>
+
+      <div className="haptic-guide">
+        <div className="haptic-guide-head">
+          <div>
+            <span>GUIDA APTICA SILENZIOSA</span>
+            <b>{hapticsEnabled?'Vibrazioni attive':'Vibrazioni facoltative'}</b>
+          </div>
+          <button type="button" className={hapticsEnabled?'haptic-toggle active':'haptic-toggle'} onClick={()=>hapticsEnabled?setHapticsEnabled(false):enableHaptics()}>
+            {hapticsEnabled?'Disattiva':'Attiva'}
+          </button>
+        </div>
+        <div className="haptic-legend">
+          <button type="button" onClick={()=>{if(hapticsSupported)navigator.vibrate(hapticPattern('straight'));}}>1 impulso <small>Dritto</small></button>
+          <button type="button" onClick={()=>{if(hapticsSupported)navigator.vibrate(hapticPattern('left'));}}>2 impulsi <small>Sinistra</small></button>
+          <button type="button" onClick={()=>{if(hapticsSupported)navigator.vibrate(hapticPattern('right'));}}>3 impulsi <small>Destra</small></button>
+          <button type="button" onClick={()=>{if(hapticsSupported)navigator.vibrate(hapticPattern('arrival'));}}>Lungo <small>Arrivo</small></button>
+        </div>
+        <small className="haptic-note">Codice Dove Riposa Haptic: non è uno standard internazionale. È un supporto opzionale e non sostituisce le indicazioni accessibili.</small>
+      </div>
 
       <div className="step-progress">
         {instructions.map((_,i)=><span key={i} className={i<=step?'done':''}></span>)}
@@ -132,26 +182,26 @@ export default function StandardPrecisionNavigator({
         <b>{selected.settore} · {selected.fila} · {selected.posizione}</b>
         <small>{calibrated?'Ultimo riferimento verificato: '+calibrated.label:'Scansiona il QR più vicino per aumentare la precisione dell’ultimo tratto.'}</small>
         {!arrivalStatus&&<div className="arrival-actions">
-          <button onClick={()=>{setArrivalStatus('found');onArrivalConfirmed?.();}}>✓ Ho trovato la sepoltura</button>
-          <button onClick={()=>{setArrivalStatus('missing');setScanInfo('Ricalibra dal QR più vicino e ricontrolla settore, fila e posizione.');}}>Non la trovo</button>
+          <button onClick={()=>{vibrate('arrival');setArrivalStatus('found');onArrivalConfirmed?.();}}>✓ Ho trovato la sepoltura</button>
+          <button onClick={()=>{vibrate('recalibrate');setArrivalStatus('missing');setScanInfo('Ricalibra dal QR più vicino e ricontrolla settore, fila e posizione.');}}>Non la trovo</button>
         </div>}
         {arrivalStatus==='found'&&<div className="arrival-outcome found">✓ Posizione finale confermata da te sul dispositivo.</div>}
         {arrivalStatus==='missing'&&<div className="arrival-outcome missing">Ricalibra dal marker più vicino: Dove Riposa non dichiara l’arrivo finché non lo confermi tu.</div>}
       </div>}
 
-      <div className="precision-controls">
-        <button disabled={step===0} onClick={()=>{setArrivalStatus('');setStep(Math.max(0,step-1));}}>← Indietro</button>
-        <button disabled={step===instructions.length-1} onClick={()=>{setArrivalStatus('');setStep(Math.min(instructions.length-1,step+1));}}>Prossima →</button>
-      </div>
+      {step<instructions.length-1&&<div className="precision-controls">
+        <button disabled={step===0} onClick={()=>moveTo(step-1)}>← Indietro</button>
+        <button onClick={()=>moveTo(step+1)}>Prossima →</button>
+      </div>}
 
       {(step<instructions.length-1||arrivalStatus==='missing')&&<div className="marker-fallback">
         <span>{arrivalStatus==='missing'?'Ricalibra da un marker vicino':'Calibrazione demo'}</span>
         {(Array.isArray(markers)?markers:Object.values(markers||{})).slice(0,3).map(m=>
-          <button key={m.id} onClick={()=>{onCalibrateRef.current(m);setStep(Math.min(Math.max(Number(m.stepIndex)||0,0),Math.max(instructions.length-1,0)));setArrivalStatus('');setScanInfo('Marker demo: '+m.label);}}>{m.code}</button>
+          <button key={m.id} onClick={()=>{onCalibrateRef.current(m);setStep(Math.min(Math.max(Number(m.stepIndex)||0,0),Math.max(instructions.length-1,0)));setArrivalStatus('');vibrate('recalibrate');setScanInfo('Marker demo: '+m.label);}}>{m.code}</button>
         )}
       </div>}
 
-      {scanInfo&&<div className="scan-info">{scanInfo}</div>}
+      {scanInfo&&<div className="scan-info" aria-live="polite">{scanInfo}</div>}
       <div className="ar-note">Demo tecnica: percorso, accessibilità e marker diventano operativi solo dopo planimetria e sopralluogo validati.</div>
       {error&&<div className="camera-error">{error}</div>}
     </div>
