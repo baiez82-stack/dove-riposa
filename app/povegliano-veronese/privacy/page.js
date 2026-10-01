@@ -42,7 +42,7 @@ export default function PrivacyPage(){
         <section className="privacy-section">
           <h2>2. Ricerca pubblica</h2>
           <p>I nominativi della demo sono fittizi. Nome, cognome e anno digitati vengono filtrati nel browser e non vengono inviati a Dove Riposa per finalità di analytics o profilazione.</p>
-          <p>Nel servizio reale la consultazione dovrà restare separata da eventuali servizi non istituzionali e non richiederà la creazione di un account solo per conoscere l’ubicazione di una sepoltura.</p>
+          <p>Nel servizio reale la consultazione dovrà restare separata da eventuali servizi non istituzionali. La semplice ricerca dell’ubicazione di una sepoltura non richiederà la creazione di un account: eventuali misure anti-abuso dovranno essere tecniche e proporzionate, senza identificare il cittadino solo per consentire la consultazione.</p>
         </section>
 
         <section className="privacy-section">
@@ -61,7 +61,7 @@ export default function PrivacyPage(){
         <section className="privacy-section">
           <h2>5. Dati cimiteriali e persone decedute</h2>
           <p>Nel pilot reale dovranno essere utilizzati solo i dati necessari alla finalità di ricerca e localizzazione, nei limiti stabiliti dall’ente: ad esempio nome, cognome, riferimenti temporali essenziali, cimitero, settore, fila e posizione.</p>
-          <p>Il GDPR non si applica direttamente ai dati delle persone decedute, ma l’ordinamento italiano disciplina l’esercizio di determinati diritti tramite l’art. 2-terdecies del Codice Privacy. Il Garante ha inoltre richiamato la necessità di mantenere separato il servizio istituzionale di ricerca da funzioni social o commerciali.</p>
+          <p>Il considerando 27 del GDPR prevede che il Regolamento non si applichi direttamente ai dati delle persone decedute; in Italia, però, l’art. 2-terdecies del Codice Privacy consente a determinati soggetti di esercitare i diritti riferiti a tali dati. Nei provvedimenti del 12 febbraio 2026 il Garante ha inoltre chiarito che, per i servizi cimiteriali, continuano a rilevare le tutele compatibili, la base giuridica dell’ente, la minimizzazione e la separazione tra ricerca istituzionale e funzioni social o commerciali.</p>
         </section>
 
         <section className="privacy-section">
@@ -85,6 +85,7 @@ export default function PrivacyPage(){
         <h2>Riferimenti ufficiali</h2>
         <p><a href="https://www.garanteprivacy.it/home/docweb/-/docweb-display/docweb/10228173" target="_blank" rel="noreferrer">Garante Privacy · Cimiteri digitali, newsletter 9 marzo 2026</a></p>
         <p><a href="https://www.garanteprivacy.it/home/docweb/-/docweb-display/docweb/10225702" target="_blank" rel="noreferrer">Garante Privacy · Provvedimento 12 febbraio 2026, doc. web 10225702</a></p>
+        <p><a href="https://www.normattiva.it/atto/caricaDettaglioAtto?atto.articolo.numero=2&atto.articolo.sottoArticolo=1&atto.articolo.tipoArticolo=0&atto.codiceRedazionale=18G00129&atto.dataPubblicazioneGazzetta=2018-09-04" target="_blank" rel="noreferrer">Codice Privacy · art. 2-terdecies, diritti riguardanti le persone decedute</a></p>
         <p><a href="https://www.garanteprivacy.it/home/docweb/-/docweb-display/docweb/9677876" target="_blank" rel="noreferrer">Garante Privacy · Linee guida cookie e altri strumenti di tracciamento</a></p>
         <p><a href="https://www.normattiva.it/eli/id/2003/07/29/003G0218/CONSOLIDATED/" target="_blank" rel="noreferrer">D.lgs. 196/2003 · Codice Privacy</a></p>
       </div>
