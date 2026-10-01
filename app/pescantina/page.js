@@ -95,7 +95,6 @@ export default function PescantinaPage(){
   function openRecord(r){
     setSelected(r);
     setRouteMode('short');
-    setCalibrated(current=>current||markers.ingresso);
     setCameraOpen(false);
     track('result_open');
     setTimeout(()=>document.getElementById('mappa')?.scrollIntoView({behavior:'smooth'}),50);
@@ -179,11 +178,7 @@ export default function PescantinaPage(){
             </div>
 
             <button className="primary precision-button" onClick={()=>{setCameraOpen(true);track('navigation_start',{mode:routeMode});}}>Apri Dove Riposa Precision</button>
-            <div className="demo-calibration">
-              <span>Marker demo:</span>
-              {Object.values(markers).map(m=><button key={m.id} onClick={()=>calibrate(m)}>{m.label}</button>)}
-            </div>
-            <div className="camera-privacy">La fotocamera resta sul dispositivo. I marker identificano punti del cimitero, non la persona che utilizza il servizio.</div>
+            <div className="camera-privacy">Precision funziona anche senza fotocamera. La fotocamera viene attivata solo se scegli “Scansiona QR” e il video non viene salvato né inviato a Dove Riposa.</div>
           </>}
         </div>
       </div>
@@ -214,15 +209,6 @@ export default function PescantinaPage(){
       onArrivalConfirmed={()=>track('arrival_confirmed',{mode:routeMode})}
       onClose={()=>setCameraOpen(false)}
     />}
-
-    <section className="wrap precision-features">
-      <div className="section-head"><span className="eyebrow">PERCHÉ DOVE RIPOSA</span><h2>Non solo una mappa con un pin.</h2></div>
-      <div className="info-cards">
-        <article><h3>Dove Riposa Precision</h3><p>I QR identificano punti fisici del cimitero e permettono di ricalibrare il percorso nei tratti in cui il GPS può essere poco affidabile.</p></article>
-        <article><h3>Dove Riposa Access</h3><p>Il percorso può usare dati verificati su fondo, pendenza, larghezza, gradini, rampe e punti di sosta, invece di presumere l’accessibilità dalla sola mappa.</p></article>
-        <article><h3>Dove Riposa Check</h3><p>Alla fine mostriamo settore, fila e posizione e chiediamo una conferma dell’utente: nessuna falsa promessa di precisione assoluta.</p></article>
-      </div>
-    </section>
 
     <footer>
       <div className="footer-brand"><BrandLockup compact subtitle="Pescantina · demo"/></div>
