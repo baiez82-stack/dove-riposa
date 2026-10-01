@@ -51,14 +51,6 @@ const demoRecords=[
   }
 ];
 
-function track(event,meta={}){
-  fetch('/api/analytics',{
-    method:'POST',
-    headers:{'content-type':'application/json'},
-    body:JSON.stringify({event,comune:'pescantina',source:'demo',...meta})
-  }).catch(()=>{});
-}
-
 export default function PescantinaPage(){
   const [q,setQ]=useState({nome:'',cognome:'',anno:''});
   const [searched,setSearched]=useState(false);
@@ -72,8 +64,6 @@ export default function PescantinaPage(){
     const cal=params.get('cal');
     const source=params.get('src')||'direct';
     if(cal && markers[cal]) setCalibrated(markers[cal]);
-    track('page_view',{source});
-    if(source.startsWith('qr-')) track('qr_entry',{source});
   },[]);
 
   const results=useMemo(()=>{
@@ -89,20 +79,17 @@ export default function PescantinaPage(){
     e.preventDefault();
     setSearched(true);
     setSelected(null);
-    track('search');
   }
 
   function openRecord(r){
     setSelected(r);
     setRouteMode('short');
     setCameraOpen(false);
-    track('result_open');
     setTimeout(()=>document.getElementById('mappa')?.scrollIntoView({behavior:'smooth'}),50);
   }
 
   function calibrate(marker){
     setCalibrated(marker);
-    track('navigation_start',{mode:'precision'});
   }
 
   return <main>
@@ -177,7 +164,7 @@ export default function PescantinaPage(){
               <span className="calibration-status">{calibrated?'✓':'QR'}</span>
             </div>
 
-            <button className="primary precision-button" onClick={()=>{setCameraOpen(true);track('navigation_start',{mode:routeMode});}}>Apri Dove Riposa Precision</button>
+            <button className="primary precision-button" onClick={()=>setCameraOpen(true)}>Apri Dove Riposa Precision</button>
             <div className="camera-privacy">Precision funziona anche senza fotocamera. La fotocamera viene attivata solo se scegli “Scansiona QR” e il video non viene salvato né inviato a Dove Riposa.</div>
           </>}
         </div>
@@ -206,7 +193,6 @@ export default function PescantinaPage(){
       markers={markers}
       municipalityLabel="Pescantina"
       onCalibrate={calibrate}
-      onArrivalConfirmed={()=>track('arrival_confirmed',{mode:routeMode})}
       onClose={()=>setCameraOpen(false)}
     />}
 
