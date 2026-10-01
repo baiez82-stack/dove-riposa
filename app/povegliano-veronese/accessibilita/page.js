@@ -38,7 +38,7 @@ export default function AccessibilityPage(){
 
         <section className="privacy-section">
           <h2>Obblighi in caso di adozione da parte di una PA</h2>
-          <p>Prima della pubblicazione come servizio istituzionale, l’ente dovrà effettuare le verifiche previste, predisporre il meccanismo di feedback e pubblicare tramite AgID la propria Dichiarazione di Accessibilità. Il link ufficiale generato da AgID dovrà essere inserito nel footer del servizio e aggiornato secondo le scadenze applicabili.</p>
+          <p>Prima della pubblicazione come servizio istituzionale, l’ente dovrà effettuare le verifiche previste, predisporre il meccanismo di feedback e pubblicare tramite AgID la propria Dichiarazione di Accessibilità. Per le PA la dichiarazione va riesaminata e, se necessario, aggiornata ogni anno entro il 23 settembre; il link ufficiale generato da AgID deve essere esposto nel footer del servizio.</p>
         </section>
 
         <section className="privacy-section">
