@@ -175,3 +175,64 @@ linear-gradient(180deg,#f7f3eb 0%,var(--paper) 100%)}
   .precision-modal .haptic-note{font-size:10px}
   .precision-modal .arrival-actions{grid-template-columns:1fr}
 }
+
+
+/* Visual QA pass 2026-10-01 */
+.map-card,.map-card>*,
+.result-card,.result-main,
+.citizen-route-panel,
+.simple-destination{min-width:0}
+.map-card{max-width:100%}
+.citizen-route-panel{overflow-wrap:anywhere}
+.citizen-route-panel>.eyebrow{margin-bottom:4px}
+.citizen-route-panel h3{margin:10px 0 14px}
+.citizen-route-panel>p{margin:0 0 4px}
+.simple-destination{
+  display:grid;
+  gap:6px;
+  margin:18px 0;
+  padding:18px;
+  border-radius:16px;
+  background:#fff;
+  border:1px solid var(--line)
+}
+.simple-destination span,
+.simple-destination b,
+.simple-destination small{display:block;margin:0}
+.simple-destination b{font-family:var(--font-display),Georgia,serif;font-size:24px;line-height:1.12}
+.simple-destination small{font-size:14px;line-height:1.45;color:var(--muted)}
+.public-access-note{margin-top:2px}
+.citizen-start-button{width:100%}
+footer p{line-height:1.7}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible{
+  outline:3px solid #d5a94f;
+  outline-offset:3px
+}
+@media(max-width:820px){
+  .map-card{overflow:hidden;border-radius:18px}
+  .map-card>.pescantina-map-card,
+  .map-card>.cemetery-map-shell{border-radius:0;border-left:0;border-right:0}
+  .citizen-route-panel{padding:26px 22px}
+  .public-route-head{margin-bottom:14px}
+  .public-route-head h2{font-size:34px}
+  .public-route-head p{font-size:15px}
+}
+@media(max-width:560px){
+  .wrap{padding-left:16px;padding-right:16px}
+  .municipality-hero{padding-left:16px;padding-right:16px}
+  .simple-destination{padding:16px;gap:7px}
+  .simple-destination b{font-size:23px}
+  .public-access-note{font-size:14px}
+  .camera-privacy{font-size:12px;line-height:1.55}
+  .privacy-page{padding-top:32px}
+  .privacy-hero h1{font-size:42px}
+  .privacy-hero>p{font-size:17px}
+  .privacy-section{padding:18px}
+  .privacy-section h2{font-size:23px}
+  .privacy-section p,.privacy-section li{font-size:15px;line-height:1.65}
+  .privacy-sources{padding:20px}
+  footer{padding-left:16px;padding-right:16px}
+}
