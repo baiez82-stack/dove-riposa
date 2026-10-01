@@ -15,7 +15,7 @@ export default function TermsPage(){
 
     <section className="privacy-page wrap">
       <div className="privacy-hero">
-        <span className="eyebrow">DEMO PILOTA · AGGIORNAMENTO 30/09/2026</span>
+        <span className="eyebrow">DEMO PILOTA · AGGIORNAMENTO 01/10/2026</span>
         <h1>Termini d’uso</h1>
         <p>Questi termini disciplinano esclusivamente la demo tecnica di Dove Riposa. La demo non è un servizio ufficiale del Comune di Pescantina e non contiene dati o planimetrie comunali ufficiali.</p>
       </div>
@@ -31,7 +31,7 @@ export default function TermsPage(){
 
         <section className="privacy-section"><h2>4. Dati e cartografia della demo</h2><p>Nomi, date, settori, file, loculi, distanze, marker, condizioni dei percorsi e indicazioni di accessibilità sono esemplificativi. La ricostruzione grafica non è una planimetria ufficiale. Nel servizio reale potranno essere pubblicati soltanto dati forniti o validati dall’ente competente e nei limiti delle finalità istituzionali definite dall’ente.</p></section>
 
-        <section className="privacy-section"><h2>5. Navigazione, Precision e accessibilità fisica</h2><p>Le indicazioni di navigazione e la sovrapposizione tramite fotocamera sono assistenza orientativa. Non sostituiscono segnaletica, recinzioni, divieti, indicazioni del personale o valutazioni sul posto. Le informazioni su rampe, pendenze, superfici, gradini e percorsi accessibili devono essere considerate affidabili solo quando risultano validate dall’ente tramite sopralluogo. In caso di contrasto prevalgono sempre le condizioni reali e le indicazioni ufficiali.</p></section>
+        <section className="privacy-section"><h2>5. Navigazione, Precision e accessibilità fisica</h2><p>Le indicazioni di navigazione sono assistenza orientativa. Fotocamera e vibrazione sono facoltative e si attivano solo su scelta dell’utente. La guida aptica usa un pattern sperimentale Dove Riposa e non è uno standard assistivo certificato. Le indicazioni non sostituiscono segnaletica, recinzioni, divieti, personale o valutazioni sul posto. Le informazioni su rampe, pendenze, superfici, gradini e percorsi accessibili sono affidabili solo dopo validazione dell’ente tramite sopralluogo; in caso di contrasto prevalgono sempre le condizioni reali e le indicazioni ufficiali.</p></section>
 
         <section className="privacy-section"><h2>6. Dove Riposa Live</h2><p>Gli avvisi Live della demo sono simulazioni. Nel servizio reale eventuali chiusure, lavori, limitazioni o orari saranno pubblicati dagli operatori autorizzati. Un avviso digitale non garantisce che non possano esistere condizioni improvvise non ancora segnalate; l’utente deve rispettare la segnaletica e le disposizioni presenti sul posto.</p></section>
 
