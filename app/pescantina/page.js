@@ -157,7 +157,7 @@ export default function PescantinaPage(){
 
             <div className={calibrated?'calibration-card calibrated':'calibration-card'}>
               <div>
-                <b>{calibrated?'Posizione calibrata':'Calibrazione necessaria'}</b>
+                <b>{calibrated?'Riferimento QR acquisito':'Calibrazione necessaria'}</b>
                 <span>{calibrated?calibrated.label:'Scansiona un marker Dove Riposa vicino a te'}</span>
               </div>
               <span className="calibration-status">{calibrated?'✓':'QR'}</span>
