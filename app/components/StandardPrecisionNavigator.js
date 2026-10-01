@@ -33,6 +33,7 @@ export default function StandardPrecisionNavigator({
   const [scanInfo,setScanInfo]=useState('');
   const [step,setStep]=useState(0);
   const [arrivalStatus,setArrivalStatus]=useState('');
+  const hapticsEnabledRef=useRef(false);
 
   const instructions=routeMode==='assist'
     ? selected.assistInstructions
@@ -78,7 +79,7 @@ export default function StandardPrecisionNavigator({
   }
 
   function vibrate(type){
-    if(!hapticsEnabled||!hapticsSupported) return;
+    if(!hapticsEnabledRef.current||!hapticsSupported) return;
     navigator.vibrate(hapticPattern(type));
   }
 
@@ -94,6 +95,7 @@ export default function StandardPrecisionNavigator({
       setScanInfo('Le vibrazioni web non sono supportate da questo browser. La guida visiva resta disponibile.');
       return;
     }
+    hapticsEnabledRef.current=true;
     setHapticsEnabled(true);
     navigator.vibrate(hapticPattern(directionFor(step)));
   }
@@ -135,6 +137,7 @@ export default function StandardPrecisionNavigator({
     return()=>{
       clearInterval(timer);
       stream?.getTracks().forEach(t=>t.stop());
+      navigator.vibrate?.(0);
     };
   },[markers]);
 
@@ -155,13 +158,13 @@ export default function StandardPrecisionNavigator({
       <div className="ar-instruction" aria-live="polite">{instructions[step]}</div>
       <div className="ar-distance">{modeLabel} · {distance}</div>
 
-      <div className="haptic-guide">
+      {step<instructions.length-1&&<div className="haptic-guide">
         <div className="haptic-guide-head">
           <div>
             <span>GUIDA APTICA SILENZIOSA</span>
             <b>{hapticsEnabled?'Vibrazioni attive':'Vibrazioni facoltative'}</b>
           </div>
-          <button type="button" className={hapticsEnabled?'haptic-toggle active':'haptic-toggle'} onClick={()=>hapticsEnabled?setHapticsEnabled(false):enableHaptics()}>
+          <button type="button" className={hapticsEnabled?'haptic-toggle active':'haptic-toggle'} onClick={()=>{if(hapticsEnabled){hapticsEnabledRef.current=false;setHapticsEnabled(false);navigator.vibrate?.(0);}else{enableHaptics();}}}>
             {hapticsEnabled?'Disattiva':'Attiva'}
           </button>
         </div>
@@ -172,7 +175,7 @@ export default function StandardPrecisionNavigator({
           <button type="button" onClick={()=>{if(hapticsSupported)navigator.vibrate(hapticPattern('arrival'));}}>Lungo <small>Arrivo</small></button>
         </div>
         <small className="haptic-note">Codice Dove Riposa Haptic: non è uno standard internazionale. È un supporto opzionale e non sostituisce le indicazioni accessibili.</small>
-      </div>
+      </div>}
 
       <div className="step-progress">
         {instructions.map((_,i)=><span key={i} className={i<=step?'done':''}></span>)}
