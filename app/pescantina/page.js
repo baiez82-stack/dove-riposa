@@ -52,7 +52,7 @@ const demoRecords=[
 ];
 
 export default function PescantinaPage(){
-  const [q,setQ]=useState({nome:'',cognome:'',anno:''});
+  const [q,setQ]=useState('');
   const [searched,setSearched]=useState(false);
   const [selected,setSelected]=useState(null);
   const [routeMode,setRouteMode]=useState('short');
@@ -66,12 +66,12 @@ export default function PescantinaPage(){
   },[]);
 
   const results=useMemo(()=>{
-    const n=s=>s.trim().toLowerCase();
-    return demoRecords.filter(r=>
-      (!n(q.nome)||r.nome.toLowerCase().includes(n(q.nome))) &&
-      (!n(q.cognome)||r.cognome.toLowerCase().includes(n(q.cognome))) &&
-      (!n(q.anno)||r.anno.includes(n(q.anno))||r.morte.includes(n(q.anno)))
-    );
+    const terms=q.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    if(!terms.length) return demoRecords;
+    return demoRecords.filter(r=>{
+      const haystack=`${r.nome} ${r.cognome} ${r.anno} ${r.morte}`.toLowerCase();
+      return terms.every(term=>haystack.includes(term));
+    });
   },[q]);
 
   function submit(e){
@@ -103,12 +103,12 @@ export default function PescantinaPage(){
         <h1>Trova una sepoltura.</h1>
         <p>Cerca senza registrazione e prova il percorso fino alla posizione. Nominativi, mappa e indicazioni sono dimostrativi e non sono dati ufficiali del Comune.</p>
       </div>
-      <form className="search-card public-search" onSubmit={submit}>
-        <label>Nome<input value={q.nome} onChange={e=>setQ({...q,nome:e.target.value})} placeholder="es. Lucia"/></label>
-        <label>Cognome<input value={q.cognome} onChange={e=>setQ({...q,cognome:e.target.value})} placeholder="es. Ferrari"/></label>
-        <label>Anno <span>(facoltativo)</span><input value={q.anno} onChange={e=>setQ({...q,anno:e.target.value})} placeholder="es. 1948" inputMode="numeric"/></label>
-        <button className="primary" type="submit">Cerca sepoltura</button>
-        <p className="micro">Dati fittizi · nessun account cittadino · <Link href="/pescantina/privacy">Privacy</Link></p>
+      <form className="search-card public-search simple-citizen-search" onSubmit={submit}>
+        <label className="public-search-main">Nome e cognome
+          <input value={q} onChange={e=>setQ(e.target.value)} placeholder="es. Lucia Ferrari" autoComplete="off" />
+        </label>
+        <button className="primary" type="submit">Cerca</button>
+        <p className="micro">Puoi scrivere anche solo il cognome. Dati fittizi · nessun account cittadino · <Link href="/pescantina/privacy">Privacy</Link></p>
       </form>
     </section>
 
@@ -123,67 +123,36 @@ export default function PescantinaPage(){
             <div className="place"><b>{r.settore}</b><span>{r.fila} · {r.posizione}</span></div>
             <div className="source">Dato dimostrativo fittizio</div>
           </div>
-          <button className="secondary" onClick={()=>openRecord(r)}>Vedi posizione</button>
+          <button className="secondary" onClick={()=>openRecord(r)}>Guidami</button>
         </article>)}
         {results.length===0&&<div className="empty">Nessuna corrispondenza nei dati demo.</div>}
       </div>
     </section>}
 
-    <section className="wrap" id="mappa">
-      <div className="section-head">
-        <span className="eyebrow">DOVE RIPOSA PRECISION · DEMO</span>
-        <h2>{selected?selected.nome+' '+selected.cognome:'Mappa e navigazione'}</h2>
-        <p>{selected?selected.settore+' · '+selected.fila+' · '+selected.posizione:'Seleziona un risultato per provare percorso breve, accessibile e assistito.'}</p>
+    {selected&&<section className="wrap" id="mappa">
+      <div className="section-head public-route-head">
+        <span className="eyebrow">PERCORSO</span>
+        <h2>{selected.nome} {selected.cognome}</h2>
+        <p>{selected.settore} · {selected.fila} · {selected.posizione}</p>
       </div>
 
       <div className="map-card">
         <PescantinaMap selected={selected} routeMode={routeMode} calibrated={calibrated}/>
-        <div className="map-info">
-          <span className="eyebrow">PRECISION + ACCESSIBILITÀ</span>
-          <h3>{selected?'Scegli il percorso':'Seleziona una sepoltura'}</h3>
-          <p>La demo combina percorso, marker QR di posizione, accessibilità e controllo finale di arrivo. I dati fisici restano “da verificare” finché non vengono rilevati sul posto.</p>
-
-          {selected&&<>
-            <div className="route-mode">
-              <button className={routeMode==='short'?'active':''} onClick={()=>setRouteMode('short')}>Breve demo <small>{selected.shortDistance}</small></button>
-              <button className={routeMode==='accessible'?'active':''} onClick={()=>setRouteMode('accessible')}>Accessibilità demo ♿ <small>{selected.accessibleDistance}</small></button>
-              <button className={routeMode==='assist'?'active':''} onClick={()=>setRouteMode('assist')}>Assistito demo ♥ <small>{selected.assistDistance}</small></button>
-            </div>
-
-            {routeMode==='assist'&&<div className="assist-note">
-              <b>Dove Riposa Assist</b>
-              <span>Simula la preferenza per un percorso più semplice. Pendenze, fondo e punti di sosta devono essere rilevati e validati sul posto prima dell’uso reale.</span>
-            </div>}
-
-            <div className={calibrated?'calibration-card calibrated':'calibration-card'}>
-              <div>
-                <b>{calibrated?'Riferimento QR acquisito':'Calibrazione necessaria'}</b>
-                <span>{calibrated?calibrated.label:'Scansiona un marker Dove Riposa vicino a te'}</span>
-              </div>
-              <span className="calibration-status">{calibrated?'✓':'QR'}</span>
-            </div>
-
-            <button className="primary precision-button" onClick={()=>setCameraOpen(true)}>Apri Dove Riposa Precision</button>
-            <div className="camera-privacy">Precision funziona anche senza fotocamera. La fotocamera viene attivata solo se scegli “Scansiona QR” e il video non viene salvato né inviato a Dove Riposa.</div>
-          </>}
+        <div className="map-info citizen-route-panel">
+          <span className="eyebrow">IL TUO PERCORSO</span>
+          <h3>Pronto a partire</h3>
+          <p>Ti guidiamo dall’ingresso fino a <b>{selected.settore} · {selected.fila} · {selected.posizione}</b>, un passaggio alla volta.</p>
+          <div className="simple-destination">
+            <span>Destinazione</span>
+            <b>{selected.nome} {selected.cognome}</b>
+            <small>{selected.settore} · {selected.fila} · {selected.posizione}</small>
+          </div>
+          <div className="public-access-note">Le informazioni dettagliate sull’accessibilità non sono ancora verificate sul posto in questa demo.</div>
+          <button className="primary precision-button citizen-start-button" onClick={()=>setCameraOpen(true)}>Inizia il percorso</button>
+          <div className="camera-privacy">Puoi seguire le indicazioni senza fotocamera. Se vuoi migliorare la precisione, potrai scansionare un QR lungo il percorso.</div>
         </div>
       </div>
-
-      <div className="accessibility-layer" id="accessibilita">
-        <div className="accessibility-layer-head">
-          <div><span className="eyebrow">DOVE RIPOSA ACCESS</span><h3>Il percorso accessibile non si presume</h3></div>
-          <span className="layer-status">Demo · da rilevare</span>
-        </div>
-        <p>Ogni tratto viene descritto con superficie, pendenza, larghezza, gradini, rampe e punti di sosta. Per Pescantina questi valori sono volutamente “da rilevare”: la schermata satellitare non basta per certificare l’accessibilità.</p>
-        <div className="accessibility-segment-grid">
-          {accessibilitySegments.map(s=><div className="accessibility-segment-card" key={s.id}>
-            <div className="segment-top"><b>{s.label}</b><span>{s.id}</span></div>
-            <div className="segment-tags"><span>{s.surface}</span><span>Pendenza {s.slope}</span><span>Larghezza {s.width}</span></div>
-            <small>{s.status}</small>
-          </div>)}
-        </div>
-      </div>
-    </section>
+    </section>}
 
     {cameraOpen&&selected&&<StandardPrecisionNavigator
       selected={selected}
@@ -227,8 +196,6 @@ function PescantinaMap({selected,routeMode,calibrated}){
       <path d="M138 370 L300 370" className="cem-path minor"/>
       <path d="M420 370 L582 370" className="cem-path minor"/>
 
-      {accessibilitySegments.map(s=><path key={s.id} d={s.path} className="surface-segment pending"/>)}
-
       {Array.from({length:7}).map((_,i)=><line key={'l'+i} x1="160" y1={110+i*34} x2="278" y2={110+i*34} className="grave-row"/>)}
       {Array.from({length:4}).map((_,i)=><rect key={'r'+i} x={455+(i%2)*60} y={120+Math.floor(i/2)*95} width="34" height="64" rx="3" className="grave-block"/>)}
 
@@ -250,9 +217,8 @@ function PescantinaMap({selected,routeMode,calibrated}){
       </>}
     </svg>
     <div className="pescantina-map-legend">
-      <span><i className="legend-line"></i> Percorsi demo</span>
-      <span><i className="legend-dot"></i> Marker Precision</span>
-      <span><i className="legend-pending"></i> Accessibilità da rilevare</span>
+      <span><i className="legend-line"></i> Percorso indicativo</span>
+      <span><i className="legend-dot"></i> Punti QR</span>
     </div>
   </div>;
 }
