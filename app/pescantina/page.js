@@ -23,9 +23,9 @@ const demoRecords=[
     accessibleRoute:'M360 480 L360 385 L282 385 L282 245 L240 210',
     assistRoute:'M360 480 L360 405 L315 405 L315 305 L270 305 L240 210',
     shortDistance:'Demo 55 m',accessibleDistance:'Demo 68 m',assistDistance:'Demo 74 m',
-    instructions:['Entra dall’ingresso principale','Raggiungi il nodo centrale','Svolta verso l’area sinistra','Prosegui fino alla Fila 4','Loculo 12'],
-    accessibleInstructions:['Entra dall’ingresso principale','Mantieni l’asse centrale','Usa il ramo accessibile demo verso sinistra','Prosegui sul percorso da validare','Raggiungi Fila 4 · Loculo 12'],
-    assistInstructions:['Entra dall’ingresso principale','Procedi lungo il percorso più regolare della demo','Raggiungi il nodo centrale','Prosegui verso l’area sinistra','Raggiungi Fila 4 · Loculo 12']
+    instructions:['Vai dritto fino al nodo centrale','Raggiungi il nodo centrale','Svolta verso l’area sinistra','Prosegui fino alla Fila 4','Loculo 12'],
+    accessibleInstructions:['Vai dritto lungo l’asse centrale','Mantieni l’asse centrale','Usa il ramo accessibile demo verso sinistra','Prosegui sul percorso da validare','Raggiungi Fila 4 · Loculo 12'],
+    assistInstructions:['Vai dritto lungo il percorso più regolare della demo','Procedi lungo il percorso più regolare della demo','Raggiungi il nodo centrale','Prosegui verso l’area sinistra','Raggiungi Fila 4 · Loculo 12']
   },
   {
     id:2,nome:'Carlo',cognome:'Mantovani',anno:'1939',morte:'2021',settore:'Campo B',fila:'Fila 6',posizione:'Tomba 27',
@@ -34,9 +34,9 @@ const demoRecords=[
     accessibleRoute:'M360 480 L360 385 L438 385 L438 285 L500 245',
     assistRoute:'M360 480 L360 410 L405 410 L405 320 L465 320 L500 245',
     shortDistance:'Demo 60 m',accessibleDistance:'Demo 72 m',assistDistance:'Demo 78 m',
-    instructions:['Entra dall’ingresso principale','Raggiungi il nodo centrale','Svolta verso l’area destra','Prosegui fino alla Fila 6','Tomba 27'],
-    accessibleInstructions:['Entra dall’ingresso principale','Mantieni l’asse centrale','Usa il ramo accessibile demo verso destra','Prosegui sul percorso da validare','Raggiungi Fila 6 · Tomba 27'],
-    assistInstructions:['Entra dall’ingresso principale','Procedi lungo il percorso più regolare della demo','Raggiungi il nodo centrale','Prosegui verso l’area destra','Raggiungi Fila 6 · Tomba 27']
+    instructions:['Vai dritto fino al nodo centrale','Raggiungi il nodo centrale','Svolta verso l’area destra','Prosegui fino alla Fila 6','Tomba 27'],
+    accessibleInstructions:['Vai dritto lungo l’asse centrale','Mantieni l’asse centrale','Usa il ramo accessibile demo verso destra','Prosegui sul percorso da validare','Raggiungi Fila 6 · Tomba 27'],
+    assistInstructions:['Vai dritto lungo il percorso più regolare della demo','Procedi lungo il percorso più regolare della demo','Raggiungi il nodo centrale','Prosegui verso l’area destra','Raggiungi Fila 6 · Tomba 27']
   },
   {
     id:3,nome:'Gianna',cognome:'Rossi',anno:'1955',morte:'2025',settore:'Settore C',fila:'Fila 2',posizione:'Loculo 8',
@@ -45,7 +45,7 @@ const demoRecords=[
     accessibleRoute:'M360 480 L360 385 L300 385 L250 350',
     assistRoute:'M360 480 L360 420 L320 420 L320 385 L275 385 L250 350',
     shortDistance:'Demo 42 m',accessibleDistance:'Demo 50 m',assistDistance:'Demo 57 m',
-    instructions:['Entra dall’ingresso principale','Prosegui fino al primo passaggio','Svolta verso sinistra','Raggiungi la Fila 2','Loculo 8'],
+    instructions:['Vai dritto fino al primo passaggio','Prosegui fino al primo passaggio','Svolta verso sinistra','Raggiungi la Fila 2','Loculo 8'],
     accessibleInstructions:['Entra dall’ingresso principale','Mantieni l’asse centrale fino al nodo','Usa il ramo accessibile demo verso sinistra','Raggiungi la Fila 2','Loculo 8'],
     assistInstructions:['Entra dall’ingresso principale','Segui il percorso regolare della demo','Raggiungi il nodo centrale','Svolta verso la Fila 2','Loculo 8']
   }
