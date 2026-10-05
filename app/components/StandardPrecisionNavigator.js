@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import jsQR from 'jsqr';
 
 function markerFromValue(value,markers){
   const list=Array.isArray(markers)?markers:Object.values(markers||{});
@@ -32,6 +33,7 @@ export default function StandardPrecisionNavigator({
   const detectorTimerRef=useRef(null);
   const onCalibrateRef=useRef(onCalibrate);
   const hapticsEnabledRef=useRef(false);
+  const scanBusyRef=useRef(false);
 
   const [scannerOpen,setScannerOpen]=useState(false);
   const [scannerStarting,setScannerStarting]=useState(false);
@@ -91,6 +93,14 @@ export default function StandardPrecisionNavigator({
     navigator.vibrate(hapticPattern(type));
   }
 
+  function arrowFor(index){
+    const direction=directionFor(index);
+    if(direction==='left') return '←';
+    if(direction==='right') return '→';
+    if(direction==='arrival') return '●';
+    return '↑';
+  }
+
   function moveTo(index){
     const next=Math.min(Math.max(index,0),Math.max(instructions.length-1,0));
     setArrivalStatus('');
@@ -119,6 +129,7 @@ export default function StandardPrecisionNavigator({
   function stopScanner(){
     clearInterval(detectorTimerRef.current);
     detectorTimerRef.current=null;
+    scanBusyRef.current=false;
     streamRef.current?.getTracks().forEach(track=>track.stop());
     streamRef.current=null;
     if(videoRef.current) videoRef.current.srcObject=null;
@@ -136,21 +147,6 @@ export default function StandardPrecisionNavigator({
       setError('Fotocamera non disponibile su questo browser.');
       return;
     }
-
-    if(!('BarcodeDetector' in window)){
-      setNotice('La lettura QR dentro Dove Riposa non è supportata da questo browser. Puoi comunque aprire il QR con la fotocamera del telefono.');
-      return;
-    }
-
-    try{
-      if(window.BarcodeDetector.getSupportedFormats){
-        const formats=await window.BarcodeDetector.getSupportedFormats();
-        if(!formats.includes('qr_code')){
-          setNotice('Questo browser non supporta la lettura dei QR dentro Dove Riposa. Puoi usare la fotocamera del telefono.');
-          return;
-        }
-      }
-    }catch{}
 
     setScannerStarting(true);
 
@@ -194,13 +190,47 @@ export default function StandardPrecisionNavigator({
         videoRef.current.setAttribute('playsinline','');
         await videoRef.current.play();
 
-        const detector=new window.BarcodeDetector({formats:['qr_code']});
+        let detector=null;
+
+        try{
+          if('BarcodeDetector' in window){
+            let canUseNative=true;
+            if(window.BarcodeDetector.getSupportedFormats){
+              const formats=await window.BarcodeDetector.getSupportedFormats();
+              canUseNative=formats.includes('qr_code');
+            }
+            if(canUseNative) detector=new window.BarcodeDetector({formats:['qr_code']});
+          }
+        }catch{}
+
+        const canvas=detector?null:document.createElement('canvas');
+        const context=canvas?.getContext('2d',{willReadFrequently:true});
+
         detectorTimerRef.current=setInterval(async()=>{
-          if(cancelled||!videoRef.current||videoRef.current.readyState<2) return;
+          if(cancelled||scanBusyRef.current||!videoRef.current||videoRef.current.readyState<2) return;
+
+          scanBusyRef.current=true;
 
           try{
-            const found=await detector.detect(videoRef.current);
-            const marker=markerFromValue(found?.[0]?.rawValue,markers);
+            let rawValue='';
+
+            if(detector){
+              const found=await detector.detect(videoRef.current);
+              rawValue=found?.[0]?.rawValue||'';
+            }else if(context){
+              const width=videoRef.current.videoWidth;
+              const height=videoRef.current.videoHeight;
+              if(!width||!height) return;
+
+              canvas.width=width;
+              canvas.height=height;
+              context.drawImage(videoRef.current,0,0,width,height);
+              const frame=context.getImageData(0,0,width,height);
+              const found=jsQR(frame.data,width,height,{inversionAttempts:'attemptBoth'});
+              rawValue=found?.data||'';
+            }
+
+            const marker=markerFromValue(rawValue,markers);
             if(!marker) return;
 
             onCalibrateRef.current(marker);
@@ -212,8 +242,10 @@ export default function StandardPrecisionNavigator({
             vibrate('recalibrate');
             setNotice('Posizione aggiornata: '+marker.label);
             stopScanner();
-          }catch{}
-        },650);
+          }catch{}finally{
+            scanBusyRef.current=false;
+          }
+        },500);
       }catch{
         setError('La fotocamera è stata autorizzata ma non riesce a mostrare il video. Chiudi e riprova.');
         stopScanner();
@@ -288,23 +320,27 @@ export default function StandardPrecisionNavigator({
     {liveNotice&&<div className="precision-nav-live">↻ {liveNotice}</div>}
 
     <div className="precision-nav-reference">
-      <span>{calibrated?'Posizione aggiornata con QR':'QR facoltativo'}</span>
-      <b>{calibrated?calibrated.label:'Puoi seguire il percorso anche senza fotocamera'}</b>
+      <span>PUNTO DI PARTENZA</span>
+      <b>{calibrated?'Posizione confermata · '+calibrated.label:'Ingresso principale'}</b>
+      <small>{calibrated?'Il percorso riparte da questo punto.':'Scansiona il QR all’ingresso per confermare da dove parte il percorso.'}</small>
       <button type="button" onClick={startScanner} disabled={scannerStarting}>
-        {scannerStarting?'Avvio fotocamera…':'Scansiona QR'}
+        {scannerStarting?'Avvio fotocamera…':calibrated?'Scansiona altro QR':'Scansiona QR ingresso'}
       </button>
     </div>
 
+    {notice&&<div className="precision-nav-notice" aria-live="polite">{notice}</div>}
+    {error&&<div className="precision-nav-error" aria-live="assertive">{error}</div>}
+
     <div className="precision-nav-step">
       <span className="precision-step-count">{step+1} / {instructions.length}</span>
-      <div className="precision-step-arrow" aria-hidden="true">{step>=instructions.length-1?'●':'↑'}</div>
+      <div className="precision-step-arrow" aria-hidden="true">{arrowFor(step)}</div>
       <h2 aria-live="polite">{instructions[step]}</h2>
       <p>{modeLabel} · {distance}</p>
     </div>
 
     {step<instructions.length-1&&<div className="precision-nav-actions">
-      <button type="button" className="secondary" disabled={step===0} onClick={()=>moveTo(step-1)}>Indietro</button>
-      <button type="button" className="primary" onClick={()=>moveTo(step+1)}>Prossima</button>
+      {step>0&&<button type="button" className="secondary" onClick={()=>moveTo(step-1)}>Indietro</button>}
+      <button type="button" className={step===0?'primary full':'primary'} onClick={()=>moveTo(step+1)}>Prossima</button>
     </div>}
 
     {step===instructions.length-1&&<div className="precision-arrival">
@@ -331,9 +367,6 @@ export default function StandardPrecisionNavigator({
     {hapticsEnabled&&<div className="precision-haptic-note">
       1 impulso dritto · 2 sinistra · 3 destra · lungo arrivo
     </div>}
-
-    {notice&&<div className="precision-nav-notice" aria-live="polite">{notice}</div>}
-    {error&&<div className="precision-nav-error" aria-live="assertive">{error}</div>}
 
     <div className="precision-nav-demo">
       Demo: mappa, distanze e percorsi di Pescantina devono essere verificati sul posto prima dell’uso reale.
