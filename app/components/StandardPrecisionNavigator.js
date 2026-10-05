@@ -7,11 +7,13 @@ function markerFromValue(value,markers){
   const raw=String(value||'');
   const direct=list.find(m=>m.code===raw.trim().toUpperCase());
   if(direct) return direct;
+
   try{
     const url=new URL(raw,window.location.origin);
     const id=url.searchParams.get('cal');
     if(id) return list.find(m=>m.id===id)||null;
   }catch{}
+
   return null;
 }
 
@@ -31,9 +33,10 @@ export default function StandardPrecisionNavigator({
   const onCalibrateRef=useRef(onCalibrate);
   const hapticsEnabledRef=useRef(false);
 
-  const [cameraActive,setCameraActive]=useState(false);
+  const [scannerOpen,setScannerOpen]=useState(false);
+  const [scannerStarting,setScannerStarting]=useState(false);
   const [error,setError]=useState('');
-  const [scanInfo,setScanInfo]=useState('');
+  const [notice,setNotice]=useState('');
   const [step,setStep]=useState(0);
   const [arrivalStatus,setArrivalStatus]=useState('');
   const [hapticsEnabled,setHapticsEnabled]=useState(false);
@@ -53,12 +56,16 @@ export default function StandardPrecisionNavigator({
     : routeMode==='accessible'
       ? 'Percorso accessibile'
       : 'Percorso più breve';
+
   const hapticsSupported=typeof navigator!=='undefined'&&typeof navigator.vibrate==='function';
 
   useEffect(()=>{onCalibrateRef.current=onCalibrate;},[onCalibrate]);
 
   useEffect(()=>{
-    const next=Math.min(Math.max(Number(calibrated?.stepIndex)||0,0),Math.max(instructions.length-1,0));
+    const next=Math.min(
+      Math.max(Number(calibrated?.stepIndex)||0,0),
+      Math.max(instructions.length-1,0)
+    );
     setStep(next);
     setArrivalStatus('');
   },[calibrated?.id,routeMode,selected?.id,instructions.length]);
@@ -91,73 +98,138 @@ export default function StandardPrecisionNavigator({
     vibrate(directionFor(next));
   }
 
-  function enableHaptics(){
-    if(!hapticsSupported){
-      setScanInfo('Le vibrazioni web non sono supportate da questo browser. La guida visiva resta disponibile.');
+  function toggleHaptics(){
+    if(hapticsEnabled){
+      hapticsEnabledRef.current=false;
+      setHapticsEnabled(false);
+      navigator.vibrate?.(0);
       return;
     }
+
+    if(!hapticsSupported){
+      setNotice('Le vibrazioni non sono supportate da questo browser. Le indicazioni visive restano disponibili.');
+      return;
+    }
+
     hapticsEnabledRef.current=true;
     setHapticsEnabled(true);
     navigator.vibrate(hapticPattern(directionFor(step)));
   }
 
-  function stopCamera(){
+  function stopScanner(){
     clearInterval(detectorTimerRef.current);
     detectorTimerRef.current=null;
     streamRef.current?.getTracks().forEach(track=>track.stop());
     streamRef.current=null;
     if(videoRef.current) videoRef.current.srcObject=null;
-    setCameraActive(false);
+    setScannerOpen(false);
+    setScannerStarting(false);
   }
 
-  async function startCamera(){
+  async function startScanner(){
     setError('');
-    setScanInfo('');
+    setNotice('');
+
+    if(scannerStarting) return;
 
     if(!navigator.mediaDevices?.getUserMedia){
-      setError('La fotocamera non è disponibile su questo browser.');
+      setError('Fotocamera non disponibile su questo browser.');
+      return;
+    }
+
+    if(!('BarcodeDetector' in window)){
+      setNotice('La lettura QR dentro Dove Riposa non è supportata da questo browser. Puoi comunque aprire il QR con la fotocamera del telefono.');
       return;
     }
 
     try{
-      const stream=await navigator.mediaDevices.getUserMedia({
-        video:{facingMode:{ideal:'environment'}},
-        audio:false
-      });
+      if(window.BarcodeDetector.getSupportedFormats){
+        const formats=await window.BarcodeDetector.getSupportedFormats();
+        if(!formats.includes('qr_code')){
+          setNotice('Questo browser non supporta la lettura dei QR dentro Dove Riposa. Puoi usare la fotocamera del telefono.');
+          return;
+        }
+      }
+    }catch{}
+
+    setScannerStarting(true);
+
+    try{
+      let stream;
+      try{
+        stream=await navigator.mediaDevices.getUserMedia({
+          video:{
+            facingMode:{ideal:'environment'},
+            width:{ideal:1280},
+            height:{ideal:720}
+          },
+          audio:false
+        });
+      }catch(firstError){
+        if(firstError?.name==='NotAllowedError'||firstError?.name==='SecurityError') throw firstError;
+        stream=await navigator.mediaDevices.getUserMedia({video:true,audio:false});
+      }
+
       streamRef.current=stream;
-      setCameraActive(true);
-
-      if(videoRef.current){
-        videoRef.current.srcObject=stream;
-        await videoRef.current.play();
+      setScannerOpen(true);
+    }catch(error){
+      setScannerStarting(false);
+      if(error?.name==='NotAllowedError'||error?.name==='SecurityError'){
+        setError('Permesso fotocamera non concesso. Abilitalo nelle impostazioni del browser oppure continua senza QR.');
+      }else{
+        setError('Non riesco ad avviare la fotocamera. Puoi continuare il percorso senza QR.');
       }
-
-      if(!('BarcodeDetector' in window)){
-        setScanInfo('Questo browser non supporta la lettura QR dentro la pagina. Puoi usare la fotocamera del telefono per aprire direttamente il QR Dove Riposa.');
-        return;
-      }
-
-      const detector=new window.BarcodeDetector({formats:['qr_code']});
-      detectorTimerRef.current=setInterval(async()=>{
-        if(!videoRef.current||videoRef.current.readyState<2) return;
-        try{
-          const found=await detector.detect(videoRef.current);
-          const marker=markerFromValue(found?.[0]?.rawValue,markers);
-          if(!marker) return;
-
-          onCalibrateRef.current(marker);
-          const markerStep=Math.min(Math.max(Number(marker.stepIndex)||0,0),Math.max(instructions.length-1,0));
-          setStep(markerStep);
-          vibrate('recalibrate');
-          setScanInfo('Riferimento riconosciuto: '+marker.label);
-          stopCamera();
-        }catch{}
-      },900);
-    }catch{
-      setError('Permesso fotocamera non concesso o fotocamera non disponibile. La navigazione testuale resta utilizzabile.');
-      stopCamera();
     }
   }
+
+  useEffect(()=>{
+    if(!scannerOpen||!streamRef.current||!videoRef.current) return;
+
+    let cancelled=false;
+
+    async function attachAndScan(){
+      try{
+        videoRef.current.srcObject=streamRef.current;
+        videoRef.current.muted=true;
+        videoRef.current.setAttribute('playsinline','');
+        await videoRef.current.play();
+
+        const detector=new window.BarcodeDetector({formats:['qr_code']});
+        detectorTimerRef.current=setInterval(async()=>{
+          if(cancelled||!videoRef.current||videoRef.current.readyState<2) return;
+
+          try{
+            const found=await detector.detect(videoRef.current);
+            const marker=markerFromValue(found?.[0]?.rawValue,markers);
+            if(!marker) return;
+
+            onCalibrateRef.current(marker);
+            const markerStep=Math.min(
+              Math.max(Number(marker.stepIndex)||0,0),
+              Math.max(instructions.length-1,0)
+            );
+            setStep(markerStep);
+            vibrate('recalibrate');
+            setNotice('Posizione aggiornata: '+marker.label);
+            stopScanner();
+          }catch{}
+        },650);
+      }catch{
+        setError('La fotocamera è stata autorizzata ma non riesce a mostrare il video. Chiudi e riprova.');
+        stopScanner();
+      }finally{
+        setScannerStarting(false);
+      }
+    }
+
+    attachAndScan();
+
+    return()=>{
+      cancelled=true;
+      clearInterval(detectorTimerRef.current);
+      detectorTimerRef.current=null;
+    };
+  },[scannerOpen,markers,instructions.length]);
 
   useEffect(()=>{
     return()=>{
@@ -167,103 +239,104 @@ export default function StandardPrecisionNavigator({
     };
   },[]);
 
-  function close(){
-    stopCamera();
+  function closeNavigator(){
+    stopScanner();
     navigator.vibrate?.(0);
     onClose();
   }
 
-  return <div className={cameraActive?'camera-modal precision-modal camera-on':'camera-modal precision-modal camera-off'}>
-    <video ref={videoRef} playsInline muted aria-hidden={!cameraActive}/>
-    <div className="camera-overlay">
-      <button className="camera-close" onClick={close} aria-label="Chiudi">×</button>
+  if(scannerOpen){
+    return <div className="precision-scanner" role="dialog" aria-modal="true" aria-label="Scansione QR Dove Riposa">
+      <video ref={videoRef} className="precision-scanner-video" playsInline muted/>
+      <div className="precision-scanner-overlay">
+        <button className="precision-scanner-close" onClick={stopScanner} aria-label="Chiudi scanner">×</button>
 
-      <div className="camera-top">
-        <b>Percorso verso la sepoltura</b>
-        <span>{municipalityLabel} · {selected.nome} {selected.cognome}</span>
-      </div>
-
-      <div className="precision-cal-row">
-        <div className={calibrated?'precision-cal-chip calibrated':'precision-cal-chip'}>
-          {calibrated ? '✓ Posizione aggiornata · '+calibrated.label : 'Posizione non ancora aggiornata con QR'}
-        </div>
-        {!cameraActive
-          ? <button type="button" className="scan-qr-button" onClick={startCamera}>Scansiona un QR</button>
-          : <button type="button" className="scan-qr-button active" onClick={stopCamera}>Chiudi fotocamera</button>}
-      </div>
-
-      {cameraActive&&<div className="camera-local-note">Fotocamera attiva solo per leggere il QR. Il video non viene salvato o inviato a Dove Riposa.</div>}
-      {liveNotice&&<div className="precision-live-chip">↻ {liveNotice}</div>}
-
-      <div className="ar-arrow">{step>=instructions.length-1?'●':'↑'}</div>
-      <div className="ar-instruction" aria-live="polite">{instructions[step]}</div>
-      <div className="ar-distance">{modeLabel} · {distance}</div>
-
-      {step<instructions.length-1&&<div className="haptic-guide">
-        <div className="haptic-guide-head">
-          <div>
-            <span>VIBRAZIONI DURANTE IL PERCORSO</span>
-            <b>{hapticsEnabled?'Vibrazioni attive':'Vibrazioni disattivate'}</b>
-          </div>
-          <button
-            type="button"
-            className={hapticsEnabled?'haptic-toggle active':'haptic-toggle'}
-            onClick={()=>{
-              if(hapticsEnabled){
-                hapticsEnabledRef.current=false;
-                setHapticsEnabled(false);
-                navigator.vibrate?.(0);
-              }else{
-                enableHaptics();
-              }
-            }}
-          >
-            {hapticsEnabled?'Disattiva':'Attiva'}
-          </button>
+        <div className="precision-scanner-title">
+          <b>Inquadra il QR Dove Riposa</b>
+          <span>Avvicina il codice al centro del riquadro.</span>
         </div>
 
-        {hapticsEnabled&&<div className="haptic-legend">
-          <span>1 impulso · Dritto</span>
-          <span>2 impulsi · Sinistra</span>
-          <span>3 impulsi · Destra</span>
-          <span>Lungo · Arrivo</span>
-        </div>}
+        <div className="precision-scan-frame" aria-hidden="true">
+          <span></span><span></span><span></span><span></span>
+        </div>
 
-        <small className="haptic-note">{hapticsEnabled?'Funzione sperimentale: le vibrazioni non sostituiscono la segnaletica o altri ausili.':'Facoltative e senza audio.'}</small>
-      </div>}
-
-      <div className="step-progress" aria-hidden="true">
-        {instructions.map((_,i)=><span key={i} className={i<=step?'done':''}></span>)}
+        <div className="precision-scanner-privacy">
+          Il video resta sul dispositivo e serve solo a leggere il QR.
+        </div>
       </div>
+    </div>;
+  }
 
-      {step===instructions.length-1&&<div className="arrival-check">
-        <span className="arrival-kicker">SEI ARRIVATO</span>
-        <b>{selected.settore} · {selected.fila} · {selected.posizione}</b>
-        <small>{calibrated?'Posizione aggiornata con QR: '+calibrated.label:'Controlla settore, fila e posizione indicati qui sopra.'}</small>
+  return <div className="precision-nav" role="dialog" aria-modal="true" aria-label="Navigazione Dove Riposa">
+    <button className="precision-nav-close" onClick={closeNavigator} aria-label="Chiudi">×</button>
 
-        {!arrivalStatus&&<div className="arrival-actions">
-          <button onClick={()=>{vibrate('arrival');setArrivalStatus('found');}}>Ho trovato la sepoltura</button>
-          <button onClick={()=>{vibrate('recalibrate');setArrivalStatus('missing');setScanInfo('Se disponibile, scansiona il QR più vicino e ricontrolla settore, fila e posizione.');}}>Non la trovo</button>
-        </div>}
+    <div className="precision-nav-head">
+      <div>
+        <span>DOVE RIPOSA</span>
+        <b>{selected.nome} {selected.cognome}</b>
+        <small>{municipalityLabel} · {selected.settore} · {selected.fila}</small>
+      </div>
+      <button
+        type="button"
+        className={hapticsEnabled?'precision-haptic-toggle active':'precision-haptic-toggle'}
+        onClick={toggleHaptics}
+      >
+        {hapticsEnabled?'Vibrazione ON':'Vibrazione'}
+      </button>
+    </div>
 
-        {arrivalStatus==='found'&&<div className="arrival-outcome found">✓ Arrivo confermato da te sul dispositivo.</div>}
-        {arrivalStatus==='missing'&&<div className="arrival-outcome missing">Prova a scansionare un QR vicino oppure torna al passaggio precedente.</div>}
+    {liveNotice&&<div className="precision-nav-live">↻ {liveNotice}</div>}
+
+    <div className="precision-nav-reference">
+      <span>{calibrated?'Posizione aggiornata con QR':'QR facoltativo'}</span>
+      <b>{calibrated?calibrated.label:'Puoi seguire il percorso anche senza fotocamera'}</b>
+      <button type="button" onClick={startScanner} disabled={scannerStarting}>
+        {scannerStarting?'Avvio fotocamera…':'Scansiona QR'}
+      </button>
+    </div>
+
+    <div className="precision-nav-step">
+      <span className="precision-step-count">{step+1} / {instructions.length}</span>
+      <div className="precision-step-arrow" aria-hidden="true">{step>=instructions.length-1?'●':'↑'}</div>
+      <h2 aria-live="polite">{instructions[step]}</h2>
+      <p>{modeLabel} · {distance}</p>
+    </div>
+
+    {step<instructions.length-1&&<div className="precision-nav-actions">
+      <button type="button" className="secondary" disabled={step===0} onClick={()=>moveTo(step-1)}>Indietro</button>
+      <button type="button" className="primary" onClick={()=>moveTo(step+1)}>Prossima</button>
+    </div>}
+
+    {step===instructions.length-1&&<div className="precision-arrival">
+      <span>CONTROLLA LA POSIZIONE</span>
+      <h2>{selected.settore} · {selected.fila} · {selected.posizione}</h2>
+      <p>{calibrated?'Ultimo QR: '+calibrated.label:'Verifica settore, fila e posizione sul posto.'}</p>
+
+      {!arrivalStatus&&<div className="precision-arrival-actions">
+        <button type="button" className="primary" onClick={()=>{vibrate('arrival');setArrivalStatus('found');}}>Ho trovato la sepoltura</button>
+        <button type="button" className="secondary" onClick={()=>{vibrate('recalibrate');setArrivalStatus('missing');}}>Non la trovo</button>
       </div>}
 
-      {step<instructions.length-1&&<div className="precision-controls">
-        <button disabled={step===0} onClick={()=>moveTo(step-1)}>← Indietro</button>
-        <button onClick={()=>moveTo(step+1)}>Prossima indicazione →</button>
+      {arrivalStatus==='found'&&<div className="precision-arrival-result success">✓ Arrivo confermato.</div>}
+
+      {arrivalStatus==='missing'&&<div className="precision-arrival-recovery">
+        <p>Puoi tornare all’indicazione precedente oppure aggiornare la posizione con un QR vicino.</p>
+        <button type="button" className="secondary" onClick={()=>moveTo(Math.max(step-1,0))}>Torna indietro</button>
+        <button type="button" className="primary" onClick={startScanner} disabled={scannerStarting}>
+          {scannerStarting?'Avvio fotocamera…':'Scansiona QR'}
+        </button>
       </div>}
+    </div>}
 
-      {arrivalStatus==='missing'&&<div className="arrival-recovery">
-        <button type="button" onClick={()=>moveTo(Math.max(step-1,0))}>← Torna indietro</button>
-        {!cameraActive&&<button type="button" onClick={startCamera}>Scansiona un QR vicino</button>}
-      </div>}
+    {hapticsEnabled&&<div className="precision-haptic-note">
+      1 impulso dritto · 2 sinistra · 3 destra · lungo arrivo
+    </div>}
 
-      {scanInfo&&<div className="scan-info" aria-live="polite">{scanInfo}</div>}
-      {error&&<div className="camera-error" aria-live="assertive">{error}</div>}
+    {notice&&<div className="precision-nav-notice" aria-live="polite">{notice}</div>}
+    {error&&<div className="precision-nav-error" aria-live="assertive">{error}</div>}
 
-      <div className="ar-note">Demo: percorso e posizioni devono essere verificati sul posto prima dell’uso reale.</div>
+    <div className="precision-nav-demo">
+      Demo: mappa, distanze e percorsi di Pescantina devono essere verificati sul posto prima dell’uso reale.
     </div>
   </div>;
 }
