@@ -76,8 +76,8 @@ export default function AdminQrGenerator(){
     <div className="qr-admin-head">
       <div>
         <span className="eyebrow">DOVE RIPOSA PRECISION</span>
-        <h2>QR di posizione</h2>
-        <p>Genera i QR fisici per i marker di calibrazione. Ogni QR apre direttamente il Comune e comunica a Dove Riposa il punto in cui si trova l’utente.</p>
+        <h2>Nodi QR di posizione</h2>
+        <p>Genera i nodi QR fisici di Precision. Ogni QR identifica un luogo del cimitero, apre direttamente il Comune e conferma a Dove Riposa il punto da cui ripartire.</p>
       </div>
       <span className="status">● Generazione locale</span>
     </div>
@@ -94,7 +94,7 @@ export default function AdminQrGenerator(){
     </div>
 
     <div className="admin-warning qr-warning">
-      <b>Prima di stampare:</b> usa il dominio che rimarrà attivo. Se in futuro passi a un dominio definitivo, rigenera i QR. Il marker fisico va collocato esattamente nel punto a cui è associato.
+      <b>Prima di stampare:</b> usa il dominio che rimarrà attivo. Se in futuro passi a un dominio definitivo, rigenera i QR. Il nodo QR va collocato esattamente nel punto fisico a cui è associato.
     </div>
 
     {error&&<div className="login-error">{error}</div>}
