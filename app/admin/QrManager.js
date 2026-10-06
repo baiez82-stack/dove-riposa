@@ -99,14 +99,14 @@ export default function QrManager(){
     <div className="admin-head qr-admin-head">
       <div>
         <span className="eyebrow">DOVE RIPOSA PRECISION</span>
-        <h1>QR marker</h1>
+        <h1>Nodi QR Precision</h1>
       </div>
       <span className="status">QR reali · dati demo</span>
     </div>
 
     <div className="pilot-banner">
       <b>Questi QR sono realmente scansionabili.</b>
-      <span>Ogni codice apre la pagina del Comune e imposta il marker di calibrazione indicato. Non contiene nomi di defunti né dati personali.</span>
+      <span>Ogni QR identifica un punto fisico del cimitero. Non identifica una persona: apre la pagina del Comune e conferma il nodo da cui Dove Riposa può ripartire.</span>
     </div>
 
     <div className="qr-admin-grid">
@@ -125,7 +125,7 @@ export default function QrManager(){
           </select>
         </label>
 
-        <label>Posizione / marker
+        <label>Nodo di posizione
           <select value={marker?.id||''} onChange={e=>setMarkerId(e.target.value)}>
             {markers.map(m=><option key={m.id} value={m.id}>{m.code} · {m.label}</option>)}
           </select>
@@ -136,9 +136,9 @@ export default function QrManager(){
         </label>
 
         <div className="qr-marker-meta">
-          <span>Codice marker</span>
+          <span>Codice nodo</span>
           <b>{marker?.code||'—'}</b>
-          <small>{marker?.label||'Nessun marker'}</small>
+          <small>{marker?.label||'Nessun nodo'}</small>
         </div>
 
         <div className="admin-warning">Per una stampa definitiva usa un dominio stabile. Se cambi dominio dopo aver stampato i QR, dovrai rigenerarli oppure mantenere il vecchio dominio come redirect.</div>
@@ -170,7 +170,7 @@ export default function QrManager(){
     </div>
 
     <div className="admin-panel">
-      <h2>Marker disponibili</h2>
+      <h2>Nodi disponibili</h2>
       <div className="qr-marker-list">
         {markers.map(m=><button key={m.id} className={marker?.id===m.id?'qr-marker-row active':'qr-marker-row'} onClick={()=>setMarkerId(m.id)}>
           <div><b>{m.label}</b><span>{m.code}</span></div>
