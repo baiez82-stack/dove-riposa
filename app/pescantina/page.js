@@ -149,7 +149,7 @@ export default function PescantinaPage(){
           </div>
           <div className="public-access-note">Le informazioni dettagliate sull’accessibilità non sono ancora verificate sul posto in questa demo.</div>
           <button className="primary precision-button citizen-start-button" onClick={()=>setCameraOpen(true)}>Inizia il percorso</button>
-          <div className="camera-privacy">Il percorso parte dall’ingresso principale. Il QR all’ingresso è consigliato per confermare la posizione, ma non è obbligatorio.</div>
+          <div className="camera-privacy">Il percorso parte dall’ingresso principale. I QR di posizione confermano un punto fisico certo e permettono di ripartire da lì.</div>
         </div>
       </div>
     </section>}
@@ -218,7 +218,7 @@ function PescantinaMap({selected,routeMode,calibrated}){
     </svg>
     <div className="pescantina-map-legend">
       <span><i className="legend-line"></i> Percorso indicativo</span>
-      <span><i className="legend-dot"></i> Punti QR</span>
+      <span><i className="legend-dot"></i> Nodi QR Precision</span>
     </div>
   </div>;
 }
