@@ -58,6 +58,7 @@ export default function StandardPrecisionNavigator({
     : routeMode==='accessible'
       ? 'Percorso accessibile'
       : 'Percorso più breve';
+  const verifiedDistance=distance&&!/demo|verificare/i.test(String(distance));
 
   const hapticsSupported=typeof navigator!=='undefined'&&typeof navigator.vibrate==='function';
 
@@ -284,8 +285,8 @@ export default function StandardPrecisionNavigator({
         <button className="precision-scanner-close" onClick={stopScanner} aria-label="Chiudi scanner">×</button>
 
         <div className="precision-scanner-title">
-          <b>Inquadra il QR Dove Riposa</b>
-          <span>Avvicina il codice al centro del riquadro.</span>
+          <b>Inquadra il QR di posizione</b>
+          <span>Conferma il punto fisico da cui ripartire.</span>
         </div>
 
         <div className="precision-scan-frame" aria-hidden="true">
@@ -322,7 +323,7 @@ export default function StandardPrecisionNavigator({
     <div className="precision-nav-reference">
       <span>PUNTO DI PARTENZA</span>
       <b>{calibrated?'Posizione confermata · '+calibrated.label:'Ingresso principale'}</b>
-      <small>{calibrated?'Il percorso riparte da questo punto.':'Se sei già all’ingresso puoi iniziare subito. Il QR serve a confermare la posizione, ma non è obbligatorio.'}</small>
+      <small>{calibrated?'Nodo Precision confermato. Il percorso riparte da questo punto.':'Se sei già all’ingresso puoi iniziare subito. Il QR di posizione conferma il punto fisico, ma non è obbligatorio.'}</small>
       <button type="button" onClick={startScanner} disabled={scannerStarting}>
         {scannerStarting?'Avvio fotocamera…':calibrated?'Scansiona altro QR':'Scansiona QR ingresso · consigliato'}
       </button>
@@ -335,7 +336,7 @@ export default function StandardPrecisionNavigator({
       <span className="precision-step-count">{step+1} / {instructions.length}</span>
       <div className="precision-step-arrow" aria-hidden="true">{arrowFor(step)}</div>
       <h2 aria-live="polite">{instructions[step]}</h2>
-      <p>{modeLabel} · {distance}</p>
+      <p>{modeLabel}{verifiedDistance?' · '+distance:''}</p>
     </div>
 
     {step<instructions.length-1&&<div className="precision-nav-actions">
