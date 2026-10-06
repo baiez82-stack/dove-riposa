@@ -171,9 +171,9 @@ export default function StandardPrecisionNavigator({
     }catch(error){
       setScannerStarting(false);
       if(error?.name==='NotAllowedError'||error?.name==='SecurityError'){
-        setError('Permesso fotocamera non concesso. Abilitalo nelle impostazioni del browser oppure continua senza QR.');
+        setError('Permesso fotocamera non concesso. Abilitalo nelle impostazioni del browser oppure continua dall’ingresso senza QR.');
       }else{
-        setError('Non riesco ad avviare la fotocamera. Puoi continuare il percorso senza QR.');
+        setError('Non riesco ad avviare la fotocamera. Puoi continuare dall’ingresso senza QR.');
       }
     }
   }
@@ -322,9 +322,9 @@ export default function StandardPrecisionNavigator({
     <div className="precision-nav-reference">
       <span>PUNTO DI PARTENZA</span>
       <b>{calibrated?'Posizione confermata · '+calibrated.label:'Ingresso principale'}</b>
-      <small>{calibrated?'Il percorso riparte da questo punto.':'Scansiona il QR all’ingresso per confermare da dove parte il percorso.'}</small>
+      <small>{calibrated?'Il percorso riparte da questo punto.':'Se sei già all’ingresso puoi iniziare subito. Il QR serve a confermare la posizione, ma non è obbligatorio.'}</small>
       <button type="button" onClick={startScanner} disabled={scannerStarting}>
-        {scannerStarting?'Avvio fotocamera…':calibrated?'Scansiona altro QR':'Scansiona QR ingresso'}
+        {scannerStarting?'Avvio fotocamera…':calibrated?'Scansiona altro QR':'Scansiona QR ingresso · consigliato'}
       </button>
     </div>
 
