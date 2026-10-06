@@ -22,7 +22,7 @@ const demoRecords=[
     route:'M360 480 L360 385 L300 385 L300 270 L240 210',
     accessibleRoute:'M360 480 L360 385 L282 385 L282 245 L240 210',
     assistRoute:'M360 480 L360 405 L315 405 L315 305 L270 305 L240 210',
-    shortDistance:'Demo 55 m',accessibleDistance:'Demo 68 m',assistDistance:'Demo 74 m',
+    shortDistance:'Distanza da verificare',accessibleDistance:'Distanza da verificare',assistDistance:'Distanza da verificare',
     instructions:['Vai dritto fino al nodo centrale','Raggiungi il nodo centrale','Svolta verso l’area sinistra','Prosegui fino alla Fila 4','Loculo 12'],
     accessibleInstructions:['Vai dritto lungo l’asse centrale','Mantieni l’asse centrale','Usa il ramo accessibile demo verso sinistra','Prosegui sul percorso da validare','Raggiungi Fila 4 · Loculo 12'],
     assistInstructions:['Vai dritto lungo il percorso più regolare della demo','Procedi lungo il percorso più regolare della demo','Raggiungi il nodo centrale','Prosegui verso l’area sinistra','Raggiungi Fila 4 · Loculo 12']
@@ -33,7 +33,7 @@ const demoRecords=[
     route:'M360 480 L360 385 L430 385 L430 300 L500 245',
     accessibleRoute:'M360 480 L360 385 L438 385 L438 285 L500 245',
     assistRoute:'M360 480 L360 410 L405 410 L405 320 L465 320 L500 245',
-    shortDistance:'Demo 60 m',accessibleDistance:'Demo 72 m',assistDistance:'Demo 78 m',
+    shortDistance:'Distanza da verificare',accessibleDistance:'Distanza da verificare',assistDistance:'Distanza da verificare',
     instructions:['Vai dritto fino al nodo centrale','Raggiungi il nodo centrale','Svolta verso l’area destra','Prosegui fino alla Fila 6','Tomba 27'],
     accessibleInstructions:['Vai dritto lungo l’asse centrale','Mantieni l’asse centrale','Usa il ramo accessibile demo verso destra','Prosegui sul percorso da validare','Raggiungi Fila 6 · Tomba 27'],
     assistInstructions:['Vai dritto lungo il percorso più regolare della demo','Procedi lungo il percorso più regolare della demo','Raggiungi il nodo centrale','Prosegui verso l’area destra','Raggiungi Fila 6 · Tomba 27']
@@ -44,10 +44,10 @@ const demoRecords=[
     route:'M360 480 L360 410 L300 410 L250 350',
     accessibleRoute:'M360 480 L360 385 L300 385 L250 350',
     assistRoute:'M360 480 L360 420 L320 420 L320 385 L275 385 L250 350',
-    shortDistance:'Demo 42 m',accessibleDistance:'Demo 50 m',assistDistance:'Demo 57 m',
+    shortDistance:'Distanza da verificare',accessibleDistance:'Distanza da verificare',assistDistance:'Distanza da verificare',
     instructions:['Vai dritto fino al primo passaggio','Prosegui fino al primo passaggio','Svolta verso sinistra','Raggiungi la Fila 2','Loculo 8'],
-    accessibleInstructions:['Entra dall’ingresso principale','Mantieni l’asse centrale fino al nodo','Usa il ramo accessibile demo verso sinistra','Raggiungi la Fila 2','Loculo 8'],
-    assistInstructions:['Entra dall’ingresso principale','Segui il percorso regolare della demo','Raggiungi il nodo centrale','Svolta verso la Fila 2','Loculo 8']
+    accessibleInstructions:['Vai dritto lungo l’asse centrale','Mantieni l’asse centrale fino al nodo','Usa il ramo accessibile demo verso sinistra','Raggiungi la Fila 2','Loculo 8'],
+    assistInstructions:['Vai dritto lungo il percorso regolare della demo','Segui il percorso regolare della demo','Raggiungi il nodo centrale','Svolta verso la Fila 2','Loculo 8']
   }
 ];
 
@@ -149,7 +149,7 @@ export default function PescantinaPage(){
           </div>
           <div className="public-access-note">Le informazioni dettagliate sull’accessibilità non sono ancora verificate sul posto in questa demo.</div>
           <button className="primary precision-button citizen-start-button" onClick={()=>setCameraOpen(true)}>Inizia il percorso</button>
-          <div className="camera-privacy">Puoi seguire le indicazioni senza fotocamera. Se vuoi migliorare la precisione, potrai scansionare un QR lungo il percorso.</div>
+          <div className="camera-privacy">Il percorso parte dall’ingresso principale. Il QR all’ingresso è consigliato per confermare la posizione, ma non è obbligatorio.</div>
         </div>
       </div>
     </section>}
