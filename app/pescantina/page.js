@@ -25,8 +25,40 @@ const gpsSlots=[
   ['destinazione','Destinazione']
 ];
 
+function fieldInstructions(points={}){
+  return [
+    points.nodoA?'Vai verso il Nodo A':'Parti dall’ingresso principale',
+    points.nodoB?'Dal Nodo A prosegui verso il Nodo B':'Prosegui verso la zona della sepoltura',
+    points.destinazione?'Dal Nodo B prosegui verso la destinazione':'Raggiungi settore, fila e posizione',
+    'Controlla settore, fila e posizione'
+  ];
+}
+
 function encodeSharedTest(record){
-  const bytes=new TextEncoder().encode(JSON.stringify(record));
+  const points=record.gpsPoints||{};
+  const compact={
+    v:2,
+    n:record.nome||'',
+    c:record.cognome||'',
+    s:record.settore||'',
+    f:record.fila||'',
+    p:record.posizione||'',
+    g:{}
+  };
+
+  const refs=[
+    ['i','ingresso'],
+    ['a','nodoA'],
+    ['b','nodoB'],
+    ['d','destinazione']
+  ];
+
+  refs.forEach(([shortKey,id])=>{
+    const point=points[id];
+    if(point) compact.g[shortKey]=[point.lat,point.lon,point.accuracy];
+  });
+
+  const bytes=new TextEncoder().encode(JSON.stringify(compact));
   let binary='';
   bytes.forEach(byte=>{binary+=String.fromCharCode(byte);});
   return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
@@ -38,7 +70,57 @@ function decodeSharedTest(value){
     const padded=base64+'='.repeat((4-base64.length%4)%4);
     const binary=atob(padded);
     const bytes=Uint8Array.from(binary,ch=>ch.charCodeAt(0));
-    return JSON.parse(new TextDecoder().decode(bytes));
+    const data=JSON.parse(new TextDecoder().decode(bytes));
+
+    if(data?.v===2&&data.n&&data.c){
+      const gpsPoints={};
+      const refs={
+        i:['ingresso','Ingresso'],
+        a:['nodoA','Nodo A'],
+        b:['nodoB','Nodo B'],
+        d:['destinazione','Destinazione']
+      };
+
+      Object.entries(data.g||{}).forEach(([shortKey,value])=>{
+        const ref=refs[shortKey];
+        if(!ref||!Array.isArray(value)) return;
+        const [id,label]=ref;
+        gpsPoints[id]={
+          id,
+          label,
+          lat:value[0],
+          lon:value[1],
+          accuracy:value[2]
+        };
+      });
+
+      const instructions=fieldInstructions(gpsPoints);
+      return {
+        id:'field-test-pescantina',
+        fieldTest:true,
+        nome:data.n,
+        cognome:data.c,
+        anno:'',
+        morte:'',
+        settore:data.s||'Da rilevare',
+        fila:data.f||'Da rilevare',
+        posizione:data.p||'Da rilevare',
+        gpsPoints,
+        mapX:null,
+        mapY:null,
+        route:'',
+        accessibleRoute:'',
+        assistRoute:'',
+        shortDistance:'',
+        accessibleDistance:'',
+        assistDistance:'',
+        instructions,
+        accessibleInstructions:instructions,
+        assistInstructions:instructions
+      };
+    }
+
+    return data;
   }catch{return null;}
 }
 
@@ -93,6 +175,7 @@ export default function PescantinaPage(){
   const [gpsMessage,setGpsMessage]=useState('');
   const [shareUrl,setShareUrl]=useState('');
   const [shareQr,setShareQr]=useState('');
+  const [precisionQrs,setPrecisionQrs]=useState({});
 
   useEffect(()=>{
     const params=new URLSearchParams(window.location.search);
@@ -128,6 +211,29 @@ export default function PescantinaPage(){
       }
     }catch{}
   },[]);
+
+  useEffect(()=>{
+    if(!fieldTestMode) return;
+
+    let active=true;
+    const entries=[
+      ['ingresso','Ingresso'],
+      ['centro','Nodo A'],
+      ['testata','Nodo B']
+    ];
+
+    Promise.all(entries.map(async([id,label])=>{
+      const url=window.location.origin+'/pescantina?cal='+encodeURIComponent(id)+'&src=qr-marker';
+      const dataUrl=await QRCode.toDataURL(url,{errorCorrectionLevel:'H',margin:2,width:360});
+      return [id,{label,url,dataUrl}];
+    })).then(items=>{
+      if(active) setPrecisionQrs(Object.fromEntries(items));
+    }).catch(()=>{
+      if(active) setPrecisionQrs({});
+    });
+
+    return()=>{active=false;};
+  },[fieldTestMode]);
 
   const results=useMemo(()=>{
     const records=fieldTestRecord?[fieldTestRecord,...demoRecords]:demoRecords;
@@ -181,7 +287,7 @@ export default function PescantinaPage(){
     const url=window.location.origin+'/pescantina#ft='+encoded;
     setShareUrl(url);
     try{
-      const qr=await QRCode.toDataURL(url,{errorCorrectionLevel:'H',margin:2,width:420});
+      const qr=await QRCode.toDataURL(url,{errorCorrectionLevel:'M',margin:2,width:420});
       setShareQr(qr);
     }catch{
       setShareQr('');
@@ -189,16 +295,22 @@ export default function PescantinaPage(){
     return url;
   }
 
+  function downloadPrecisionQr(id){
+    const item=precisionQrs[id];
+    if(!item?.dataUrl) return;
+    const a=document.createElement('a');
+    a.href=item.dataUrl;
+    a.download='dove-riposa-pescantina-'+id+'.png';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
   async function saveFieldTest(){
     if(!fieldForm.nome.trim()||!fieldForm.cognome.trim()) return;
 
     const points=fieldForm.gpsPoints||{};
-    const instructions=[
-      points.nodoA?'Vai verso il Nodo A':'Parti dall’ingresso principale',
-      points.nodoB?'Dal Nodo A prosegui verso il Nodo B':'Prosegui verso la zona della sepoltura',
-      points.destinazione?'Dal Nodo B prosegui verso la destinazione':'Raggiungi settore, fila e posizione',
-      'Controlla settore, fila e posizione'
-    ];
+    const instructions=fieldInstructions(points);
 
     const record={
       id:'field-test-pescantina',
@@ -330,13 +442,40 @@ export default function PescantinaPage(){
 
         {fieldSaved&&<div className="field-share-box">
           <div>
-            <b>Prova pronta anche su altri telefoni</b>
-            <p>Il link contiene la configurazione nel frammento del browser: aprilo sul secondo telefono oppure inquadra il QR. I dati non vengono salvati nel database.</p>
+            <span className="eyebrow">SECONDO TELEFONO</span>
+            <b>Inquadra questo QR per aprire la stessa prova</b>
+            <p>Questo QR serve solo a trasferire la configurazione al secondo telefono. Non è un QR da mettere nel cimitero.</p>
           </div>
-          {shareQr&&<img className="field-share-qr" src={shareQr} alt="QR per aprire la prova Dove Riposa su un altro telefono"/>}
+          {shareQr
+            ? <img className="field-share-qr" src={shareQr} alt="QR per aprire la prova Dove Riposa su un altro telefono"/>
+            : <div className="admin-warning">QR di condivisione non disponibile. Usa il pulsante Condividi prova.</div>}
           <button className="primary" type="button" onClick={shareFieldTest}>Condividi prova</button>
-          {shareUrl&&<code className="field-share-url">{shareUrl}</code>}
         </div>}
+
+        <div className="field-precision-box">
+          <div>
+            <span className="eyebrow">QR FISICI PER DOMANI</span>
+            <h3>Questi sono i QR da portare nel cimitero</h3>
+            <p>Ingresso è già definito. Nodo A e Nodo B li appoggerai nei due punti strategici scelti durante il sopralluogo.</p>
+          </div>
+
+          <div className="field-precision-grid">
+            {[
+              ['ingresso','1 · Ingresso'],
+              ['centro','2 · Nodo A'],
+              ['testata','3 · Nodo B']
+            ].map(([id,label])=>{
+              const item=precisionQrs[id];
+              return <article className="field-precision-card" key={id}>
+                <b>{label}</b>
+                {item?.dataUrl
+                  ? <img src={item.dataUrl} alt={'QR '+label}/>
+                  : <div className="qr-loading">Genero QR…</div>}
+                <button className="secondary" type="button" onClick={()=>downloadPrecisionQr(id)} disabled={!item?.dataUrl}>Scarica QR</button>
+              </article>;
+            })}
+          </div>
+        </div>
       </div>
     </section>}
 
