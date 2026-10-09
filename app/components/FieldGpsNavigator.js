@@ -156,7 +156,9 @@ export default function FieldGpsNavigator({
     ()=>segmentDeviationMeters(currentPoint,startPoint,targetPoint),
     [position?.lat,position?.lon,startPoint?.lat,startPoint?.lon,targetPoint?.lat,targetPoint?.lon]
   );
+  const recoveryBearing=useMemo(()=>distanceMeters(currentPoint,startPoint)>2?bearingDegrees(currentPoint,startPoint):null,[position?.lat,position?.lon,startPoint?.lat,startPoint?.lon]);
   const relativeAngle=bearing!=null&&heading!=null?normalize180(bearing-heading):0;
+  const recoveryAngle=recoveryBearing!=null&&heading!=null?normalize180(recoveryBearing-heading):0;
   const headingError=bearing!=null&&heading!=null?Math.abs(normalize180(bearing-heading)):null;
   const gpsAccuracy=position?.accuracy??null;
   const gpsGood=gpsAccuracy==null||gpsAccuracy<=20;
@@ -164,7 +166,9 @@ export default function FieldGpsNavigator({
   const routeCorridor=Math.max(7,Math.min(18,(gpsAccuracy||6)*1.4));
   const nearTarget=distance!=null&&distance<=nearThreshold&&gpsGood;
   const isDestination=target?.id==='destinazione';
+  const currentLabel=sequence[currentIndex]?.label||'ultimo nodo';
   const instruction=turnInstruction(points,currentAnchor);
+  const routeReady=Boolean(points.ingresso&&points.nodoA&&points.nodoB&&points.destinazione);
   const deviationCandidate=Boolean(
     guideActive&&gpsGood&&!nearTarget&&targetPoint&&startPoint&&(
       (segmentInfo?.distance??0)>routeCorridor||
@@ -280,6 +284,12 @@ export default function FieldGpsNavigator({
     if(starting||guideActive) return;
     setError('');
     setNotice('');
+
+    if(!routeReady){
+      setError('Percorso non completo: registra Ingresso, Nodo A, Nodo B e Destinazione prima di avviare la prova.');
+      return;
+    }
+
     setStarting(true);
 
     try{
@@ -449,8 +459,8 @@ export default function FieldGpsNavigator({
           <small>{calibrated?'Il prossimo punto viene calcolato da qui.':'Per la prova migliore scansiona prima il QR all’ingresso.'}</small>
         </div>
 
-        <button className="primary field-guide-launch" type="button" onClick={startGuide} disabled={starting}>
-          {starting?'Attivazione…':'Attiva guida fotocamera'}
+        <button className="primary field-guide-launch" type="button" onClick={startGuide} disabled={starting||!routeReady}>
+          {starting?'Attivazione…':routeReady?'Attiva guida fotocamera':'Prima registra i 4 punti'}
         </button>
         <small className="field-guide-permissions">Usa fotocamera, posizione e bussola solo durante la navigazione.</small>
         {error&&<div className="precision-nav-error">{error}</div>}
@@ -484,11 +494,11 @@ export default function FieldGpsNavigator({
         <span className="field-camera-target">{offRoute?'FUORI PERCORSO':isDestination?'DESTINAZIONE':target?.label?.toUpperCase()}</span>
         <div
           className={heading==null?'field-camera-arrow no-heading':'field-camera-arrow'}
-          style={heading==null?undefined:{transform:'rotate('+relativeAngle+'deg)'}}
+          style={heading==null?undefined:{transform:'rotate('+(offRoute?recoveryAngle:relativeAngle)+'deg)'}}
           aria-hidden="true"
         >↑</div>
         <h2>{offRoute
-          ? movingAway?'Stai andando dalla parte sbagliata':'Torna verso il percorso'
+          ? movingAway?'Hai girato troppo presto':'Fuori percorso'
           : nearTarget
             ? isDestination?'Sei nella zona della sepoltura':'Nodo vicino: cerca il QR'
             : instruction}</h2>
@@ -504,7 +514,7 @@ export default function FieldGpsNavigator({
 
       <div className="field-camera-bottom">
         {offRoute&&<div className="field-camera-offroute">
-          Hai deviato prima del punto previsto. Segui la freccia per rientrare verso {target?.label||'il prossimo punto'}.
+          Torna all’ultimo punto certo: <b>{currentLabel}</b>. La freccia ora indica quel punto; da lì riparti verso {target?.label||'il prossimo nodo'}.
         </div>}
         {notice&&<div className="field-camera-notice">{notice}</div>}
         {error&&<div className="precision-nav-error">{error}</div>}
