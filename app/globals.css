@@ -290,3 +290,21 @@ select:focus-visible{
 .field-route-point>span{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--ink);color:#fff;font-size:12px;font-weight:900}
 .field-route-point b,.field-route-point small{display:block}
 .field-route-point small{margin-top:2px;color:var(--muted);font-size:10px;overflow-wrap:anywhere}
+
+.field-share-box{align-items:start}
+.field-share-box .eyebrow{display:block;margin-bottom:4px}
+.field-share-box>div>b{display:block;font-size:18px}
+.field-share-qr{display:block;margin:0 auto;width:min(260px,76vw)}
+.field-precision-box{margin-top:18px;padding:18px;border:1px solid var(--line);border-radius:18px;background:#fff}
+.field-precision-box h3{margin:5px 0 5px;font-family:var(--font-display),Georgia,serif;font-size:28px}
+.field-precision-box>div>p{margin:0;color:var(--muted);font-size:12px;line-height:1.5}
+.field-precision-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}
+.field-precision-card{display:grid;gap:10px;justify-items:center;padding:14px;border:1px solid var(--line);border-radius:14px;background:#faf8f2}
+.field-precision-card>b{font-size:14px;text-align:center}
+.field-precision-card img{width:min(100%,220px);height:auto;border-radius:10px;background:#fff;padding:6px;border:1px solid var(--line)}
+.field-precision-card .qr-loading{display:grid;place-items:center;width:180px;max-width:100%;aspect-ratio:1;border-radius:10px;background:#fff;border:1px dashed var(--line);font-size:11px;color:var(--muted)}
+.field-precision-card button{width:100%}
+@media(max-width:720px){
+  .field-precision-grid{grid-template-columns:1fr}
+  .field-precision-card img{width:min(230px,70vw)}
+}
