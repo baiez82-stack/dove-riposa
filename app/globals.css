@@ -257,3 +257,27 @@ select:focus-visible{
 .precision-scan-frame{position:relative;width:min(68vw,300px);aspect-ratio:1;border-radius:26px;background:rgba(255,255,255,.02)}.precision-scan-frame span{position:absolute;width:58px;height:58px;border-color:#fff;border-style:solid}.precision-scan-frame span:nth-child(1){left:0;top:0;border-width:4px 0 0 4px;border-radius:20px 0 0 0}.precision-scan-frame span:nth-child(2){right:0;top:0;border-width:4px 4px 0 0;border-radius:0 20px 0 0}.precision-scan-frame span:nth-child(3){left:0;bottom:0;border-width:0 0 4px 4px;border-radius:0 0 0 20px}.precision-scan-frame span:nth-child(4){right:0;bottom:0;border-width:0 4px 4px 0;border-radius:0 0 20px 0}
 .precision-scanner-privacy{position:absolute;bottom:30px;left:24px;right:24px;text-align:center;color:rgba(255,255,255,.78);font-size:10px;line-height:1.45}
 @media(max-width:560px){.precision-nav{padding:18px 14px 24px}.precision-nav-close{top:10px;right:10px}.precision-nav-head{padding-right:46px}.precision-nav-head b{font-size:22px}.precision-nav-reference{grid-template-columns:1fr}.precision-nav-reference>button{grid-column:1;grid-row:auto;width:100%;margin-top:8px;min-height:50px}.precision-nav-step{padding:26px 0 20px}.precision-step-arrow{font-size:82px;margin-top:10px}.precision-nav-step h2{font-size:36px}.precision-nav-actions{grid-template-columns:.8fr 1.2fr}.precision-nav-actions button{min-height:58px;font-size:16px}.precision-arrival{padding:18px}.precision-arrival h2{font-size:28px}.precision-arrival-actions{grid-template-columns:1fr}.precision-arrival-actions button{min-height:54px}.precision-scanner-title{top:78px}.precision-scanner-title b{font-size:26px}.precision-scan-frame{width:min(76vw,300px)}}
+
+
+/* Pescantina field test */
+.field-test-form{display:grid;gap:14px;margin-top:18px}
+.field-test-person{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.field-test-person input{min-height:48px}
+.field-gps-box{padding:16px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.55)}
+.field-gps-box>div:first-child b{display:block;font-size:16px}
+.field-gps-box>div:first-child p{margin:4px 0 14px;color:var(--muted);font-size:12px;line-height:1.45}
+.field-gps-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.field-gps-point{display:grid;grid-template-columns:30px 1fr;grid-template-areas:"icon title" "icon meta";align-items:center;text-align:left;gap:2px 8px;min-height:66px;padding:10px 12px}
+.field-gps-point>span{grid-area:icon;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:rgba(24,52,45,.08);font-weight:900}
+.field-gps-point>b{grid-area:title}
+.field-gps-point>small{grid-area:meta;color:var(--muted);white-space:normal;overflow-wrap:anywhere}
+.field-gps-point.saved{border-color:rgba(49,92,67,.35);background:#f3f8f2}
+.field-save-test{min-height:52px}
+.field-share-box{margin-top:18px;padding:18px;border-radius:18px;background:#f5f1e8;border:1px solid var(--line);display:grid;gap:12px}
+.field-share-box p{margin:4px 0 0;color:var(--muted);font-size:12px;line-height:1.5}
+.field-share-qr{width:min(220px,70vw);height:auto;border-radius:12px;background:#fff;padding:8px;border:1px solid var(--line)}
+.field-share-url{display:block;max-height:76px;overflow:auto;padding:10px;border-radius:10px;background:#fff;font-size:9px;line-height:1.35;overflow-wrap:anywhere}
+@media(max-width:620px){
+  .field-test-person,.field-gps-grid{grid-template-columns:1fr}
+  .field-share-box .primary{min-height:52px}
+}
