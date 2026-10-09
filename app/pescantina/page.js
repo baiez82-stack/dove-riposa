@@ -380,7 +380,9 @@ export default function PescantinaPage(){
       </div>
 
       <div className="map-card">
-        <PescantinaMap selected={selected} routeMode={routeMode} calibrated={calibrated}/>
+        {selected.fieldTest
+          ? <FieldTestRouteSummary selected={selected}/>
+          : <PescantinaMap selected={selected} routeMode={routeMode} calibrated={calibrated}/>}
         <div className="map-info citizen-route-panel">
           <span className="eyebrow">IL TUO PERCORSO</span>
           <h3>Pronto a partire</h3>
@@ -462,6 +464,28 @@ function PescantinaMap({selected,routeMode,calibrated}){
     <div className="pescantina-map-legend">
       <span><i className="legend-line"></i> Percorso indicativo</span>
       <span><i className="legend-dot"></i> Nodi QR Precision</span>
+    </div>
+  </div>;
+}
+
+
+function FieldTestRouteSummary({selected}){
+  const points=selected.gpsPoints||{};
+  const rows=gpsSlots.map(([id,label])=>points[id]&&{...points[id],fallbackLabel:label}).filter(Boolean);
+
+  return <div className="field-route-summary">
+    <span className="eyebrow">RILIEVO GPS TEST</span>
+    <h3>Punti registrati</h3>
+    <p>Questa prova usa i punti rilevati sul posto. La planimetria demo non viene mostrata.</p>
+    <div className="field-route-points">
+      {rows.map((point,index)=><div className="field-route-point" key={point.id||index}>
+        <span>{index+1}</span>
+        <div>
+          <b>{point.label||point.fallbackLabel}</b>
+          <small>{point.lat}, {point.lon} · accuratezza ±{point.accuracy} m</small>
+        </div>
+      </div>)}
+      {!rows.length&&<div className="empty">Nessun punto GPS registrato. Puoi comunque provare ricerca, QR e Check.</div>}
     </div>
   </div>;
 }
