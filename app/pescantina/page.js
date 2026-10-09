@@ -5,6 +5,7 @@ import Link from 'next/link';
 import QRCode from 'qrcode';
 import BrandLockup from '../components/BrandLockup';
 import StandardPrecisionNavigator from '../components/StandardPrecisionNavigator';
+import FieldGpsNavigator from '../components/FieldGpsNavigator';
 import { getPrecisionConfig } from '../data/precision';
 
 const markers=getPrecisionConfig('pescantina').markers;
@@ -534,21 +535,30 @@ export default function PescantinaPage(){
             <small>{selected.settore} · {selected.fila} · {selected.posizione}</small>
           </div>
           <div className="public-access-note">Le informazioni dettagliate sull’accessibilità non sono ancora verificate sul posto in questa demo.</div>
-          <button className="primary precision-button citizen-start-button" onClick={()=>setCameraOpen(true)}>Inizia il percorso</button>
+          <button className="primary precision-button citizen-start-button" onClick={()=>setCameraOpen(true)}>{selected.fieldTest?'Avvia guida fotocamera':'Inizia il percorso'}</button>
           <div className="camera-privacy">Il percorso parte dall’ingresso principale. I QR di posizione confermano un punto fisico certo e permettono di ripartire da lì.</div>
         </div>
       </div>
     </section>}
 
-    {cameraOpen&&selected&&<StandardPrecisionNavigator
-      selected={selected}
-      routeMode={routeMode}
-      calibrated={calibrated}
-      markers={markers}
-      municipalityLabel="Pescantina"
-      onCalibrate={calibrate}
-      onClose={()=>setCameraOpen(false)}
-    />}
+    {cameraOpen&&selected&&(selected.fieldTest
+      ? <FieldGpsNavigator
+          selected={selected}
+          calibrated={calibrated}
+          markers={markers}
+          municipalityLabel="Pescantina"
+          onCalibrate={calibrate}
+          onClose={()=>setCameraOpen(false)}
+        />
+      : <StandardPrecisionNavigator
+          selected={selected}
+          routeMode={routeMode}
+          calibrated={calibrated}
+          markers={markers}
+          municipalityLabel="Pescantina"
+          onCalibrate={calibrate}
+          onClose={()=>setCameraOpen(false)}
+        />)}
 
     <footer>
       <div className="footer-brand"><BrandLockup compact subtitle="Pescantina · demo"/></div>
