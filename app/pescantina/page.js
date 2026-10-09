@@ -401,6 +401,7 @@ export default function PescantinaPage(){
         <span className="eyebrow">FIELD TEST · PESCANTINA</span>
         <h2>Prepara la prova in pochi tocchi</h2>
         <p>Inserisci il defunto e registra le posizioni con il GPS. Non devi misurare metri né scrivere il percorso a mano.</p>
+        <Link className="primary link-button field-print-qrs" href="/pescantina/qr-test" target="_blank">Apri i 3 QR da stampare →</Link>
 
         <div className="field-test-form">
           <div className="field-test-person">
@@ -443,20 +444,21 @@ export default function PescantinaPage(){
         {fieldSaved&&<div className="field-share-box">
           <div>
             <span className="eyebrow">SECONDO TELEFONO</span>
-            <b>Inquadra questo QR per aprire la stessa prova</b>
-            <p>Questo QR serve solo a trasferire la configurazione al secondo telefono. Non è un QR da mettere nel cimitero.</p>
+            <b>Passa la prova al secondo telefono</b>
+            <p>Inquadra il QR qui sotto oppure usa il pulsante di condivisione. Il link tecnico resta nascosto.</p>
           </div>
           {shareQr
             ? <img className="field-share-qr" src={shareQr} alt="QR per aprire la prova Dove Riposa su un altro telefono"/>
             : <div className="admin-warning">QR di condivisione non disponibile. Usa il pulsante Condividi prova.</div>}
-          <button className="primary" type="button" onClick={shareFieldTest}>Condividi prova</button>
+          <button className="primary" type="button" onClick={shareFieldTest}>Invia al secondo telefono</button>
         </div>}
 
         <div className="field-precision-box">
           <div>
             <span className="eyebrow">QR FISICI PER DOMANI</span>
-            <h3>Questi sono i QR da portare nel cimitero</h3>
+            <h3>Questi sono i 3 QR da stampare</h3>
             <p>Ingresso è già definito. Nodo A e Nodo B li appoggerai nei due punti strategici scelti durante il sopralluogo.</p>
+            <Link className="secondary link-button" href="/pescantina/qr-test" target="_blank">Apri versione stampa →</Link>
           </div>
 
           <div className="field-precision-grid">
