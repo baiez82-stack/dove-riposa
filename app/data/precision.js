@@ -18,8 +18,8 @@ export const precisionConfigs = {
     cemeteryName: 'Cimitero comunale',
     markers: {
       ingresso: { id:'ingresso', code:'DR-PC-ING', label:'Ingresso principale', x:360, y:470, stepIndex:0 },
-      centro: { id:'centro', code:'DR-PC-CEN', label:'Nodo centrale', x:360, y:385, stepIndex:1 },
-      testata: { id:'testata', code:'DR-PC-TES', label:'Testata centrale', x:360, y:105, stepIndex:2 }
+      centro: { id:'centro', code:'DR-PC-CEN', label:'Nodo A', x:360, y:385, stepIndex:1 },
+      testata: { id:'testata', code:'DR-PC-TES', label:'Nodo B', x:360, y:105, stepIndex:2 }
     }
   }
 };
