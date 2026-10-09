@@ -39,6 +39,32 @@ function bearingDegrees(a,b){
   return normalize360(toDeg(Math.atan2(y,x)));
 }
 
+function segmentDeviationMeters(point,start,end){
+  if(!point||!start||!end) return null;
+
+  const meanLat=toRad((start.lat+end.lat)/2);
+  const metersPerLon=111320*Math.cos(meanLat);
+  const metersPerLat=110540;
+
+  const bx=(end.lon-start.lon)*metersPerLon;
+  const by=(end.lat-start.lat)*metersPerLat;
+  const px=(point.lon-start.lon)*metersPerLon;
+  const py=(point.lat-start.lat)*metersPerLat;
+  const lengthSq=bx*bx+by*by;
+
+  if(lengthSq<0.01) return {distance:distanceMeters(point,start),progress:0};
+
+  const rawT=(px*bx+py*by)/lengthSq;
+  const t=Math.max(0,Math.min(1,rawT));
+  const nearestX=bx*t;
+  const nearestY=by*t;
+
+  return {
+    distance:Math.hypot(px-nearestX,py-nearestY),
+    progress:t
+  };
+}
+
 function markerFromValue(value,markers){
   const list=Array.isArray(markers)?markers:Object.values(markers||{});
   const raw=String(value||'');
@@ -100,6 +126,10 @@ export default function FieldGpsNavigator({
   const scannerTimerRef=useRef(null);
   const scanBusyRef=useRef(false);
   const alertedTargetRef=useRef('');
+  const deviationTimerRef=useRef(null);
+  const offRouteAlertedRef=useRef(false);
+  const lastDistanceRef=useRef(null);
+  const movingAwayCountRef=useRef(0);
 
   const [guideActive,setGuideActive]=useState(false);
   const [scannerOpen,setScannerOpen]=useState(false);
@@ -110,22 +140,38 @@ export default function FieldGpsNavigator({
   const [notice,setNotice]=useState('');
   const [arrivalStatus,setArrivalStatus]=useState('');
   const [haptics,setHaptics]=useState(true);
+  const [offRoute,setOffRoute]=useState(false);
+  const [movingAway,setMovingAway]=useState(false);
 
   const points=selected.gpsPoints||{};
   const currentAnchor=anchorFromMarker(calibrated)||'ingresso';
   const currentIndex=Math.max(0,sequence.findIndex(item=>item.id===currentAnchor));
   const target=sequence[Math.min(currentIndex+1,sequence.length-1)];
   const targetPoint=points[target?.id]||null;
+  const startPoint=points[currentAnchor]||null;
   const currentPoint=position?{lat:position.lat,lon:position.lon}:null;
   const distance=useMemo(()=>distanceMeters(currentPoint,targetPoint),[position?.lat,position?.lon,targetPoint?.lat,targetPoint?.lon]);
   const bearing=useMemo(()=>bearingDegrees(currentPoint,targetPoint),[position?.lat,position?.lon,targetPoint?.lat,targetPoint?.lon]);
+  const segmentInfo=useMemo(
+    ()=>segmentDeviationMeters(currentPoint,startPoint,targetPoint),
+    [position?.lat,position?.lon,startPoint?.lat,startPoint?.lon,targetPoint?.lat,targetPoint?.lon]
+  );
   const relativeAngle=bearing!=null&&heading!=null?normalize180(bearing-heading):0;
+  const headingError=bearing!=null&&heading!=null?Math.abs(normalize180(bearing-heading)):null;
   const gpsAccuracy=position?.accuracy??null;
   const gpsGood=gpsAccuracy==null||gpsAccuracy<=20;
   const nearThreshold=Math.max(8,Math.min(15,gpsAccuracy||8));
+  const routeCorridor=Math.max(7,Math.min(18,(gpsAccuracy||6)*1.4));
   const nearTarget=distance!=null&&distance<=nearThreshold&&gpsGood;
   const isDestination=target?.id==='destinazione';
   const instruction=turnInstruction(points,currentAnchor);
+  const deviationCandidate=Boolean(
+    guideActive&&gpsGood&&!nearTarget&&targetPoint&&startPoint&&(
+      (segmentInfo?.distance??0)>routeCorridor||
+      movingAway||
+      (headingError!=null&&headingError>75&&distance!=null&&distance>nearThreshold+6)
+    )
+  );
 
   useEffect(()=>{
     if(!nearTarget||!target?.id||alertedTargetRef.current===target.id) return;
@@ -136,7 +182,53 @@ export default function FieldGpsNavigator({
   },[nearTarget,target?.id,haptics,isDestination]);
 
   useEffect(()=>{
+    if(distance==null||!gpsGood||nearTarget){
+      lastDistanceRef.current=distance;
+      movingAwayCountRef.current=0;
+      setMovingAway(false);
+      return;
+    }
+
+    const previous=lastDistanceRef.current;
+    const tolerance=Math.max(3,(gpsAccuracy||6)*0.45);
+
+    if(previous!=null&&distance>previous+tolerance){
+      movingAwayCountRef.current+=1;
+    }else if(previous!=null&&distance<previous-tolerance/2){
+      movingAwayCountRef.current=0;
+    }
+
+    lastDistanceRef.current=distance;
+    setMovingAway(movingAwayCountRef.current>=2);
+  },[distance,gpsGood,nearTarget,gpsAccuracy,target?.id]);
+
+  useEffect(()=>{
+    clearTimeout(deviationTimerRef.current);
+
+    if(!deviationCandidate){
+      setOffRoute(false);
+      offRouteAlertedRef.current=false;
+      return;
+    }
+
+    deviationTimerRef.current=setTimeout(()=>{
+      setOffRoute(true);
+      if(!offRouteAlertedRef.current){
+        offRouteAlertedRef.current=true;
+        if(haptics&&navigator.vibrate) navigator.vibrate([180,100,180,100,180]);
+      }
+    },1600);
+
+    return()=>clearTimeout(deviationTimerRef.current);
+  },[deviationCandidate,haptics,target?.id]);
+
+  useEffect(()=>{
     alertedTargetRef.current='';
+    offRouteAlertedRef.current=false;
+    movingAwayCountRef.current=0;
+    lastDistanceRef.current=null;
+    setMovingAway(false);
+    setOffRoute(false);
     setArrivalStatus('');
   },[calibrated?.id]);
 
@@ -166,7 +258,9 @@ export default function FieldGpsNavigator({
 
   function stopGuide(){
     clearInterval(scannerTimerRef.current);
+    clearTimeout(deviationTimerRef.current);
     scannerTimerRef.current=null;
+    deviationTimerRef.current=null;
     scanBusyRef.current=false;
     if(watchRef.current!=null&&navigator.geolocation){
       navigator.geolocation.clearWatch(watchRef.current);
@@ -334,6 +428,7 @@ export default function FieldGpsNavigator({
 
   useEffect(()=>()=>{
     clearInterval(scannerTimerRef.current);
+    clearTimeout(deviationTimerRef.current);
     if(watchRef.current!=null&&navigator.geolocation) navigator.geolocation.clearWatch(watchRef.current);
     streamRef.current?.getTracks().forEach(track=>track.stop());
     detachOrientation();
@@ -385,18 +480,22 @@ export default function FieldGpsNavigator({
       <p>Il nodo letto diventa immediatamente il nuovo punto certo.</p>
       <button className="secondary" type="button" onClick={stopQrScan}>Annulla scansione</button>
     </div>:<>
-      <div className="field-camera-direction">
-        <span className="field-camera-target">{isDestination?'DESTINAZIONE':target?.label?.toUpperCase()}</span>
+      <div className={offRoute?'field-camera-direction off-route':'field-camera-direction'}>
+        <span className="field-camera-target">{offRoute?'FUORI PERCORSO':isDestination?'DESTINAZIONE':target?.label?.toUpperCase()}</span>
         <div
           className={heading==null?'field-camera-arrow no-heading':'field-camera-arrow'}
           style={heading==null?undefined:{transform:'rotate('+relativeAngle+'deg)'}}
           aria-hidden="true"
         >↑</div>
-        <h2>{nearTarget
-          ? isDestination?'Sei nella zona della sepoltura':'Nodo vicino: cerca il QR'
-          : instruction}</h2>
+        <h2>{offRoute
+          ? movingAway?'Stai andando dalla parte sbagliata':'Torna verso il percorso'
+          : nearTarget
+            ? isDestination?'Sei nella zona della sepoltura':'Nodo vicino: cerca il QR'
+            : instruction}</h2>
         <div className="field-camera-distance">
-          {distance!=null?'~ '+Math.max(0,Math.round(distance))+' m':'Calcolo distanza…'}
+          {distance!=null
+            ? '~ '+Math.max(0,Math.round(distance))+' m'+(target?.label?' a '+target.label:'')
+            : 'Calcolo distanza…'}
         </div>
         <small>{gpsAccuracy!=null
           ? 'GPS ±'+gpsAccuracy+' m'+(gpsGood?'':' · precisione bassa')
@@ -404,6 +503,9 @@ export default function FieldGpsNavigator({
       </div>
 
       <div className="field-camera-bottom">
+        {offRoute&&<div className="field-camera-offroute">
+          Hai deviato prima del punto previsto. Segui la freccia per rientrare verso {target?.label||'il prossimo punto'}.
+        </div>}
         {notice&&<div className="field-camera-notice">{notice}</div>}
         {error&&<div className="precision-nav-error">{error}</div>}
 
@@ -423,6 +525,7 @@ export default function FieldGpsNavigator({
         </div>}
 
         {heading==null&&<div className="field-camera-help">La distanza è attiva. Per orientare la freccia abilita l’accesso alla bussola, se richiesto dal telefono.</div>}
+        {!gpsGood&&<div className="field-camera-help">GPS poco preciso: non segnalo deviazioni finché l’accuratezza non migliora. Il QR resta il punto certo.</div>}
       </div>
     </>}
   </div>;
