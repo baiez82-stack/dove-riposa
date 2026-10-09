@@ -281,3 +281,12 @@ select:focus-visible{
   .field-test-person,.field-gps-grid{grid-template-columns:1fr}
   .field-share-box .primary{min-height:52px}
 }
+
+.field-route-summary{padding:22px;border-radius:18px;background:#f7f4ec;border:1px solid var(--line);align-self:stretch}
+.field-route-summary h3{margin:5px 0 6px;font-family:var(--font-display),Georgia,serif;font-size:28px}
+.field-route-summary>p{margin:0 0 14px;color:var(--muted);font-size:12px;line-height:1.5}
+.field-route-points{display:grid;gap:8px}
+.field-route-point{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:center;padding:10px;border-radius:12px;background:#fff;border:1px solid var(--line)}
+.field-route-point>span{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--ink);color:#fff;font-size:12px;font-weight:900}
+.field-route-point b,.field-route-point small{display:block}
+.field-route-point small{margin-top:2px;color:var(--muted);font-size:10px;overflow-wrap:anywhere}
