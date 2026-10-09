@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import QRCode from 'qrcode';
 import BrandLockup from '../components/BrandLockup';
 import StandardPrecisionNavigator from '../components/StandardPrecisionNavigator';
 import { getPrecisionConfig } from '../data/precision';
@@ -15,7 +16,31 @@ const accessibilitySegments=[
   {id:'A4',label:'Asse centrale → testata',surface:'Da rilevare',slope:'Da rilevare',width:'Da rilevare',rest:false,status:'Da verificare sul posto',path:'M360 385 L360 105'}
 ];
 
-const emptyFieldTest={nome:'',cognome:'',anno:'',morte:'',settore:'',fila:'',posizione:'',steps:''};
+const emptyFieldTest={nome:'',cognome:'',anno:'',morte:'',settore:'',fila:'',posizione:'',gpsPoints:{}};
+
+const gpsSlots=[
+  ['ingresso','Ingresso'],
+  ['nodoA','Nodo A'],
+  ['nodoB','Nodo B'],
+  ['destinazione','Destinazione']
+];
+
+function encodeSharedTest(record){
+  const bytes=new TextEncoder().encode(JSON.stringify(record));
+  let binary='';
+  bytes.forEach(byte=>{binary+=String.fromCharCode(byte);});
+  return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+
+function decodeSharedTest(value){
+  try{
+    const base64=String(value||'').replace(/-/g,'+').replace(/_/g,'/');
+    const padded=base64+'='.repeat((4-base64.length%4)%4);
+    const binary=atob(padded);
+    const bytes=Uint8Array.from(binary,ch=>ch.charCodeAt(0));
+    return JSON.parse(new TextDecoder().decode(bytes));
+  }catch{return null;}
+}
 
 const demoRecords=[
   {
@@ -64,6 +89,10 @@ export default function PescantinaPage(){
   const [fieldTestRecord,setFieldTestRecord]=useState(null);
   const [fieldForm,setFieldForm]=useState(emptyFieldTest);
   const [fieldSaved,setFieldSaved]=useState(false);
+  const [gpsBusy,setGpsBusy]=useState('');
+  const [gpsMessage,setGpsMessage]=useState('');
+  const [shareUrl,setShareUrl]=useState('');
+  const [shareQr,setShareQr]=useState('');
 
   useEffect(()=>{
     const params=new URLSearchParams(window.location.search);
@@ -72,21 +101,29 @@ export default function PescantinaPage(){
     setFieldTestMode(params.get('fieldtest')==='1');
 
     try{
-      const raw=localStorage.getItem('dr-pescantina-field-test');
-      if(raw){
-        const record=JSON.parse(raw);
-        if(record?.nome&&record?.cognome){
-          setFieldTestRecord(record);
-          setFieldForm({
-            nome:record.nome||'',
-            cognome:record.cognome||'',
-            anno:record.anno||'',
-            morte:record.morte||'',
-            settore:record.settore||'',
-            fila:record.fila||'',
-            posizione:record.posizione||'',
-            steps:Array.isArray(record.instructions)?record.instructions.join('\n'):''
-          });
+      const hashValue=window.location.hash.startsWith('#ft=')?window.location.hash.slice(4):'';
+      const shared=hashValue?decodeSharedTest(hashValue):null;
+      const localRaw=localStorage.getItem('dr-pescantina-field-test');
+      const local=localRaw?JSON.parse(localRaw):null;
+      const record=shared?.nome&&shared?.cognome?shared:local;
+
+      if(record?.nome&&record?.cognome){
+        if(shared) localStorage.setItem('dr-pescantina-field-test',JSON.stringify(record));
+        setFieldTestRecord(record);
+        setFieldForm({
+          nome:record.nome||'',
+          cognome:record.cognome||'',
+          anno:record.anno||'',
+          morte:record.morte||'',
+          settore:record.settore||'',
+          fila:record.fila||'',
+          posizione:record.posizione||'',
+          gpsPoints:record.gpsPoints||{}
+        });
+
+        if(shared){
+          setQ(record.cognome);
+          setSearched(true);
         }
       }
     }catch{}
@@ -102,11 +139,66 @@ export default function PescantinaPage(){
     });
   },[q,fieldTestRecord]);
 
-  function saveFieldTest(){
+  function captureGps(id,label){
+    setGpsMessage('');
+
+    if(!navigator.geolocation){
+      setGpsMessage('GPS non disponibile su questo browser.');
+      return;
+    }
+
+    setGpsBusy(id);
+    navigator.geolocation.getCurrentPosition(position=>{
+      const point={
+        id,
+        label,
+        lat:Number(position.coords.latitude.toFixed(7)),
+        lon:Number(position.coords.longitude.toFixed(7)),
+        accuracy:Math.round(position.coords.accuracy),
+        capturedAt:new Date().toISOString()
+      };
+
+      setFieldForm(current=>({
+        ...current,
+        gpsPoints:{...(current.gpsPoints||{}),[id]:point}
+      }));
+      setGpsBusy('');
+      setFieldSaved(false);
+      setGpsMessage(label+' registrato · accuratezza stimata ±'+point.accuracy+' m');
+    },error=>{
+      setGpsBusy('');
+      if(error?.code===1) setGpsMessage('Permesso posizione non concesso. Abilita la posizione nel browser e riprova.');
+      else setGpsMessage('Non riesco a rilevare la posizione. Spostati all’aperto e riprova.');
+    },{
+      enableHighAccuracy:true,
+      timeout:15000,
+      maximumAge:0
+    });
+  }
+
+  async function buildShare(record){
+    const encoded=encodeSharedTest(record);
+    const url=window.location.origin+'/pescantina#ft='+encoded;
+    setShareUrl(url);
+    try{
+      const qr=await QRCode.toDataURL(url,{errorCorrectionLevel:'H',margin:2,width:420});
+      setShareQr(qr);
+    }catch{
+      setShareQr('');
+    }
+    return url;
+  }
+
+  async function saveFieldTest(){
     if(!fieldForm.nome.trim()||!fieldForm.cognome.trim()) return;
 
-    const steps=fieldForm.steps.split(/\n+/).map(v=>v.trim()).filter(Boolean);
-    const instructions=steps.length?steps:['Percorso da rilevare sul posto','Controlla settore, fila e posizione'];
+    const points=fieldForm.gpsPoints||{};
+    const instructions=[
+      points.nodoA?'Vai verso il Nodo A':'Parti dall’ingresso principale',
+      points.nodoB?'Dal Nodo A prosegui verso il Nodo B':'Prosegui verso la zona della sepoltura',
+      points.destinazione?'Dal Nodo B prosegui verso la destinazione':'Raggiungi settore, fila e posizione',
+      'Controlla settore, fila e posizione'
+    ];
 
     const record={
       id:'field-test-pescantina',
@@ -118,6 +210,7 @@ export default function PescantinaPage(){
       settore:fieldForm.settore.trim()||'Da rilevare',
       fila:fieldForm.fila.trim()||'Da rilevare',
       posizione:fieldForm.posizione.trim()||'Da rilevare',
+      gpsPoints:points,
       mapX:null,
       mapY:null,
       route:'',
@@ -137,7 +230,25 @@ export default function PescantinaPage(){
       setFieldSaved(true);
       setQ(record.cognome);
       setSearched(true);
+      await buildShare(record);
     }catch{}
+  }
+
+  async function shareFieldTest(){
+    if(!shareUrl) return;
+    if(navigator.share){
+      try{
+        await navigator.share({title:'Dove Riposa · test Pescantina',url:shareUrl});
+        return;
+      }catch{}
+    }
+
+    try{
+      await navigator.clipboard.writeText(shareUrl);
+      setGpsMessage('Link prova copiato. Aprilo sul secondo telefono.');
+    }catch{
+      setGpsMessage('Copia il link mostrato sotto e aprilo sul secondo telefono.');
+    }
   }
 
   function clearFieldTest(){
@@ -145,6 +256,9 @@ export default function PescantinaPage(){
     setFieldTestRecord(null);
     setFieldForm(emptyFieldTest);
     setFieldSaved(false);
+    setShareUrl('');
+    setShareQr('');
+    setGpsMessage('');
   }
 
   function submit(e){
@@ -172,23 +286,57 @@ export default function PescantinaPage(){
 
     {fieldTestMode&&<section className="wrap" style={{paddingTop:'20px'}}>
       <div className="admin-panel">
-        <span className="eyebrow">FIELD TEST · SOLO QUESTO DISPOSITIVO</span>
-        <h2>Prepara la sepoltura di prova</h2>
-        <p>Questi dati restano nel browser del telefono e non vengono salvati nel database.</p>
-        <div className="admin-form">
-          <input placeholder="Nome" value={fieldForm.nome} onChange={e=>{setFieldForm({...fieldForm,nome:e.target.value});setFieldSaved(false);}}/>
-          <input placeholder="Cognome" value={fieldForm.cognome} onChange={e=>{setFieldForm({...fieldForm,cognome:e.target.value});setFieldSaved(false);}}/>
-          <input placeholder="Anno nascita (facoltativo)" value={fieldForm.anno} onChange={e=>setFieldForm({...fieldForm,anno:e.target.value})}/>
-          <input placeholder="Anno morte (facoltativo)" value={fieldForm.morte} onChange={e=>setFieldForm({...fieldForm,morte:e.target.value})}/>
-          <input placeholder="Settore / campo" value={fieldForm.settore} onChange={e=>setFieldForm({...fieldForm,settore:e.target.value})}/>
-          <input placeholder="Fila" value={fieldForm.fila} onChange={e=>setFieldForm({...fieldForm,fila:e.target.value})}/>
-          <input placeholder="Posizione / loculo" value={fieldForm.posizione} onChange={e=>setFieldForm({...fieldForm,posizione:e.target.value})}/>
-          <textarea rows="6" placeholder={"Istruzioni reali, una per riga\nEs. Vai dritto fino al primo incrocio\nGira a sinistra al nodo A"} value={fieldForm.steps} onChange={e=>setFieldForm({...fieldForm,steps:e.target.value})}/>
-          <button className="primary" type="button" onClick={saveFieldTest}>Salva test sul telefono</button>
-          <button className="secondary" type="button" onClick={clearFieldTest}>Cancella test locale</button>
+        <span className="eyebrow">FIELD TEST · PESCANTINA</span>
+        <h2>Prepara la prova in pochi tocchi</h2>
+        <p>Inserisci il defunto e registra le posizioni con il GPS. Non devi misurare metri né scrivere il percorso a mano.</p>
+
+        <div className="field-test-form">
+          <div className="field-test-person">
+            <input placeholder="Nome" value={fieldForm.nome} onChange={e=>{setFieldForm({...fieldForm,nome:e.target.value});setFieldSaved(false);}}/>
+            <input placeholder="Cognome" value={fieldForm.cognome} onChange={e=>{setFieldForm({...fieldForm,cognome:e.target.value});setFieldSaved(false);}}/>
+            <input placeholder="Settore / campo (se lo sai)" value={fieldForm.settore} onChange={e=>setFieldForm({...fieldForm,settore:e.target.value})}/>
+            <input placeholder="Fila (se la sai)" value={fieldForm.fila} onChange={e=>setFieldForm({...fieldForm,fila:e.target.value})}/>
+            <input placeholder="Posizione / loculo (se lo sai)" value={fieldForm.posizione} onChange={e=>setFieldForm({...fieldForm,posizione:e.target.value})}/>
+          </div>
+
+          <div className="field-gps-box">
+            <div>
+              <b>Registra 4 punti</b>
+              <p>Vai fisicamente nel punto e tocca il pulsante. Il telefono salva coordinate e accuratezza GPS.</p>
+            </div>
+
+            <div className="field-gps-grid">
+              {gpsSlots.map(([id,label])=>{
+                const point=fieldForm.gpsPoints?.[id];
+                return <button
+                  key={id}
+                  type="button"
+                  className={point?'secondary field-gps-point saved':'secondary field-gps-point'}
+                  onClick={()=>captureGps(id,label)}
+                  disabled={gpsBusy===id}
+                >
+                  <span>{point?'✓':'+'}</span>
+                  <b>{gpsBusy===id?'Rilevamento…':label}</b>
+                  <small>{point?point.lat+', '+point.lon+' · ±'+point.accuracy+' m':'Tocca quando sei sul posto'}</small>
+                </button>;
+              })}
+            </div>
+            {gpsMessage&&<div className="import-message">{gpsMessage}</div>}
+          </div>
+
+          <button className="primary field-save-test" type="button" onClick={saveFieldTest}>Salva e prepara la prova</button>
+          <button className="secondary" type="button" onClick={clearFieldTest}>Azzera prova</button>
         </div>
-        <div className="admin-warning">Usa step 1 dall’ingresso al Nodo A, step 2 dal Nodo A al Nodo B, poi gli ultimi step verso la sepoltura. Non inserire distanze non misurate.</div>
-        {fieldSaved&&<div className="import-message">Test salvato. Ora puoi cercare il cognome qui sotto.</div>}
+
+        {fieldSaved&&<div className="field-share-box">
+          <div>
+            <b>Prova pronta anche su altri telefoni</b>
+            <p>Il link contiene la configurazione nel frammento del browser: aprilo sul secondo telefono oppure inquadra il QR. I dati non vengono salvati nel database.</p>
+          </div>
+          {shareQr&&<img className="field-share-qr" src={shareQr} alt="QR per aprire la prova Dove Riposa su un altro telefono"/>}
+          <button className="primary" type="button" onClick={shareFieldTest}>Condividi prova</button>
+          {shareUrl&&<code className="field-share-url">{shareUrl}</code>}
+        </div>}
       </div>
     </section>}
 
@@ -216,7 +364,7 @@ export default function PescantinaPage(){
             <h3>{r.nome} {r.cognome}</h3>
             <p>{r.anno}–{r.morte}</p>
             <div className="place"><b>{r.settore}</b><span>{r.fila} · {r.posizione}</span></div>
-            <div className="source">{r.fieldTest?'TEST LOCALE · solo questo dispositivo':'Dato dimostrativo fittizio'}</div>
+            <div className="source">{r.fieldTest?'TEST SUL CAMPO · configurazione condivisibile':'Dato dimostrativo fittizio'}</div>
           </div>
           <button className="secondary" onClick={()=>openRecord(r)}>Guidami</button>
         </article>)}
