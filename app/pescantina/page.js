@@ -15,6 +15,8 @@ const accessibilitySegments=[
   {id:'A4',label:'Asse centrale → testata',surface:'Da rilevare',slope:'Da rilevare',width:'Da rilevare',rest:false,status:'Da verificare sul posto',path:'M360 385 L360 105'}
 ];
 
+const emptyFieldTest={nome:'',cognome:'',anno:'',morte:'',settore:'',fila:'',posizione:'',steps:''};
+
 const demoRecords=[
   {
     id:1,nome:'Lucia',cognome:'Ferrari',anno:'1948',morte:'2023',settore:'Settore A',fila:'Fila 4',posizione:'Loculo 12',
@@ -58,21 +60,92 @@ export default function PescantinaPage(){
   const [routeMode,setRouteMode]=useState('short');
   const [calibrated,setCalibrated]=useState(null);
   const [cameraOpen,setCameraOpen]=useState(false);
+  const [fieldTestMode,setFieldTestMode]=useState(false);
+  const [fieldTestRecord,setFieldTestRecord]=useState(null);
+  const [fieldForm,setFieldForm]=useState(emptyFieldTest);
+  const [fieldSaved,setFieldSaved]=useState(false);
 
   useEffect(()=>{
     const params=new URLSearchParams(window.location.search);
     const cal=params.get('cal');
     if(cal && markers[cal]) setCalibrated(markers[cal]);
+    setFieldTestMode(params.get('fieldtest')==='1');
+
+    try{
+      const raw=localStorage.getItem('dr-pescantina-field-test');
+      if(raw){
+        const record=JSON.parse(raw);
+        if(record?.nome&&record?.cognome){
+          setFieldTestRecord(record);
+          setFieldForm({
+            nome:record.nome||'',
+            cognome:record.cognome||'',
+            anno:record.anno||'',
+            morte:record.morte||'',
+            settore:record.settore||'',
+            fila:record.fila||'',
+            posizione:record.posizione||'',
+            steps:Array.isArray(record.instructions)?record.instructions.join('\n'):''
+          });
+        }
+      }
+    }catch{}
   },[]);
 
   const results=useMemo(()=>{
+    const records=fieldTestRecord?[fieldTestRecord,...demoRecords]:demoRecords;
     const terms=q.trim().toLowerCase().split(/\s+/).filter(Boolean);
-    if(!terms.length) return demoRecords;
-    return demoRecords.filter(r=>{
-      const haystack=`${r.nome} ${r.cognome} ${r.anno} ${r.morte}`.toLowerCase();
+    if(!terms.length) return records;
+    return records.filter(r=>{
+      const haystack=`${r.nome} ${r.cognome} ${r.anno||""} ${r.morte||""}`.toLowerCase();
       return terms.every(term=>haystack.includes(term));
     });
-  },[q]);
+  },[q,fieldTestRecord]);
+
+  function saveFieldTest(){
+    if(!fieldForm.nome.trim()||!fieldForm.cognome.trim()) return;
+
+    const steps=fieldForm.steps.split(/\n+/).map(v=>v.trim()).filter(Boolean);
+    const instructions=steps.length?steps:['Percorso da rilevare sul posto','Controlla settore, fila e posizione'];
+
+    const record={
+      id:'field-test-pescantina',
+      fieldTest:true,
+      nome:fieldForm.nome.trim(),
+      cognome:fieldForm.cognome.trim(),
+      anno:fieldForm.anno.trim(),
+      morte:fieldForm.morte.trim(),
+      settore:fieldForm.settore.trim()||'Da rilevare',
+      fila:fieldForm.fila.trim()||'Da rilevare',
+      posizione:fieldForm.posizione.trim()||'Da rilevare',
+      mapX:null,
+      mapY:null,
+      route:'',
+      accessibleRoute:'',
+      assistRoute:'',
+      shortDistance:'',
+      accessibleDistance:'',
+      assistDistance:'',
+      instructions,
+      accessibleInstructions:instructions,
+      assistInstructions:instructions
+    };
+
+    try{
+      localStorage.setItem('dr-pescantina-field-test',JSON.stringify(record));
+      setFieldTestRecord(record);
+      setFieldSaved(true);
+      setQ(record.cognome);
+      setSearched(true);
+    }catch{}
+  }
+
+  function clearFieldTest(){
+    try{localStorage.removeItem('dr-pescantina-field-test');}catch{}
+    setFieldTestRecord(null);
+    setFieldForm(emptyFieldTest);
+    setFieldSaved(false);
+  }
 
   function submit(e){
     e.preventDefault();
@@ -96,6 +169,28 @@ export default function PescantinaPage(){
       <Link href="/" className="citizen-brand"><BrandLockup subtitle="Pescantina"/></Link>
       <nav><Link href="/">Cambia Comune</Link><a href="#cerca">Cerca</a><a href="#mappa">Mappa</a></nav>
     </header>
+
+    {fieldTestMode&&<section className="wrap" style={{paddingTop:'20px'}}>
+      <div className="admin-panel">
+        <span className="eyebrow">FIELD TEST · SOLO QUESTO DISPOSITIVO</span>
+        <h2>Prepara la sepoltura di prova</h2>
+        <p>Questi dati restano nel browser del telefono e non vengono salvati nel database.</p>
+        <div className="admin-form">
+          <input placeholder="Nome" value={fieldForm.nome} onChange={e=>{setFieldForm({...fieldForm,nome:e.target.value});setFieldSaved(false);}}/>
+          <input placeholder="Cognome" value={fieldForm.cognome} onChange={e=>{setFieldForm({...fieldForm,cognome:e.target.value});setFieldSaved(false);}}/>
+          <input placeholder="Anno nascita (facoltativo)" value={fieldForm.anno} onChange={e=>setFieldForm({...fieldForm,anno:e.target.value})}/>
+          <input placeholder="Anno morte (facoltativo)" value={fieldForm.morte} onChange={e=>setFieldForm({...fieldForm,morte:e.target.value})}/>
+          <input placeholder="Settore / campo" value={fieldForm.settore} onChange={e=>setFieldForm({...fieldForm,settore:e.target.value})}/>
+          <input placeholder="Fila" value={fieldForm.fila} onChange={e=>setFieldForm({...fieldForm,fila:e.target.value})}/>
+          <input placeholder="Posizione / loculo" value={fieldForm.posizione} onChange={e=>setFieldForm({...fieldForm,posizione:e.target.value})}/>
+          <textarea rows="6" placeholder={"Istruzioni reali, una per riga\nEs. Vai dritto fino al primo incrocio\nGira a sinistra al nodo A"} value={fieldForm.steps} onChange={e=>setFieldForm({...fieldForm,steps:e.target.value})}/>
+          <button className="primary" type="button" onClick={saveFieldTest}>Salva test sul telefono</button>
+          <button className="secondary" type="button" onClick={clearFieldTest}>Cancella test locale</button>
+        </div>
+        <div className="admin-warning">Usa step 1 dall’ingresso al Nodo A, step 2 dal Nodo A al Nodo B, poi gli ultimi step verso la sepoltura. Non inserire distanze non misurate.</div>
+        {fieldSaved&&<div className="import-message">Test salvato. Ora puoi cercare il cognome qui sotto.</div>}
+      </div>
+    </section>}
 
     <section className="municipality-hero" id="cerca">
       <div>
@@ -121,7 +216,7 @@ export default function PescantinaPage(){
             <h3>{r.nome} {r.cognome}</h3>
             <p>{r.anno}–{r.morte}</p>
             <div className="place"><b>{r.settore}</b><span>{r.fila} · {r.posizione}</span></div>
-            <div className="source">Dato dimostrativo fittizio</div>
+            <div className="source">{r.fieldTest?'TEST LOCALE · solo questo dispositivo':'Dato dimostrativo fittizio'}</div>
           </div>
           <button className="secondary" onClick={()=>openRecord(r)}>Guidami</button>
         </article>)}
@@ -210,7 +305,7 @@ function PescantinaMap({selected,routeMode,calibrated}){
         <text x={m.x+18} y={m.y+5}>{m.id==='ingresso'?'QR ingresso':m.id==='centro'?'QR nodo':'QR testata'}</text>
       </g>)}
 
-      {selected&&<>
+      {selected&&selected.mapX!=null&&selected.mapY!=null&&<>
         <path d={selectedPath} className={routeMode==='assist'?'selected-route assist-route':routeMode==='accessible'?'selected-route accessible-route':'selected-route'}/>
         <circle cx={selected.mapX} cy={selected.mapY} r="13" className="selected-pin"/>
         <circle cx={selected.mapX} cy={selected.mapY} r="4" className="selected-pin-core"/>
