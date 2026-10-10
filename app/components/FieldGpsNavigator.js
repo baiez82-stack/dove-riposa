@@ -501,7 +501,7 @@ export default function FieldGpsNavigator({
     </div>;
   }
 
-  return <div className="field-camera-guide" role="dialog" aria-modal="true" aria-label="Navigazione visuale Dove Riposa">
+  return <div className={scannerOpen?'field-camera-guide scanning':'field-camera-guide'} role="dialog" aria-modal="true" aria-label="Navigazione visuale Dove Riposa">
     <video ref={videoRef} className="field-camera-video" playsInline muted autoPlay/>
 
     <div className="field-camera-shade"></div>
@@ -511,6 +511,7 @@ export default function FieldGpsNavigator({
       <div>
         <span>DOVE RIPOSA</span>
         <b>{selected.nome} {selected.cognome}</b>
+        {cameraStatus==='ready'&&<small className="field-camera-live">● Fotocamera attiva</small>}
       </div>
       <div className="field-camera-top-actions">
         <button type="button" onClick={()=>setHaptics(v=>!v)}>{haptics?'Vibrazioni ON':'Vibrazioni OFF'}</button>
