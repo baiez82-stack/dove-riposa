@@ -410,3 +410,9 @@ select:focus-visible{
 .field-camera-live{display:inline-block;margin-top:5px;padding:4px 7px;border-radius:999px;background:rgba(24,90,61,.72);color:#fff;font-size:9px;font-weight:900;letter-spacing:.04em}
 .field-camera-guide.scanning .field-camera-shade{background:linear-gradient(180deg,rgba(0,0,0,.22) 0%,rgba(0,0,0,.03) 28%,rgba(0,0,0,.02) 68%,rgba(0,0,0,.24) 100%)}
 .field-camera-guide.scanning .field-camera-scan{background:rgba(0,0,0,.08)}
+
+.field-signal-flash{position:absolute;inset:0;z-index:5;pointer-events:none;border:8px solid rgba(255,255,255,.92);box-shadow:inset 0 0 80px rgba(255,255,255,.24);animation:fieldSignalPulse .65s ease-out forwards}
+.field-signal-flash.node,.field-signal-flash.recalibrate{border-color:rgba(245,245,245,.95)}
+.field-signal-flash.offroute{border-color:rgba(255,92,72,.98);box-shadow:inset 0 0 100px rgba(255,92,72,.28)}
+.field-signal-flash.arrival{border-color:rgba(255,255,255,.98);box-shadow:inset 0 0 110px rgba(255,255,255,.34)}
+@keyframes fieldSignalPulse{0%{opacity:0}15%{opacity:1}45%{opacity:.35}70%{opacity:1}100%{opacity:0}}
