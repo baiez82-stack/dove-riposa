@@ -406,3 +406,7 @@ select:focus-visible{
 .field-camera-offroute{padding:12px 14px;border-radius:14px;background:rgba(138,38,24,.88);border:1px solid rgba(255,255,255,.2);font-size:13px;font-weight:900;line-height:1.35;text-align:center;backdrop-filter:blur(8px)}
 
 .field-camera-loading{position:absolute;inset:0;z-index:1;display:grid;place-items:center;background:#111;color:#fff;font-size:15px;font-weight:900;letter-spacing:.02em}
+
+.field-camera-live{display:inline-block;margin-top:5px;padding:4px 7px;border-radius:999px;background:rgba(24,90,61,.72);color:#fff;font-size:9px;font-weight:900;letter-spacing:.04em}
+.field-camera-guide.scanning .field-camera-shade{background:linear-gradient(180deg,rgba(0,0,0,.22) 0%,rgba(0,0,0,.03) 28%,rgba(0,0,0,.02) 68%,rgba(0,0,0,.24) 100%)}
+.field-camera-guide.scanning .field-camera-scan{background:rgba(0,0,0,.08)}
