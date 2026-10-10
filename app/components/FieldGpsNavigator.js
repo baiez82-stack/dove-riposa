@@ -130,6 +130,8 @@ export default function FieldGpsNavigator({
   const offRouteAlertedRef=useRef(false);
   const lastDistanceRef=useRef(null);
   const movingAwayCountRef=useRef(0);
+  const audioContextRef=useRef(null);
+  const flashTimerRef=useRef(null);
 
   const [guideActive,setGuideActive]=useState(false);
   const [scannerOpen,setScannerOpen]=useState(false);
@@ -140,6 +142,7 @@ export default function FieldGpsNavigator({
   const [notice,setNotice]=useState('');
   const [arrivalStatus,setArrivalStatus]=useState('');
   const [haptics,setHaptics]=useState(true);
+  const [signalFlash,setSignalFlash]=useState('');
   const [offRoute,setOffRoute]=useState(false);
   const [movingAway,setMovingAway]=useState(false);
   const [cameraStatus,setCameraStatus]=useState('idle');
@@ -170,6 +173,7 @@ export default function FieldGpsNavigator({
   const currentLabel=sequence[currentIndex]?.label||'ultimo nodo';
   const instruction=turnInstruction(points,currentAnchor);
   const routeReady=Boolean(points.ingresso&&points.nodoA&&points.nodoB&&points.destinazione);
+  const vibrationSupported=typeof navigator!=='undefined'&&typeof navigator.vibrate==='function';
   const deviationCandidate=Boolean(
     guideActive&&gpsGood&&!nearTarget&&targetPoint&&startPoint&&(
       (segmentInfo?.distance??0)>routeCorridor||
@@ -181,9 +185,7 @@ export default function FieldGpsNavigator({
   useEffect(()=>{
     if(!nearTarget||!target?.id||alertedTargetRef.current===target.id) return;
     alertedTargetRef.current=target.id;
-    if(haptics&&typeof navigator!=='undefined'&&navigator.vibrate){
-      navigator.vibrate(isDestination?[420]:[100,80,100,80,260]);
-    }
+    signalUser(isDestination?'arrival':'node');
   },[nearTarget,target?.id,haptics,isDestination]);
 
   useEffect(()=>{
@@ -220,7 +222,7 @@ export default function FieldGpsNavigator({
       setOffRoute(true);
       if(!offRouteAlertedRef.current){
         offRouteAlertedRef.current=true;
-        if(haptics&&navigator.vibrate) navigator.vibrate([180,100,180,100,180]);
+        signalUser('offroute');
       }
     },1600);
 
@@ -268,6 +270,66 @@ export default function FieldGpsNavigator({
     };
   },[guideActive]);
 
+  function ensureAudioContext(){
+    if(typeof window==='undefined') return null;
+    if(!audioContextRef.current){
+      const AudioContextClass=window.AudioContext||window.webkitAudioContext;
+      if(AudioContextClass) audioContextRef.current=new AudioContextClass();
+    }
+    const ctx=audioContextRef.current;
+    if(ctx?.state==='suspended') ctx.resume().catch(()=>{});
+    return ctx;
+  }
+
+  function playTone(type){
+    const ctx=ensureAudioContext();
+    if(!ctx) return;
+
+    const patterns={
+      node:[[880,0,.11],[880,.17,.11]],
+      offroute:[[360,0,.12],[300,.18,.12],[240,.36,.18]],
+      arrival:[[1040,0,.35]],
+      recalibrate:[[720,0,.09],[980,.15,.18]]
+    };
+    const pattern=patterns[type]||patterns.node;
+
+    pattern.forEach(([frequency,offset,duration])=>{
+      const osc=ctx.createOscillator();
+      const gain=ctx.createGain();
+      osc.type='sine';
+      osc.frequency.value=frequency;
+      gain.gain.setValueAtTime(.0001,ctx.currentTime+offset);
+      gain.gain.exponentialRampToValueAtTime(.08,ctx.currentTime+offset+.015);
+      gain.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+offset+duration);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(ctx.currentTime+offset);
+      osc.stop(ctx.currentTime+offset+duration+.03);
+    });
+  }
+
+  function signalUser(type){
+    if(!haptics) return;
+
+    const patterns={
+      node:[100,80,100,80,260],
+      offroute:[180,100,180,100,180],
+      arrival:[420],
+      recalibrate:[80,60,220]
+    };
+
+    let vibrated=false;
+    if(vibrationSupported){
+      try{vibrated=navigator.vibrate(patterns[type]||[120])!==false;}catch{}
+    }
+
+    if(!vibrated) playTone(type);
+
+    clearTimeout(flashTimerRef.current);
+    setSignalFlash(type);
+    flashTimerRef.current=setTimeout(()=>setSignalFlash(''),650);
+  }
+
   function attachOrientation(){
     const handler=event=>{
       let next=null;
@@ -311,6 +373,7 @@ export default function FieldGpsNavigator({
     setStarting(false);
     setCameraStatus('idle');
     navigator.vibrate?.(0);
+    clearTimeout(flashTimerRef.current);
   }
 
   async function startGuide(){
@@ -324,6 +387,7 @@ export default function FieldGpsNavigator({
     }
 
     setStarting(true);
+    ensureAudioContext();
 
     try{
       if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){
@@ -445,7 +509,7 @@ export default function FieldGpsNavigator({
         scannerTimerRef.current=null;
         setScannerOpen(false);
         setNotice('Posizione confermata · '+marker.label);
-        if(haptics&&navigator.vibrate) navigator.vibrate([80,60,220]);
+        signalUser('recalibrate');
       }catch{}finally{
         scanBusyRef.current=false;
       }
@@ -472,6 +536,8 @@ export default function FieldGpsNavigator({
     streamRef.current?.getTracks().forEach(track=>track.stop());
     detachOrientation();
     navigator.vibrate?.(0);
+    clearTimeout(flashTimerRef.current);
+    audioContextRef.current?.close?.().catch(()=>{});
   },[]);
 
   if(!guideActive){
@@ -505,6 +571,7 @@ export default function FieldGpsNavigator({
     <video ref={videoRef} className="field-camera-video" playsInline muted autoPlay/>
 
     <div className="field-camera-shade"></div>
+    {signalFlash&&<div className={'field-signal-flash '+signalFlash}></div>}
     {cameraStatus!=='ready'&&<div className="field-camera-loading">Avvio fotocamera…</div>}
 
     <div className="field-camera-top">
@@ -514,7 +581,11 @@ export default function FieldGpsNavigator({
         {cameraStatus==='ready'&&<small className="field-camera-live">● Fotocamera attiva</small>}
       </div>
       <div className="field-camera-top-actions">
-        <button type="button" onClick={()=>setHaptics(v=>!v)}>{haptics?'Vibrazioni ON':'Vibrazioni OFF'}</button>
+        <button type="button" onClick={()=>{ensureAudioContext();setHaptics(v=>!v);}}>
+          {vibrationSupported
+            ? (haptics?'Vibrazione ON':'Vibrazione OFF')
+            : (haptics?'Avvisi ON':'Avvisi OFF')}
+        </button>
         <button type="button" onClick={closeAll} aria-label="Chiudi">×</button>
       </div>
     </div>
@@ -562,7 +633,7 @@ export default function FieldGpsNavigator({
           <span>CONTROLLA LA POSIZIONE</span>
           <b>{selected.settore} · {selected.fila} · {selected.posizione}</b>
           {!arrivalStatus&&<>
-            <button className="primary" type="button" onClick={()=>{setArrivalStatus('found');navigator.vibrate?.([420]);}}>Ho trovato la sepoltura</button>
+            <button className="primary" type="button" onClick={()=>{setArrivalStatus('found');signalUser('arrival');}}>Ho trovato la sepoltura</button>
             <button className="secondary" type="button" onClick={()=>setArrivalStatus('missing')}>Non la trovo</button>
           </>}
           {arrivalStatus==='found'&&<div className="precision-arrival-result success">✓ Arrivo confermato.</div>}
@@ -570,6 +641,7 @@ export default function FieldGpsNavigator({
         </div>}
 
         {heading==null&&<div className="field-camera-help">La distanza è attiva. Per orientare la freccia abilita l’accesso alla bussola, se richiesto dal telefono.</div>}
+        {!vibrationSupported&&<div className="field-camera-help">Su iPhone Safari la vibrazione web non è disponibile: uso segnale sonoro + lampeggio visivo. Su Android resta attiva la vibrazione.</div>}
         {!gpsGood&&<div className="field-camera-help">GPS poco preciso: non segnalo deviazioni finché l’accuratezza non migliora. Il QR resta il punto certo.</div>}
       </div>
     </>}
