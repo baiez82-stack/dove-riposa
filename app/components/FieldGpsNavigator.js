@@ -142,6 +142,7 @@ export default function FieldGpsNavigator({
   const [haptics,setHaptics]=useState(true);
   const [offRoute,setOffRoute]=useState(false);
   const [movingAway,setMovingAway]=useState(false);
+  const [cameraStatus,setCameraStatus]=useState('idle');
 
   const points=selected.gpsPoints||{};
   const currentAnchor=anchorFromMarker(calibrated)||'ingresso';
@@ -236,6 +237,37 @@ export default function FieldGpsNavigator({
     setArrivalStatus('');
   },[calibrated?.id]);
 
+  useEffect(()=>{
+    if(!guideActive||!streamRef.current||!videoRef.current) return;
+
+    const video=videoRef.current;
+    let cancelled=false;
+
+    video.srcObject=streamRef.current;
+    video.muted=true;
+    video.setAttribute('playsinline','');
+
+    async function playVideo(){
+      try{
+        await video.play();
+        if(!cancelled) setCameraStatus('ready');
+      }catch{
+        if(!cancelled){
+          setCameraStatus('error');
+          setError('La fotocamera è autorizzata ma il browser non riesce a mostrare il video. Chiudi e riapri il link direttamente in Chrome o Safari.');
+        }
+      }
+    }
+
+    if(video.readyState>=1) playVideo();
+    else video.addEventListener('loadedmetadata',playVideo,{once:true});
+
+    return()=>{
+      cancelled=true;
+      video.removeEventListener('loadedmetadata',playVideo);
+    };
+  },[guideActive]);
+
   function attachOrientation(){
     const handler=event=>{
       let next=null;
@@ -277,6 +309,7 @@ export default function FieldGpsNavigator({
     setScannerOpen(false);
     setGuideActive(false);
     setStarting(false);
+    setCameraStatus('idle');
     navigator.vibrate?.(0);
   }
 
@@ -323,36 +356,32 @@ export default function FieldGpsNavigator({
         timeout:15000
       });
 
-      if(navigator.mediaDevices?.getUserMedia){
-        try{
-          streamRef.current=await navigator.mediaDevices.getUserMedia({
-            video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},
-            audio:false
-          });
-        }catch(firstError){
-          streamRef.current=await navigator.mediaDevices.getUserMedia({video:true,audio:false});
-        }
-
-        setGuideActive(true);
-        requestAnimationFrame(async()=>{
-          if(videoRef.current&&streamRef.current){
-            videoRef.current.srcObject=streamRef.current;
-            videoRef.current.muted=true;
-            videoRef.current.setAttribute('playsinline','');
-            try{await videoRef.current.play();}catch{}
-          }
-        });
-      }else{
-        setGuideActive(true);
-        setNotice('Fotocamera non disponibile: uso GPS e indicazioni a schermo.');
+      if(!navigator.mediaDevices?.getUserMedia){
+        throw new Error('CAMERA_UNAVAILABLE');
       }
+
+      setCameraStatus('requesting');
+
+      try{
+        streamRef.current=await navigator.mediaDevices.getUserMedia({
+          video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},
+          audio:false
+        });
+      }catch(firstError){
+        if(firstError?.name==='NotAllowedError'||firstError?.name==='SecurityError') throw firstError;
+        streamRef.current=await navigator.mediaDevices.getUserMedia({video:true,audio:false});
+      }
+
+      setGuideActive(true);
     }catch(error){
       if(error?.name==='NotAllowedError'||error?.name==='SecurityError'){
         setError('Permesso fotocamera non concesso. Abilitalo nel browser e riprova.');
       }else if(error?.message==='GPS_UNAVAILABLE'){
         setError('GPS non disponibile su questo browser.');
+      }else if(error?.message==='CAMERA_UNAVAILABLE'){
+        setError('Questo browser non consente l’accesso alla fotocamera. Apri il link direttamente in Chrome su Android oppure Safari su iPhone e riprova.');
       }else{
-        setError('Non riesco ad avviare la guida. Controlla fotocamera e posizione.');
+        setError('Non riesco ad avviare la guida. Controlla i permessi di Fotocamera e Posizione e riprova.');
       }
       stopGuide();
     }finally{
@@ -459,19 +488,24 @@ export default function FieldGpsNavigator({
           <small>{calibrated?'Il prossimo punto viene calcolato da qui.':'Per la prova migliore scansiona prima il QR all’ingresso.'}</small>
         </div>
 
-        <button className="primary field-guide-launch" type="button" onClick={startGuide} disabled={starting||!routeReady}>
-          {starting?'Attivazione…':routeReady?'Attiva guida fotocamera':'Prima registra i 4 punti'}
+        <button className="primary field-guide-launch" type="button" onClick={startGuide} disabled={starting}>
+          {starting?'Attivazione…':'Attiva guida fotocamera'}
         </button>
-        <small className="field-guide-permissions">Usa fotocamera, posizione e bussola solo durante la navigazione.</small>
+        <small className="field-guide-permissions">
+          {routeReady
+            ? 'Consenti Fotocamera e Posizione quando il telefono lo chiede.'
+            : 'Percorso non completo: sul telefono operatore registra prima Ingresso, Nodo A, Nodo B e Destinazione, poi ricondividi la prova.'}
+        </small>
         {error&&<div className="precision-nav-error">{error}</div>}
       </div>
     </div>;
   }
 
   return <div className="field-camera-guide" role="dialog" aria-modal="true" aria-label="Navigazione visuale Dove Riposa">
-    <video ref={videoRef} className="field-camera-video" playsInline muted/>
+    <video ref={videoRef} className="field-camera-video" playsInline muted autoPlay/>
 
     <div className="field-camera-shade"></div>
+    {cameraStatus!=='ready'&&<div className="field-camera-loading">Avvio fotocamera…</div>}
 
     <div className="field-camera-top">
       <div>
