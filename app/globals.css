@@ -404,3 +404,5 @@ select:focus-visible{
 .field-camera-direction.off-route .field-camera-target{background:rgba(138,38,24,.86)}
 .field-camera-direction.off-route .field-camera-arrow{filter:drop-shadow(0 6px 20px rgba(138,38,24,.55))}
 .field-camera-offroute{padding:12px 14px;border-radius:14px;background:rgba(138,38,24,.88);border:1px solid rgba(255,255,255,.2);font-size:13px;font-weight:900;line-height:1.35;text-align:center;backdrop-filter:blur(8px)}
+
+.field-camera-loading{position:absolute;inset:0;z-index:1;display:grid;place-items:center;background:#111;color:#fff;font-size:15px;font-weight:900;letter-spacing:.02em}
